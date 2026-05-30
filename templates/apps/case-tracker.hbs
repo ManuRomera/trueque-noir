@@ -1,0 +1,122 @@
+<form class="tn-tracker-form">
+  <section class="tn-app-header tn-panel-card">
+    <div class="tn-app-title-wrap">
+      <div class="tn-app-kicker">La Ciudad</div>
+      <h2>{{caseName}}</h2>
+      <div class="tn-app-meta">Día {{day}} / {{timeLimit}} · {{phase}}</div>
+    </div>
+    <div class="tn-app-actions">
+      <button type="button" data-action="save">Guardar</button>
+      <button type="button" data-action="prev-phase">Franja anterior</button>
+      <button type="button" data-action="next-phase">Siguiente franja</button>
+      <button type="button" data-action="toggle-board">{{#if displayVisible}}Ocultar mesa{{else}}Mostrar mesa{{/if}}</button>
+    </div>
+  </section>
+
+  <section class="tn-grid tn-tools-layout">
+    <section class="tn-panel-card tn-die-panel">
+      <div class="tn-section-title">Dado del crimen</div>
+      <div class="tn-tracker-number {{#if crimeExploded}}is-danger{{/if}}">{{crimeDie}}</div>
+      <div class="tn-inline-controls wrap tn-counter-actions">
+        <button type="button" data-action="crime-dec">-1</button>
+        <button type="button" data-action="crime-inc">+1</button>
+        <button type="button" data-action="crime-set" data-value="1">1</button>
+        <button type="button" data-action="crime-set" data-value="2">2</button>
+        <button type="button" data-action="crime-set" data-value="3">3</button>
+        <button type="button" data-action="crime-set" data-value="4">4</button>
+        <button type="button" data-action="apply-clues">Gastar 3 pistas</button>
+      </div>
+      {{#if crimeExploded}}
+        <p class="tn-small tn-danger-text">El dado del crimen ha explotado.</p>
+      {{/if}}
+    </section>
+
+    <section class="tn-panel-card">
+      <div class="tn-section-title">Tiempo y caso</div>
+      <div class="tn-field-grid tn-two-col">
+        <div class="tn-field-group">
+          <label>Caso</label>
+          <input type="text" name="caseName" value="{{caseName}}" />
+        </div>
+        <div class="tn-field-group">
+          <label>Límite de días</label>
+          <input type="number" name="timeLimit" value="{{timeLimit}}" min="1" />
+        </div>
+      </div>
+      <div class="tn-field-grid tn-two-col">
+        <div class="tn-field-group">
+          <label>Día</label>
+          <input type="number" name="day" value="{{day}}" min="1" />
+        </div>
+        <div class="tn-field-group">
+          <label>Franja actual</label>
+          <input type="text" value="{{phase}}" disabled />
+        </div>
+      </div>
+    </section>
+
+    <section class="tn-panel-card">
+      <div class="tn-section-title">Pistas del grupo</div>
+      <div class="tn-clue-summary tn-clue-summary-compact">
+        <div><span>Total</span><strong>{{clueTotal}}</strong></div>
+        <div><span>Gastadas</span><strong>{{clueSpent}}</strong></div>
+        <div><span>Guardadas</span><strong>{{clueAvailable}}</strong></div>
+      </div>
+      {{#if rumorBonusAvailable}}
+        <p class="tn-small tn-emphasis">Rumor pendiente: {{rumorBonusText}}</p>
+      {{/if}}
+    </section>
+  </section>
+
+  <section class="tn-grid tn-tools-bottom">
+    <section class="tn-panel-card">
+      <div class="tn-section-title">Herramientas del DM</div>
+      <div class="tn-field-group">
+        <label>Detective</label>
+        <select name="selectedDetective">
+          <option value="">—</option>
+          {{#each detectives as |detective|}}
+            <option value="{{detective.id}}">{{detective.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="tn-action-grid-2">
+        <button type="button" data-action="quiet-drink">Un trago tranquilo</button>
+        <button type="button" data-action="night-rest">Descanso nocturno</button>
+        <button type="button" data-action="recognition-plus">+1 reconocimiento</button>
+        <button type="button" data-action="accusation">Acusación</button>
+      </div>
+    </section>
+
+    <section class="tn-panel-card">
+      <div class="tn-section-title">Trueque</div>
+      <div class="tn-action-bar tn-top-gap">
+        <button type="button" data-action="random-trueque">Generar trueque aleatorio</button>
+      </div>
+      <div class="tn-field-grid tn-two-col">
+        <div class="tn-rule-card">
+          <h4>La ciudad se revuelve</h4>
+          <ul>
+            {{#each cityConsequences as |entry|}}
+              <li>{{entry}}</li>
+            {{/each}}
+          </ul>
+        </div>
+        <div class="tn-rule-card">
+          <h4>Pagar el precio</h4>
+          <ul>
+            {{#each priceConsequences as |entry|}}
+              <li>{{entry}}</li>
+            {{/each}}
+          </ul>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="tn-panel-card danger-zone">
+    <div class="tn-section-title">Reset de caso</div>
+    <p class="tn-small">Reinicia día, franja, pistas, rumor pendiente, dado del crimen y usos por caso.</p>
+    <button type="button" data-action="reset-case">Reiniciar caso</button>
+  </section>
+</form>

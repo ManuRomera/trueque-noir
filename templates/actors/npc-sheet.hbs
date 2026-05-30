@@ -1,0 +1,41 @@
+<form class="tn-sheet npc-sheet {{cssClass}}" autocomplete="off">
+  <section class="tn-topbar tn-panel-card tn-topbar-compact tn-topbar-npc-compact">
+    <div class="tn-topbar-main">
+      <img class="profile-img tn-portrait tn-portrait-small" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" />
+      <div class="tn-identity">
+        <input name="name" type="text" value="{{actor.name}}" placeholder="Nombre del PNJ" class="tn-name-inline tn-name-inline-small" />
+        <div class="tn-meta-row tn-meta-row-tight">
+          <input name="system.role" type="text" value="{{system.role}}" placeholder="Rol / función" class="tn-type-inline" />
+        </div>
+      </div>
+    </div>
+    <div class="tn-quick-actions tn-quick-actions-compact">
+      <button type="button" data-action="save-sheet">Guardar</button>
+    </div>
+  </section>
+
+  <section class="tn-grid tn-npc-layout tn-npc-layout-compact">
+    <section class="tn-panel-card">
+      <div class="tn-section-title">Ficha rápida</div>
+      <div class="tn-field-grid tn-three-col">
+        <div class="tn-field-group">
+          <label>Zona</label>
+          <input type="text" name="system.zone" value="{{system.zone}}" />
+        </div>
+        <div class="tn-field-group">
+          <label>Localización</label>
+          <input type="text" name="system.location" value="{{system.location}}" />
+        </div>
+        <div class="tn-field-group">
+          <label>Favor / ayuda</label>
+          <input type="text" name="system.favorScope" value="{{system.favorScope}}" />
+        </div>
+      </div>
+    </section>
+
+    <section class="tn-panel-card">
+      <div class="tn-section-title">Notas</div>
+      <textarea class="tn-npc-notes tn-npc-notes-compact" name="system.notes">{{system.notes}}</textarea>
+    </section>
+  </section>
+</form>

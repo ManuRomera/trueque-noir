@@ -1,0 +1,43 @@
+<form class="tn-case-board-sheet">
+  <section class="tn-app-header tn-panel-card tn-board-header-card">
+    <div class="tn-app-title-wrap">
+      <div class="tn-app-kicker">Mesa del caso</div>
+      <h2>{{caseName}}</h2>
+      <div class="tn-app-meta">Día {{day}} / {{timeLimit}} · {{phase}}</div>
+    </div>
+  </section>
+
+  <section class="tn-grid tn-board-layout">
+    <div class="tn-panel-card tn-board-die {{#if exploded}}exploded{{/if}}">
+      <span class="tn-board-die-label">Dado del crimen</span>
+      <div class="tn-board-die-value">{{crimeDie}}</div>
+      {{#if exploded}}
+        <div class="tn-board-warning">Explosión</div>
+      {{/if}}
+    </div>
+
+    <div class="tn-panel-card">
+      <div class="tn-clue-summary tn-clue-summary-compact">
+        <div>
+          <span>Pistas del grupo</span>
+          <strong>{{clueTotal}}</strong>
+        </div>
+        <div>
+          <span>Pistas guardadas</span>
+          <strong>{{clueAvailable}}</strong>
+        </div>
+        <div>
+          <span>Rumor pendiente</span>
+          <strong>{{#if rumorBonusAvailable}}Sí{{else}}No{{/if}}</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {{#if rumorBonusAvailable}}
+    <section class="tn-panel-card tn-board-rumor">
+      <div class="tn-section-title">Aquí han pasado cosas turbias</div>
+      <p>{{rumorBonusText}}</p>
+    </section>
+  {{/if}}
+</form>

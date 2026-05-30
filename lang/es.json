@@ -1,0 +1,21 @@
+{
+  "TRUEQUENOIR.App.CaseTracker": "Panel de la Ciudad",
+  "TRUEQUENOIR.Actor.Detective": "Detective",
+  "TRUEQUENOIR.Actor.NPC": "PNJ",
+  "TRUEQUENOIR.Roll.Risk": "Tirada de riesgo",
+  "TRUEQUENOIR.Roll.PursueCrime": "Tirada de perseguir el crimen",
+  "TRUEQUENOIR.Chat.Trueque": "Trueque",
+  "TRUEQUENOIR.Chat.CleanSuccess": "Éxito limpio",
+  "TRUEQUENOIR.Chat.MixedSuccess": "Éxito con trueque",
+  "TRUEQUENOIR.Chat.HardOutcome": "Resultado duro",
+  "TRUEQUENOIR.Tracker.Day": "Día",
+  "TRUEQUENOIR.Tracker.Phase": "Franja",
+  "TRUEQUENOIR.Tracker.CrimeDie": "Dado del crimen",
+  "TRUEQUENOIR.Tracker.CluePool": "Pistas del grupo",
+  "TRUEQUENOIR.Tracker.CaseName": "Caso",
+  "TRUEQUENOIR.Tracker.TimeLimit": "Límite de días",
+  "TRUEQUENOIR.Tracker.Reset": "Reiniciar caso",
+  "TRUEQUENOIR.Tracker.NextPhase": "Siguiente franja",
+  "TRUEQUENOIR.Tracker.PreviousPhase": "Franja anterior",
+  "TRUEQUENOIR.Tracker.RandomTrueque": "Trueque aleatorio"
+}

@@ -1,0 +1,97 @@
+{
+  "Actor": {
+    "detective": {
+      "look": "",
+      "belief": "",
+      "temperament": "",
+      "age": "",
+      "motivation": "",
+      "roleTag": "",
+      "background1": "",
+      "background2": "",
+      "background3": "",
+      "baladaTarget": "",
+      "baladaRumor": "",
+      "baladaBelieve": false,
+      "baladaTruth": "",
+      "cigarettes": {
+        "value": 9,
+        "max": 9
+      },
+      "recognition": {
+        "total": 0,
+        "spent": 0
+      },
+      "clues": {
+        "count": 0,
+        "notes": ""
+      },
+      "contacts": {
+        "notes": ""
+      },
+      "favors": {
+        "slot1": {
+          "name": "",
+          "scope": "",
+          "used": false
+        },
+        "slot2": {
+          "name": "",
+          "scope": "",
+          "used": false
+        }
+      },
+      "representativeObjects": {
+        "slot1": {
+          "name": "",
+          "used": false
+        },
+        "slot2": {
+          "name": "",
+          "used": false
+        }
+      },
+      "stability": {
+        "person": {
+          "name": "",
+          "tension": 0
+        },
+        "place": {
+          "name": "",
+          "tension": 0
+        }
+      },
+      "caseStats": {
+        "quietDrinksUsed": 0
+      },
+      "personalStates": {
+        "magullado": false,
+        "asustado": false,
+        "desesperado": false,
+        "herido": false,
+        "moribundo": false,
+        "custom": "",
+        "customActive": false,
+        "quebrado": false
+      },
+      "cityStates": {
+        "perseguido": false,
+        "corrupto": false,
+        "extorsionado": false,
+        "suspendido": false,
+        "observado": false,
+        "custom": "",
+        "customActive": false,
+        "acabado": false
+      },
+      "notes": ""
+    },
+    "npc": {
+      "role": "",
+      "zone": "",
+      "location": "",
+      "notes": "",
+      "favorScope": ""
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "id": "trueque-noir",
   "title": "Trueque Noir",
   "description": "Sistema para jugar investigaciones noir inspiradas en Balada triste de la ciudad dentro de Foundry VTT.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": {
     "minimum": 13,
     "verified": 14

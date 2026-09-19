@@ -1,5 +1,11 @@
 # Historial de cambios
 
+## 1.0.1
+
+- Nueva portada de presentación con la ficha y el Panel de la Ciudad.
+- Ajustes finales de densidad visual en la cabecera de la ficha.
+- Compatibilidad del botón del Directorio de Actores con directorios ApplicationV2.
+
 ## 1.0.0
 
 - Compatibilidad declarada con Foundry VTT 13-14.

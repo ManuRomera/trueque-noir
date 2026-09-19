@@ -4,6 +4,8 @@
 
 Un sistema de investigación noir para Foundry VTT 13 y 14, inspirado en las reglas de *Balada triste de la ciudad*. La interfaz funciona como un expediente vivo: mantiene visibles las decisiones que importan sin convertir la mesa en un panel administrativo.
 
+![Ficha del detective y Panel de la Ciudad](assets/showcase-v1.png)
+
 > Este proyecto es una implementación no oficial. No incluye el texto, las ilustraciones ni los casos del libro. Para jugar necesitas una copia legítima del manual.
 
 ## Lo esencial, siempre a la vista

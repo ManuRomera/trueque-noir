@@ -14,7 +14,7 @@
     <div class="tn-case-strip" aria-label="Estado del caso">
       <div class="tn-case-context"><span>Expediente</span><strong>{{caseName}}</strong><small>Día {{caseDay}} · {{casePhase}}</small></div>
       <div class="tn-vital tn-vital-cigarettes" title="Cigarrillos disponibles">
-        <img src="systems/trueque-noir/assets/cigarette-v1.png" alt="" />
+        <img src="systems/trueque-noir/assets/cigarette-v2.png" alt="" />
         <span>Cig.</span><strong>{{system.cigarettes.value}}/{{system.cigarettes.max}}</strong>
       </div>
       <div class="tn-vital"><span>Recon.</span><strong>{{availableRecognition}}</strong></div>
@@ -46,8 +46,13 @@
 
   <section class="tn-body tn-main-body">
     <div class="tab tn-tab-document" data-group="primary" data-tab="document">
+      <nav class="tn-document-tabs" aria-label="Secciones del documento">
+        <button type="button" class="is-active" data-doc-tab="identity">Perfil y pilares</button>
+        <button type="button" data-doc-tab="resources">Recursos y estados</button>
+        <button type="button" data-doc-tab="gear">Objetos y balada</button>
+      </nav>
       <div class="tn-grid tn-doc-layout">
-        <section class="tn-panel-card tn-profile-card">
+        <section class="tn-panel-card tn-profile-card" data-doc-section="identity">
           <div class="tn-section-title">Perfil</div>
 
           <div class="tn-field-grid tn-bg-grid">
@@ -107,7 +112,7 @@
           </div>
         </section>
 
-        <section class="tn-panel-card tn-stability-card">
+        <section class="tn-panel-card tn-stability-card" data-doc-section="identity">
           <div class="tn-section-title">Pilares</div>
           <div class="tn-field-grid tn-one-col">
             <div class="tn-compact-box">
@@ -131,7 +136,7 @@
           </div>
         </section>
 
-        <section class="tn-panel-card tn-resources-card">
+        <section class="tn-panel-card tn-resources-card" data-doc-section="resources" hidden>
           <div class="tn-section-title">Recursos</div>
 
           <div class="tn-counter-card tn-counter-card-compact">
@@ -174,7 +179,7 @@
           </div>
         </section>
         <!-- Estados personales se muestran tras Recursos en su propia tarjeta -->
-        <section class="tn-panel-card tn-state-card tn-state-card-personal">
+        <section class="tn-panel-card tn-state-card tn-state-card-personal" data-doc-section="resources" hidden>
           <div class="tn-section-title">Estados personales</div>
           <div class="tn-state-list tn-state-single-col">
             {{#each personalStates as |state|}}
@@ -188,7 +193,7 @@
         </section>
 
 
-        <section class="tn-panel-card tn-gear-card">
+        <section class="tn-panel-card tn-gear-card" data-doc-section="gear" hidden>
           <div class="tn-section-title">Objetos y favores</div>
 
           <div class="tn-field-grid tn-two-col">
@@ -220,7 +225,7 @@
           </div>
         </section>
 
-        <section class="tn-panel-card tn-balada-card">
+        <section class="tn-panel-card tn-balada-card" data-doc-section="gear" hidden>
           <div class="tn-section-title">Balada triste</div>
           <div class="tn-field-group">
             <label>¿Qué triste historia has escuchado de...?</label>
@@ -239,7 +244,7 @@
           </div>
         </section>
         <!-- La sección de estados de la ciudad se ubicará tras la Balada triste -->
-        <section class="tn-panel-card tn-state-card tn-state-card-city">
+        <section class="tn-panel-card tn-state-card tn-state-card-city" data-doc-section="resources" hidden>
           <div class="tn-section-title">Estados de la ciudad</div>
           <div class="tn-state-list tn-state-single-col">
             {{#each cityStates as |state|}}

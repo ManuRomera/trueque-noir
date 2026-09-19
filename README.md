@@ -4,6 +4,14 @@
 
 Un sistema de investigación noir para Foundry VTT 13 y 14, inspirado en las reglas de *Balada triste de la ciudad*. La interfaz funciona como un expediente vivo: mantiene visibles las decisiones que importan sin convertir la mesa en un panel administrativo.
 
+## Galería
+
+![Tablero para construir la ciudad](assets/city-builder-scene.svg)
+
+![Ficha del detective y herramientas de La Ciudad](assets/showcase-v1.png)
+
+El repositorio incluye también el cigarro transparente empleado en la ficha y el tablero ilustrado de construcción de la ciudad.
+
 > Este proyecto es una implementación no oficial. No incluye el texto, las ilustraciones ni los casos del libro. Para jugar necesitas una copia legítima del manual.
 
 ## Lo esencial, siempre a la vista
@@ -17,6 +25,10 @@ La cabecera de cada detective muestra el caso y la franja actuales, cigarrillos,
 - Contactos, historias turbias, descansos nocturnos y tragos tranquilos.
 - Acusación guiada con las preguntas «¿Quién?», «¿Qué?» y «¿Por qué?».
 - Interludios completos, incluidos estados, tensión, cajetillas, favores y tercer trasfondo.
+- Creación guiada de ciudad siguiendo contexto, cuatro zonas y localizaciones.
+- Creación guiada de detectives y generación aleatoria instantánea.
+- Veinte casos del archivo del manual preparados como diarios privados para La Ciudad.
+- Escenas iniciales para la portada y para construir visualmente la ciudad.
 
 ## Dos espacios, una sola investigación
 

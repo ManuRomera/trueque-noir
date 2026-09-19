@@ -153,7 +153,7 @@
 .trueque-noir .tn-vital strong { margin-top: 3px; color: #fff8e8; font: 700 24px/1 var(--tn-serif); }
 .trueque-noir .tn-vital-crime strong { color: var(--tn-danger); }
 .trueque-noir .tn-vital-cigarettes { position: relative; padding-left: 58px; }
-.trueque-noir .tn-vital-cigarettes img { position: absolute; left: 8px; top: 14px; width: 48px; height: 38px; object-fit: contain; transform: rotate(-12deg); }
+.trueque-noir .tn-vital-cigarettes img { position: absolute; left: 8px; top: 14px; width: 48px; height: 38px; object-fit: contain; transform: rotate(-8deg); border: 0 !important; outline: 0; background: transparent !important; box-shadow: none !important; mix-blend-mode: screen; }
 
 /* Navigation and persistent reroll affordance. */
 .trueque-noir .tn-tabs { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin: 12px 0 8px; border: 0; }
@@ -161,6 +161,10 @@
 .trueque-noir .tn-tabs .item.active { border-color: #7c3733; background: #242024; color: white; box-shadow: inset 0 -3px var(--tn-red); }
 .trueque-noir .tn-body > .tab { display: none; }
 .trueque-noir .tn-body > .tab.active { display: block; }
+.trueque-noir .tn-document-tabs { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; flex-direction: initial !important; gap: 8px; margin: 0 0 12px; }
+.trueque-noir .tn-document-tabs button { width: auto !important; min-width: 0; background: #12161a; color: var(--tn-muted); }
+.trueque-noir .tn-document-tabs button.is-active { border-color: var(--tn-gold); color: #fff8e8; box-shadow: inset 0 -3px var(--tn-gold); }
+.trueque-noir [data-doc-section][hidden] { display: none !important; }
 .trueque-noir .tn-overexpose-bar { display: grid; grid-template-columns: minmax(280px,1fr) auto auto; gap: 8px; align-items: center; margin-bottom: 12px; padding: 10px 12px; border: 1px solid #57482d; border-left: 4px solid var(--tn-gold); border-radius: 4px; background: rgba(73,55,27,.25); }
 .trueque-noir .tn-overexpose-bar span { min-width: 0; }
 .trueque-noir .tn-overexpose-bar button { width: auto; min-width: 140px; min-height: 32px; }
@@ -258,6 +262,25 @@
 
 .trueque-noir .tn-roll-dialog .form-group { margin-bottom: 12px; }
 .trueque-noir .tn-dialog-options { display: grid; grid-template-columns: repeat(2,minmax(180px,1fr)); gap: 8px; }
+
+/* Guided creation: one decision at a time, with no long scrolling form. */
+.trueque-noir .tn-wizard { height: 100%; padding: 16px; overflow: auto; background: radial-gradient(circle at 100% 0,rgba(187,59,53,.13),transparent 34%),var(--tn-bg); }
+.trueque-noir .tn-wizard-header { margin-bottom: 12px; padding: 4px 4px 12px; border-bottom: 1px solid var(--tn-border); }
+.trueque-noir .tn-wizard-header > span { color: var(--tn-red); font-size: 11px; font-weight: 900; letter-spacing: .14em; }
+.trueque-noir .tn-wizard-header h2 { margin: 3px 0; color: #fff8e8; font: 700 28px var(--tn-serif); }
+.trueque-noir .tn-wizard-header p { margin: 0; color: var(--tn-muted); }
+.trueque-noir .tn-stepper { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; margin-bottom: 12px; }
+.trueque-noir .tn-stepper span { padding: 9px; border: 1px solid var(--tn-border-soft); color: var(--tn-muted); text-align: center; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.trueque-noir .tn-stepper span.is-active { border-color: var(--tn-gold); color: var(--tn-text); background: rgba(210,170,98,.12); }
+.trueque-noir .tn-wizard [data-step][hidden] { display: none !important; }
+.trueque-noir .tn-wizard-actions { display: grid !important; grid-template-columns: repeat(2,minmax(150px,1fr)) !important; gap: 8px; margin-top: 16px; }
+.trueque-noir .tn-wizard-actions button { width: auto !important; min-width: 0; }
+.trueque-noir .tn-zone-box { margin: 10px 0; padding: 10px; border: 1px solid var(--tn-border-soft); }
+.trueque-noir .tn-zone-box legend { padding: 0 8px; color: var(--tn-gold); font: 700 14px var(--tn-serif); }
+.trueque-noir .tn-location-cloud { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 16px; }
+.trueque-noir .tn-location-cloud span { padding: 5px 8px; border: 1px solid var(--tn-border-soft); border-radius: 999px; color: var(--tn-muted); font-size: 11px; }
+.trueque-noir .tn-directory-tools { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; margin-bottom: 6px; }
+.trueque-noir .tn-case-clue { padding-left: 12px; border-left: 2px solid var(--tn-red); }
 
 @media (max-width: 900px) {
   .trueque-noir .tn-topbar { grid-template-columns: 1fr; }

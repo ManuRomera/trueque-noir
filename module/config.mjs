@@ -87,6 +87,8 @@ export function registerSystemSettings() {
   worldBoolean("rumorBonusAvailable", "Rumor pendiente", false);
   worldString("rumorBonusText", "Texto del rumor pendiente", "");
   worldBoolean("tableDisplayVisible", "Mesa del caso visible", false);
+  worldString("cityName", "Nombre de la ciudad", "La ciudad");
+  worldString("cityData", "Datos de la ciudad", "{}");
 }
 
 export function getRecognitionAvailable(actor) {

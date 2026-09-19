@@ -17,6 +17,9 @@ import {
   getNpcDefaults
 } from "./module/data-models.mjs";
 import { LegacyActorSheet, LegacyDialog, openWindows } from "./module/compat.mjs";
+import { TruequeNoirCityGenerator, TruequeNoirCharacterGenerator } from "./module/generators.mjs";
+import { ensureStarterContent } from "./module/starter-content.mjs";
+import { restoreWindowState, persistWindowState } from "./module/window-state.mjs";
 
 class TruequeNoirDetectiveSheet extends LegacyActorSheet {
   constructor(...args) {
@@ -87,6 +90,13 @@ class TruequeNoirDetectiveSheet extends LegacyActorSheet {
     html.find("[data-action='overexpose-place']").on("click", () => this.actor.overexposeLastRoll("place"));
     html.find("[data-action='open-city-tools']").on("click", async () => { await this.submit({ preventClose: true, preventRender: false }); game.truequeNoir.openCaseTracker(); });
     html.find("[data-action='open-case-board']").on("click", async () => { await this.submit({ preventClose: true, preventRender: false }); game.truequeNoir.openCaseBoard(); });
+    html.find("[data-doc-tab]").on("click", event => {
+      const tab = String(event.currentTarget.dataset.docTab || "identity");
+      html.find("[data-doc-tab]").removeClass("is-active");
+      $(event.currentTarget).addClass("is-active");
+      html.find("[data-doc-section]").attr("hidden", true);
+      html.find(`[data-doc-section='${tab}']`).removeAttr("hidden");
+    });
   }
 
   async _saveCurrentForm() {
@@ -367,11 +377,15 @@ function ensureDirectoryButtons(app, html) {
     `<div class="tn-directory-tools">
       ${game.user.isGM ? `<button type="button" class="tn-dir-btn" data-action="open-tracker">Panel de la Ciudad</button>` : ""}
       <button type="button" class="tn-dir-btn" data-action="open-board">Mesa del caso</button>
+      ${game.user.isGM ? `<button type="button" class="tn-dir-btn" data-action="create-city">Crear ciudad</button>` : ""}
+      <button type="button" class="tn-dir-btn" data-action="create-detective">Crear detective guiado</button>
     </div>`
   );
 
   wrapper.find("[data-action='open-tracker']").on("click", () => game.truequeNoir.openCaseTracker());
   wrapper.find("[data-action='open-board']").on("click", () => game.truequeNoir.openCaseBoard());
+  wrapper.find("[data-action='create-city']").on("click", () => game.truequeNoir.openCityGenerator());
+  wrapper.find("[data-action='create-detective']").on("click", () => game.truequeNoir.openCharacterGenerator());
   header.prepend(wrapper);
 }
 
@@ -433,6 +447,7 @@ async function ensureUtilityMacros() {
 
 Hooks.once("init", async function() {
   Handlebars.registerHelper("eq", (a, b) => a === b);
+  Handlebars.registerHelper("lowercase", value => String(value ?? "").toLowerCase());
   console.log("trueque-noir | Inicializando sistema");
 
   registerSystemSettings();
@@ -444,6 +459,8 @@ Hooks.once("init", async function() {
   Actors.registerSheet(TN.SYSTEM_ID, TruequeNoirDetectiveSheet, { makeDefault: true, types: ["detective", "npc"] });
 
   game.truequeNoir = {
+    openCityGenerator: () => new TruequeNoirCityGenerator().render(true),
+    openCharacterGenerator: () => new TruequeNoirCharacterGenerator().render(true),
     openCaseTracker: () => {
       if (!game.user.isGM) return ui.notifications.warn("Solo La Ciudad puede abrir el Panel de la Ciudad.");
       const existing = openWindows().find(app => app?.options?.id === "trueque-noir-case-tracker");
@@ -510,6 +527,7 @@ Hooks.once("ready", async function() {
   if (game.user?.isGM) {
     await migrateLegacyActorSystemData();
     await ensureUtilityMacros();
+    await ensureStarterContent();
   }
   if (game.settings.get(TN.SYSTEM_ID, "tableDisplayVisible")) {
     game.truequeNoir.openCaseBoard();
@@ -517,6 +535,14 @@ Hooks.once("ready", async function() {
 });
 
 Hooks.on("renderActorDirectory", ensureDirectoryButtons);
+Hooks.on("renderApplication", app => {
+  const classes = app?.options?.classes ?? [];
+  if (classes.includes("trueque-noir")) restoreWindowState(app);
+});
+Hooks.on("closeApplication", app => {
+  const classes = app?.options?.classes ?? [];
+  if (classes.includes("trueque-noir")) persistWindowState(app);
+});
 Hooks.on("updateSetting", setting => {
   if (setting?.namespace === TN.SYSTEM_ID) refreshCrimeBoard();
 });

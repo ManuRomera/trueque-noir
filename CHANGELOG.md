@@ -1,5 +1,16 @@
 # Historial de cambios
 
+## 1.2.0
+
+- Documento del detective repartido en tres subpestañas para eliminar el desplazamiento vertical innecesario.
+- Cigarro regenerado con transparencia real y presentación sin marco, fondo ni sombra rectangular.
+- Asistente guiado de construcción de ciudad según los tres bloques del manual.
+- Asistente guiado de creación de detective y generación aleatoria completa con miles de combinaciones.
+- Persistencia local de tamaño y posición para las ventanas de Trueque Noir.
+- Dos escenas iniciales: portada ambiental y tablero de construcción de la ciudad con cuatro zonas.
+- Archivo completo de veinte casos, importado como diarios privados para La Ciudad.
+- Galería de portada, interfaz y recursos restaurada en GitHub.
+
 ## 1.1.0
 
 - Reconstrucción completa de las fichas sobre una única hoja de estilos, eliminando las reglas heredadas que provocaban solapamientos.

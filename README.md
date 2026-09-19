@@ -1,64 +1,66 @@
+![Trueque Noir](assets/trueque-noir-cover-v1.png)
+
 # Trueque Noir para Foundry VTT
 
-Versión revisada de la base del sistema, centrada en separar las herramientas del DM de la hoja del detective y cubrir mejor la lógica del manual.
+Un sistema de investigación noir para Foundry VTT 13 y 14, inspirado en las reglas de *Balada triste de la ciudad*. La interfaz funciona como un expediente vivo: mantiene visibles las decisiones que importan sin convertir la mesa en un panel administrativo.
 
-## Cambios principales de esta revisión
+> Este proyecto es una implementación no oficial. No incluye el texto, las ilustraciones ni los casos del libro. Para jugar necesitas una copia legítima del manual.
 
-- La hoja del detective ya **no incluye el panel del DM**.
-- Se añade una **Mesa del caso** compartida, pensada para que todo el grupo vea:
-  - caso actual
-  - día y franja
-  - dado del crimen
-  - pistas del grupo
-  - rumor pendiente
-- Se añade un **Panel de la Ciudad** para el DM con:
-  - control de día, franja y límite
-  - control del dado del crimen
-  - gestión de pistas guardadas
-  - trueque aleatorio
-  - acusación
-  - utilidades de “un trago tranquilo” y descanso nocturno
-- La hoja del detective tiene ahora una estética más de **documento / dossier noir**, más cercana al manual.
-- Los cigarrillos pueden editarse manualmente y tienen botones rápidos de **paquete 9** y **paquete 6**.
+## Lo esencial, siempre a la vista
 
-## Reglas automatizadas o asistidas
+La cabecera de cada detective muestra el caso y la franja actuales, cigarrillos, reconocimiento, dado del crimen y pistas del grupo. Desde el mismo lugar se accede a las dos acciones centrales: **Riesgo** y **Perseguir el crimen**.
 
-- tirada de riesgo
-- tirada de perseguir el crimen
-- penalizador nocturno
-- gasto obligatorio de cigarrillo para visitas nocturnas
-- gasto opcional de cigarrillo (+2)
-- gasto opcional de reconocimiento (+2)
-- consumo de rumor pendiente (+2)
-- uso de favores como éxito automático
-- uso único por caso de objetos representativos
-- suma de pistas del grupo
-- reducción automática del dado del crimen cuando se alcanzan 3 pistas disponibles y el dado está por encima de 1
-- almacenamiento de pistas cuando el dado ya está en 1
-- subida del dado del crimen en un 4- al perseguir el crimen
-- reset de recursos por caso
+- Tiradas con trasfondo, penalizador, noche, cigarrillos, reconocimiento, rumores, objetos y favores.
+- Trueques y consecuencias explicados directamente en el chat.
+- Sobreexposición de pilares: repite la última tirada una sola vez, aumenta tensión y sustituye sus efectos.
+- Pistas compartidas, reducción automática del dado del crimen y explosión del crimen.
+- Contactos, historias turbias, descansos nocturnos y tragos tranquilos.
+- Acusación guiada con las preguntas «¿Quién?», «¿Qué?» y «¿Por qué?».
+- Interludios completos, incluidos estados, tensión, cajetillas, favores y tercer trasfondo.
 
-## Acceso rápido dentro de Foundry
+## Dos espacios, una sola investigación
 
-En la cabecera del **Directorio de Actores** aparecen:
+**Mesa del caso** ofrece al grupo una lectura limpia del tiempo, las pistas, el rumor pendiente y el dado del crimen.
 
-- **Panel de la Ciudad** (solo GM)
-- **Mesa del caso** (todos)
+**Panel de la Ciudad** concentra las herramientas de dirección: franjas, límite del caso, consecuencias, descanso, acusación, interludios y reinicio de recursos por caso.
 
-## Instalación manual
+Ambos se abren desde las macros que el sistema instala automáticamente en la barra rápida. El Panel de la Ciudad también está disponible desde la ficha del detective.
 
-1. Copia esta carpeta dentro de `Data/systems/trueque-noir`
-2. Crea un mundo nuevo usando el sistema **Trueque Noir**
-3. Crea actores de tipo `detective` o `npc`
-4. Abre el Directorio de Actores para usar los botones del sistema
+## Dirección artística y accesibilidad
 
-## Notas
+El diseño emplea una paleta de carbón, papel envejecido, ámbar y rojo de cuarto oscuro. El arte de portada y el cigarrillo de la interfaz son recursos originales creados para este sistema.
 
-- La dirección artística está inspirada en el tono del manual, pero sin incrustar ilustraciones ni tipografías extraídas del PDF.
-- Esta versión sigue siendo una base avanzada y no incluye compendios de casos ni constructor visual del mapa de la ciudad.
+- Contraste alto y foco de teclado visible.
+- Interfaz adaptable a ventanas estrechas.
+- Movimiento reducido cuando el sistema operativo así lo solicita.
+- Corrección explícita de pestañas para ApplicationV1 en Foundry 14.
+- Los iconos decorativos no sustituyen ninguna etiqueta textual.
 
+## Compatibilidad
 
-## Novedades v0.3.0
-- Macros automáticas para Herramientas de la Ciudad, Mostrar/Ocultar mesa y Mesa del caso.
-- Arreglo de guardado directo para cigarrillos.
-- Revisión visual en escala de grises, más cercana al manual.
+| Foundry VTT | Estado |
+| --- | --- |
+| 13 | Probado en Build 351 |
+| 14 | Compatible mediante el puente `foundry.appv1`; manifiesto verificado para v14 |
+
+La capa heredada ApplicationV1 continúa disponible durante Foundry 14. El puente está aislado en `module/compat.mjs` para que la futura migración a ApplicationV2 no contamine la lógica de juego.
+
+## Instalación
+
+Usa este manifiesto en **Configuración → Sistemas de juego → Instalar sistema**:
+
+```text
+https://github.com/ManuRomera/trueque-noir/releases/latest/download/system.json
+```
+
+También puedes descargar `trueque-noir.zip` desde la última versión publicada y descomprimirlo en `Data/systems/trueque-noir`.
+
+## Desarrollo y pruebas
+
+El repositorio no necesita dependencias de ejecución. Antes de una publicación se validan la sintaxis de todos los módulos, los JSON y la estructura del paquete. Las versiones etiquetadas crean automáticamente un ZIP instalable y un manifiesto independiente.
+
+## Créditos y licencia
+
+Sistema para Foundry VTT desarrollado por [Manu Romera](https://github.com/ManuRomera). Código distribuido bajo la licencia incluida en [LICENSE](LICENSE).
+
+*Balada triste de la ciudad*, Trueque Noir y sus contenidos editoriales pertenecen a sus respectivos titulares. Este repositorio no redistribuye el manual.

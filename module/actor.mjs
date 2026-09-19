@@ -369,6 +369,62 @@ export class TruequeNoirActor extends Actor {
     return true;
   }
 
+  async overexposeLastRoll(pillar = "person") {
+    const last = foundry.utils.deepClone(this.getFlag(TN.SYSTEM_ID, "lastRoll") ?? {});
+    if (!last.formula) return ui.notifications.warn("No hay una tirada reciente que repetir.");
+    if (last.used) return ui.notifications.warn("Solo puedes sobreexponerte una vez por tirada.");
+    if (!this.system.stability?.[pillar]?.name) return ui.notifications.warn("Define ese pilar de estabilidad antes de sobreexponerte.");
+    if (Number(this.system.stability?.[pillar]?.tension ?? 0) >= 3) return ui.notifications.warn("Ese pilar ya ha alcanzado su tensión máxima.");
+
+    await this.increasePillarTension(pillar);
+    if (last.type === "pursue" && last.crimeRaised) {
+      await game.settings.set(TN.SYSTEM_ID, "crimeDie", clampCrimeDie(getCrimeDie() - 1));
+    }
+
+    const roll = await (new Roll(last.formula)).evaluate();
+    const resultClass = classifyResult(roll.total);
+    const crimeRaised = last.type === "pursue" && resultClass === "hard";
+    if (crimeRaised) await this.increaseCrimeDie(1, { checkStoredClues: true });
+
+    await this.setFlag(TN.SYSTEM_ID, "lastRoll", { ...last, used: true, resultClass, crimeRaised });
+    await roll.toMessage({
+      speaker: ChatMessage.getSpeaker({ actor: this }),
+      flavor: `<div class="tn-chat-card tn-result-${resultClass}"><div class="tn-chat-header"><span class="tn-chat-type-label">Sobreexposición</span><span class="tn-chat-actor-name">${this.name}</span></div><div class="tn-chat-verdict tn-verdict-${resultClass}">${resultClass === "clean" ? "Éxito limpio" : resultClass === "mixed" ? "Trueque" : "Resultado duro"}</div><div class="tn-chat-consequence">Aumenta en 1 la tensión de ${pillar === "person" ? "su persona" : "su lugar"}. Este resultado sustituye al anterior.</div></div>`
+    });
+    await refreshCrimeBoard();
+    return { roll, total: roll.total, resultClass };
+  }
+
+  async applyInterludeBenefit(benefit, detail = "") {
+    const costs = { cigarettes2: 1, personal: 1, city: 1, personTension: 1, placeTension: 1, fullPack: 2, favor: 2, background: 3 };
+    const cost = costs[benefit];
+    if (!cost) return false;
+
+    const personal = TN.PERSONAL_STATES.find(state => state.label.toLowerCase() === detail.trim().toLowerCase())?.id
+      ?? TN.PERSONAL_STATES.find(state => this.system.personalStates?.[state.id])?.id;
+    const city = TN.CITY_STATES.find(state => state.label.toLowerCase() === detail.trim().toLowerCase())?.id
+      ?? TN.CITY_STATES.find(state => this.system.cityStates?.[state.id])?.id;
+    const freeFavor = ["slot1", "slot2"].find(slot => !this.system.favors?.[slot]?.name);
+
+    if (benefit === "personal" && !personal && !this.system.personalStates?.customActive) return ui.notifications.warn("No hay un estado personal activo que eliminar.");
+    if (benefit === "city" && !city && !this.system.cityStates?.customActive) return ui.notifications.warn("No hay un estado de la ciudad activo que eliminar.");
+    if (benefit === "favor" && (!detail.trim() || !freeFavor)) return ui.notifications.warn("Escribe el favor y deja un hueco libre.");
+    if (benefit === "background" && (!detail.trim() || this.system.background3)) return ui.notifications.warn("Escribe el trasfondo y deja libre el hueco Extra.");
+    if (!await this.spendRecognition(cost)) return false;
+
+    if (benefit === "cigarettes2") await this.adjustCigarettes(2);
+    if (benefit === "fullPack") await this.setCigarettes(this.system.cigarettes?.max);
+    if (benefit === "personTension") await this.lowerPillarTension("person");
+    if (benefit === "placeTension") await this.lowerPillarTension("place");
+    if (benefit === "personal") await this.recoverPersonalState(personal || "custom");
+    if (benefit === "city") await this.recoverCityState(city || "custom");
+    if (benefit === "favor") await this.update({ [`system.favors.${freeFavor}.name`]: detail.trim(), [`system.favors.${freeFavor}.scope`]: "Libre", [`system.favors.${freeFavor}.used`]: false });
+    if (benefit === "background") await this.update({ "system.background3": detail.trim() });
+
+    await ChatMessage.create({ speaker: { alias: "La Ciudad" }, content: `<div class="tn-chat-card"><h3>Interludio</h3><p><strong>${this.name}</strong> gasta ${cost} punto${cost === 1 ? "" : "s"} de reconocimiento.</p></div>` });
+    return true;
+  }
+
   async resetCaseState() {
     await this.update({
       "system.representativeObjects.slot1.used": false,
@@ -435,6 +491,14 @@ export class TruequeNoirActor extends Actor {
     const roll = await (new Roll(`${formula}${modifier ? ` + ${modifier}` : ""}`)).evaluate();
     const total = roll.total;
     const resultClass = classifyResult(total);
+
+    await this.setFlag(TN.SYSTEM_ID, "lastRoll", {
+      type: "risk",
+      formula: roll.formula,
+      used: false,
+      resultClass,
+      crimeRaised: false
+    });
 
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
@@ -531,6 +595,14 @@ export class TruequeNoirActor extends Actor {
     if (resultClass === "hard") {
       await this.increaseCrimeDie(1, { checkStoredClues: true });
     }
+
+    await this.setFlag(TN.SYSTEM_ID, "lastRoll", {
+      type: "pursue",
+      formula: roll.formula,
+      used: false,
+      resultClass,
+      crimeRaised: resultClass === "hard"
+    });
 
     await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),

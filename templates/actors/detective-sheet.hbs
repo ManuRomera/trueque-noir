@@ -11,9 +11,20 @@
       </div>
     </div>
 
+    <div class="tn-case-strip" aria-label="Estado del caso">
+      <div class="tn-case-context"><span>Expediente</span><strong>{{caseName}}</strong><small>Día {{caseDay}} · {{casePhase}}</small></div>
+      <div class="tn-vital tn-vital-cigarettes" title="Cigarrillos disponibles">
+        <img src="systems/trueque-noir/assets/cigarette-v1.png" alt="" />
+        <span>Cig.</span><strong>{{system.cigarettes.value}}/{{system.cigarettes.max}}</strong>
+      </div>
+      <div class="tn-vital"><span>Recon.</span><strong>{{availableRecognition}}</strong></div>
+      <div class="tn-vital tn-vital-crime"><span>Crimen</span><strong>{{crimeDie}}</strong></div>
+      <div class="tn-vital"><span>Pistas</span><strong>{{groupClues}}</strong><small>{{groupCluesAvailable}} guardadas</small></div>
+    </div>
+
     <div class="tn-quick-actions">
-      <button type="button" data-action="roll-risk">Riesgo</button>
-      <button type="button" data-action="roll-pursue">Crimen</button>
+      <button type="button" class="tn-primary-action" data-action="roll-risk"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Riesgo</button>
+      <button type="button" class="tn-primary-action" data-action="roll-pursue"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Crimen</button>
       {{#if isGM}}
         <button type="button" data-action="open-city-tools">Ciudad</button>
         <button type="button" data-action="open-case-board">Mesa</button>
@@ -26,6 +37,12 @@
     <a class="item" data-tab="resources">Investigación</a>
     <a class="item" data-tab="notes">Notas</a>
   </nav>
+
+  <section class="tn-overexpose-bar {{#unless canOverexpose}}is-muted{{/unless}}" aria-label="Sobreexposición">
+    <span><strong>¿No aceptarás el resultado?</strong> Repite la última tirada aumentando la tensión de un pilar.</span>
+    <button type="button" data-action="overexpose-person" {{#unless canOverexpose}}disabled{{/unless}}>Exponer persona</button>
+    <button type="button" data-action="overexpose-place" {{#unless canOverexpose}}disabled{{/unless}}>Exponer lugar</button>
+  </section>
 
   <section class="tn-body tn-main-body">
     <div class="tab tn-tab-document" data-group="primary" data-tab="document">
@@ -156,7 +173,7 @@
             <input type="number" data-dtype="Number" name="system.caseStats.quietDrinksUsed" value="{{system.caseStats.quietDrinksUsed}}" min="0" max="2" />
           </div>
         </section>
-
+        <!-- Estados personales se muestran tras Recursos en su propia tarjeta -->
         <section class="tn-panel-card tn-state-card tn-state-card-personal">
           <div class="tn-section-title">Estados personales</div>
           <div class="tn-state-list tn-state-single-col">
@@ -169,6 +186,7 @@
             <label class="tn-check tn-check-inline"><input type="checkbox" name="system.personalStates.customActive" {{checked system.personalStates.customActive}} /> Activo</label>
           </div>
         </section>
+
 
         <section class="tn-panel-card tn-gear-card">
           <div class="tn-section-title">Objetos y favores</div>
@@ -220,7 +238,7 @@
             </div>
           </div>
         </section>
-
+        <!-- La sección de estados de la ciudad se ubicará tras la Balada triste -->
         <section class="tn-panel-card tn-state-card tn-state-card-city">
           <div class="tn-section-title">Estados de la ciudad</div>
           <div class="tn-state-list tn-state-single-col">
@@ -233,6 +251,7 @@
             <label class="tn-check tn-check-inline"><input type="checkbox" name="system.cityStates.customActive" {{checked system.cityStates.customActive}} /> Activo</label>
           </div>
         </section>
+
       </div>
     </div>
 

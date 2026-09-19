@@ -3,7 +3,10 @@ import {
   registerSystemSettings,
   getRecognitionAvailable,
   getActorBackgrounds,
-  refreshCrimeBoard
+  refreshCrimeBoard,
+  getCrimeDie,
+  getGroupClueState,
+  phaseLabel
 } from "./module/config.mjs";
 import { TruequeNoirActor } from "./module/actor.mjs";
 import { TruequeNoirCaseTracker, TruequeNoirCaseBoard } from "./module/tracker-app.mjs";
@@ -13,8 +16,9 @@ import {
   getDetectiveDefaults,
   getNpcDefaults
 } from "./module/data-models.mjs";
+import { LegacyActorSheet, LegacyDialog, openWindows } from "./module/compat.mjs";
 
-class TruequeNoirDetectiveSheet extends ActorSheet {
+class TruequeNoirDetectiveSheet extends LegacyActorSheet {
   constructor(...args) {
     super(...args);
     if (this.actor?.type === "npc") {
@@ -26,7 +30,7 @@ class TruequeNoirDetectiveSheet extends ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["trueque-noir", "sheet", "actor", "detective-sheet"],
-      width: 1240,
+      width: 1120,
       height: 760,
       submitOnChange: true,
       submitOnClose: true,
@@ -51,6 +55,14 @@ class TruequeNoirDetectiveSheet extends ActorSheet {
     data.cityStates = TN.CITY_STATES;
     data.rumorBonusAvailable = Boolean(game.settings.get(TN.SYSTEM_ID, "rumorBonusAvailable"));
     data.rumorBonusText = game.settings.get(TN.SYSTEM_ID, "rumorBonusText");
+    const clueState = getGroupClueState();
+    data.crimeDie = getCrimeDie();
+    data.groupClues = clueState.total;
+    data.groupCluesAvailable = clueState.available;
+    data.caseName = game.settings.get(TN.SYSTEM_ID, "caseName");
+    data.caseDay = Number(game.settings.get(TN.SYSTEM_ID, "caseDay") ?? 1);
+    data.casePhase = phaseLabel(game.settings.get(TN.SYSTEM_ID, "casePhaseIndex"));
+    data.canOverexpose = Boolean(this.actor.getFlag(TN.SYSTEM_ID, "lastRoll")?.formula);
     data.isGM = game.user?.isGM;
     return data;
   }
@@ -71,6 +83,8 @@ class TruequeNoirDetectiveSheet extends ActorSheet {
     html.find("[data-action='spend-recognition']").on("click", () => this.actor.spendRecognition(1));
     html.find("[data-action='create-contact']").on("click", this._onCreateContact.bind(this));
     html.find("[data-action='create-rumor']").on("click", this._onCreateRumor.bind(this));
+    html.find("[data-action='overexpose-person']").on("click", () => this.actor.overexposeLastRoll("person"));
+    html.find("[data-action='overexpose-place']").on("click", () => this.actor.overexposeLastRoll("place"));
     html.find("[data-action='open-city-tools']").on("click", async () => { await this.submit({ preventClose: true, preventRender: false }); game.truequeNoir.openCaseTracker(); });
     html.find("[data-action='open-case-board']").on("click", async () => { await this.submit({ preventClose: true, preventRender: false }); game.truequeNoir.openCaseBoard(); });
   }
@@ -115,7 +129,7 @@ class TruequeNoirDetectiveSheet extends ActorSheet {
   async _onCreateContact(event) {
     await this._saveCurrentForm();
     event.preventDefault();
-    new Dialog({
+    new LegacyDialog({
       title: `Conozco a un tipo que... · ${this.actor.name}`,
       content: `
         <form class="tn-roll-dialog">
@@ -155,7 +169,7 @@ class TruequeNoirDetectiveSheet extends ActorSheet {
   async _onCreateRumor(event) {
     await this._saveCurrentForm();
     event.preventDefault();
-    new Dialog({
+    new LegacyDialog({
       title: `Aquí han pasado cosas turbias · ${this.actor.name}`,
       content: `
         <form class="tn-roll-dialog">
@@ -217,7 +231,7 @@ class TruequeNoirDetectiveSheet extends ActorSheet {
         </div>
       </form>`;
 
-    new Dialog({
+    new LegacyDialog({
       title: "Tirada de Riesgo",
       content,
       buttons: {
@@ -288,7 +302,7 @@ class TruequeNoirDetectiveSheet extends ActorSheet {
         </div>
       </form>`;
 
-    new Dialog({
+    new LegacyDialog({
       title: "Perseguir el Crimen",
       content,
       buttons: {
@@ -345,7 +359,8 @@ async function migrateLegacyActorSystemData() {
 
 
 function ensureDirectoryButtons(app, html) {
-  const header = html.find(".directory-header");
+  const root = html instanceof HTMLElement ? $(html) : html;
+  const header = root.find(".directory-header");
   if (!header.length || header.find(".tn-directory-tools").length) return;
 
   const wrapper = $(
@@ -425,23 +440,23 @@ Hooks.once("init", async function() {
   CONFIG.Actor.dataModels.detective = TruequeNoirDetectiveData;
   CONFIG.Actor.dataModels.npc = TruequeNoirNpcData;
 
-  Actors.unregisterSheet("core", ActorSheet);
+  Actors.unregisterSheet("core", LegacyActorSheet);
   Actors.registerSheet(TN.SYSTEM_ID, TruequeNoirDetectiveSheet, { makeDefault: true, types: ["detective", "npc"] });
 
   game.truequeNoir = {
     openCaseTracker: () => {
       if (!game.user.isGM) return ui.notifications.warn("Solo La Ciudad puede abrir el Panel de la Ciudad.");
-      const existing = Object.values(ui.windows).find(app => app?.options?.id === "trueque-noir-case-tracker");
+      const existing = openWindows().find(app => app?.options?.id === "trueque-noir-case-tracker");
       if (existing) return existing.render(true);
       return new TruequeNoirCaseTracker().render(true);
     },
     openCaseBoard: () => {
-      const existing = Object.values(ui.windows).find(app => app?.options?.id === "trueque-noir-case-board");
+      const existing = openWindows().find(app => app?.options?.id === "trueque-noir-case-board");
       if (existing) return existing.render(true);
       return new TruequeNoirCaseBoard().render(true);
     },
     closeCaseBoard: () => {
-      const existing = Object.values(ui.windows).find(app => app?.options?.id === "trueque-noir-case-board");
+      const existing = openWindows().find(app => app?.options?.id === "trueque-noir-case-board");
       if (existing) existing.close();
     },
     toggleSharedCaseBoard: async () => {

@@ -2,10 +2,10 @@
   "id": "trueque-noir",
   "title": "Trueque Noir",
   "description": "Sistema para jugar investigaciones noir inspiradas en Balada triste de la ciudad dentro de Foundry VTT.",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "compatibility": {
-    "minimum": 12,
-    "verified": 13
+    "minimum": 13,
+    "verified": 14
   },
   "authors": [
     {
@@ -18,7 +18,8 @@
     "trueque-noir.mjs"
   ],
   "styles": [
-    "styles/trueque-noir.css"
+    "styles/trueque-noir.css",
+    "styles/noir-redesign.css"
   ],
   "languages": [
     {
@@ -41,6 +42,7 @@
   "primaryTokenAttribute": null,
   "secondaryTokenAttribute": null,
   "socket": true,
+  "background": "systems/trueque-noir/assets/trueque-noir-cover-v1.png",
   "manifest": "https://github.com/ManuRomera/trueque-noir/releases/latest/download/system.json",
   "download": "https://github.com/ManuRomera/trueque-noir/releases/latest/download/trueque-noir.zip",
   "template": "template.json"

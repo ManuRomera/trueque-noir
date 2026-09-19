@@ -6,12 +6,13 @@ import {
   refreshCrimeBoard,
   getCrimeDie
 } from "./config.mjs";
+import { LegacyApplication, LegacyDialog } from "./compat.mjs";
 
 function detectiveOptions() {
   return game.actors.filter(actor => actor.type === "detective").map(actor => ({ id: actor.id, name: actor.name }));
 }
 
-export class TruequeNoirCaseTracker extends Application {
+export class TruequeNoirCaseTracker extends LegacyApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "trueque-noir-case-tracker",
@@ -61,6 +62,7 @@ export class TruequeNoirCaseTracker extends Application {
     html.find("[data-action='quiet-drink']").on("click", this._onQuietDrink.bind(this));
     html.find("[data-action='night-rest']").on("click", this._onNightRest.bind(this));
     html.find("[data-action='recognition-plus']").on("click", this._onRecognitionPlus.bind(this));
+    html.find("[data-action='interlude']").on("click", this._onInterlude.bind(this));
     html.find("[data-action='accusation']").on("click", this._onAccusation.bind(this));
   }
 
@@ -160,7 +162,7 @@ export class TruequeNoirCaseTracker extends Application {
     if (!detective) return ui.notifications.warn("Selecciona un detective.");
 
     const personalStates = TN.PERSONAL_STATES.filter(state => detective.system.personalStates?.[state.id]);
-    new Dialog({
+    new LegacyDialog({
       title: `Un trago tranquilo · ${detective.name}`,
       content: `
         <form class="tn-roll-dialog">
@@ -232,7 +234,7 @@ export class TruequeNoirCaseTracker extends Application {
   async _onAccusation(event) {
     event.preventDefault();
     const clueState = getGroupClueState();
-    new Dialog({
+    new LegacyDialog({
       title: "Acusación y detención",
       content: `
         <form class="tn-roll-dialog">
@@ -293,6 +295,45 @@ export class TruequeNoirCaseTracker extends Application {
     });
   }
 
+  async _onInterlude(event) {
+    event.preventDefault();
+    const detective = this.getSelectedDetective();
+    if (!detective) return ui.notifications.warn("Selecciona un detective.");
+
+    new LegacyDialog({
+      title: `Interludio · ${detective.name}`,
+      content: `
+        <form class="tn-roll-dialog">
+          <div class="form-group"><label>Beneficio de reconocimiento</label>
+            <select name="benefit">
+              <option value="cigarettes2">1 punto · recuperar 2 cigarrillos</option>
+              <option value="personal">1 punto · eliminar un estado personal</option>
+              <option value="city">1 punto · eliminar un estado de la ciudad</option>
+              <option value="personTension">1 punto · reducir tensión de la persona</option>
+              <option value="placeTension">1 punto · reducir tensión del lugar</option>
+              <option value="fullPack">2 puntos · reponer la cajetilla</option>
+              <option value="favor">2 puntos · conseguir un favor</option>
+              <option value="background">3 puntos · añadir un trasfondo</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Estado, favor o trasfondo</label><input name="detail" type="text" placeholder="Especifica cuál, si corresponde" /></div>
+        </form>`,
+      buttons: {
+        apply: {
+          label: "Aplicar",
+          callback: async html => {
+            const benefit = String(html.find("[name='benefit']").val() || "");
+            const detail = String(html.find("[name='detail']").val() || "");
+            await detective.applyInterludeBenefit(benefit, detail);
+            this.render(false);
+          }
+        },
+        cancel: { label: "Cancelar" }
+      },
+      default: "apply"
+    }, { classes: ["trueque-noir", "tn-dialog"] }).render(true);
+  }
+
   async _onResetCase(event) {
     event.preventDefault();
     await game.settings.set(TN.SYSTEM_ID, "caseName", "Caso abierto");
@@ -314,7 +355,7 @@ export class TruequeNoirCaseTracker extends Application {
   }
 }
 
-export class TruequeNoirCaseBoard extends Application {
+export class TruequeNoirCaseBoard extends LegacyApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: "trueque-noir-case-board",

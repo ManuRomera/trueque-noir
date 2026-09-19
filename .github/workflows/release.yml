@@ -1,0 +1,39 @@
+name: Publicar Trueque Noir
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validar JavaScript y manifiestos
+        run: |
+          node --check trueque-noir.mjs
+          for file in module/*.mjs; do node --check "$file"; done
+          python -m json.tool system.json >/dev/null
+          python -m json.tool template.json >/dev/null
+          python -m json.tool lang/es.json >/dev/null
+
+      - name: Preparar paquete
+        run: |
+          mkdir -p dist/trueque-noir
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'dist' --exclude '*.zip' ./ dist/trueque-noir/
+          cd dist
+          zip -r trueque-noir.zip trueque-noir
+          cp trueque-noir/system.json system.json
+
+      - name: Publicar versión
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            dist/trueque-noir.zip
+            dist/system.json

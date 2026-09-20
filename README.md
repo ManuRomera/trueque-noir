@@ -34,6 +34,11 @@ La pantalla compartida no es un panel de control: es la mesa donde se amontonan 
 - **La interfaz impide el error antes de que ocurra.** Objetos gastados, favores usados, tragos
   agotados o cigarrillos que no llegan: el control se desactiva y explica por qué.
 
+<p align="center">
+  <img src="./Trueque.png" alt="Trueque Noir" width="850">
+</p>
+
+
 ## Compatibilidad
 
 | Foundry VTT | Estado |

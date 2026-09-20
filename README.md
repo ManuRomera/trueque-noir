@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="assets/cover.png" alt="Trueque Noir" width="900">
+  <img src="assets/logo.webp" alt="Trueque Noir" width="720">
+</p>
+
+<p align="center">
+  <img src="assets/scenes/noir.webp" alt="" width="900">
 </p>
 
 <h1 align="center">Trueque Noir</h1>
@@ -33,11 +37,12 @@ La pantalla compartida no es un panel de control: es la mesa donde se amontonan 
 - **El dado del crimen como personaje.** Domina la Mesa y el Panel, y avisa cuando explota.
 - **La interfaz impide el error antes de que ocurra.** Objetos gastados, favores usados, tragos
   agotados o cigarrillos que no llegan: el control se desactiva y explica por qué.
+- **Once ambientaciones, una misma regla.** El noir no es una época: elige mundo y cambian la
+  portada y todas las tablas de creación aleatoria.
 
 <p align="center">
-  <img src="./Trueque.png" alt="Trueque Noir" width="850">
+  <img src="./Trueque.png" alt="Ficha, Panel de La Ciudad, Mesa del caso y archivo de casos en Foundry VTT" width="900">
 </p>
-
 
 ## Compatibilidad
 
@@ -76,9 +81,32 @@ buscar nada por el menú.
 La bienvenida vuelve a abrirse cuando quieras desde el menú **Trueque Noir** de los controles de
 escena. Ahí están también el Panel, la Mesa, los asistentes y el archivo de casos.
 
-El sistema prepara además una **escena de portada de 1920 × 1024**, sin cuadrícula, sin niebla de
-guerra y sin visión de token: al activarla aparece encuadrada y a pantalla completa sin tocar el
-zoom. Solo esa escena se reencuadra sola; las tuyas conservan su cámara.
+El sistema prepara además una **escena de portada** con el rótulo del juego integrado sobre la
+ilustración, sin cuadrícula, sin niebla de guerra y sin visión de token: al activarla aparece
+encuadrada y a pantalla completa sin tocar el zoom. Mide 1920 px de ancho y toma su alto de la
+ambientación elegida, para que la imagen nunca se deforme. Solo esa escena se reencuadra sola;
+las tuyas conservan su cámara.
+
+## Once ciudades donde llueve igual
+
+| | |
+| --- | --- |
+| **Noir clásico** | Lluvia, gabardinas y una ciudad que no piensa devolverte nada |
+| **Los años veinte** | Ley seca, charlestón y sótanos donde el alcohol vale más que la vida |
+| **Actualidad** | Cámaras en cada esquina y expedientes que se archivan solos |
+| **Futuro tecnológico** | Todo queda registrado y, aun así, nadie sabe qué pasó |
+| **Replicantes** | Neón sobre agua sucia y preguntas que es mejor no hacerle a nadie |
+| **Después del fin** | Queda ciudad suficiente para que alguien quiera matar por ella |
+| **Lejano Oeste** | Polvo, deudas y una estrella de hojalata que no impresiona a nadie |
+| **Medievo** | Gremios que lo deciden todo y un obispo que perdona por dinero |
+| **Roma imperial** | Ínsulas que se derrumban y vigiles que llegan tarde |
+| **Steampunk** | Vapor, hollín y máquinas que valen más que quienes las manejan |
+| **Edo** | Faroles de papel, deudas de honor y una ciudad de madera que arde |
+
+Cada una trae su ilustración de portada y sus propias tablas: nombres, oficios, aspecto,
+objetos representativos, zonas, quién manda en cada barrio y las catorce localizaciones
+comunes del manual dichas con sus palabras. Se cambia desde el menú **Trueque Noir**, desde
+el Panel o al construir la ciudad, y la escena de portada se adapta sola.
 
 ## Las dos mesas
 
@@ -118,7 +146,8 @@ En **Configuración → Ajustes del sistema**:
 
 ## Qué incluye realmente
 
-El sistema trae su código, su interfaz, la ilustración de portada y el cigarrillo de la ficha.
+El sistema trae su código, su interfaz, las once ilustraciones de portada, el rótulo, el retrato,
+el token y el cigarrillo de la ficha.
 Incluye además un archivo de **veinte casos escritos por Pepe Pedraz, Jorge Serrano y Mirella
 Machancoses**, que **no se importa solo**: La Ciudad decide si quiere crearlos como diarios
 privados. [CONTENIDO.md](CONTENIDO.md) detalla qué se distribuye, qué se retiró y qué decisión

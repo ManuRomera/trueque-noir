@@ -10,6 +10,7 @@ import { TruequeNoirDetectiveData, TruequeNoirNpcData, getDetectiveDefaults, get
 import { LegacyActorSheet, ActorsCollection, findWindow } from "./module/compat.mjs";
 import { TruequeNoirCityGenerator, TruequeNoirCharacterGenerator } from "./module/generators.mjs";
 import { ensureCoverScene, bindCoverSceneCamera } from "./module/scene-setup.mjs";
+import { openThemePicker } from "./module/theme-picker.mjs";
 import { importCaseArchive } from "./module/case-archive.mjs";
 import { openWelcome, maybeOpenWelcome } from "./module/welcome.mjs";
 import { registerSceneControls, registerDirectoryButton, ensureUtilityMacros, applyPortraitPreference } from "./module/ui-hooks.mjs";
@@ -57,6 +58,7 @@ Hooks.once("init", function() {
   game.truequeNoir = {
     openWelcome,
     importCaseArchive,
+    openThemePicker,
     openCityGenerator: () => {
       if (!game.user.isGM) return ui.notifications.warn("Solo La Ciudad puede construir la ciudad.");
       return (findWindow("trueque-noir-city-generator") ?? new TruequeNoirCityGenerator()).render(true);

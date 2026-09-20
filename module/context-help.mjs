@@ -1,9 +1,8 @@
 /**
  * Ayuda contextual de escritorio.
  *
- * Aparece como una ventana flotante anclada al elemento que se está inspeccionando,
- * tras una pausa corta del ratón. El clic derecho —y el icono «?»— la fijan hasta
- * que se pulsa fuera.
+ * Aparece como una ventana flotante junto al cursor, tras una pausa corta del ratón.
+ * El clic derecho —y el icono «?»— la fijan hasta que se pulsa fuera.
  */
 const HOVER_DELAY = 800;
 const MARGIN = 10;
@@ -24,6 +23,7 @@ let timer = null;
 let popup = null;
 let source = null;
 let pinned = false;
+const pointer = { x: 0, y: 0 };
 
 function dismiss() {
   if (timer) clearTimeout(timer);
@@ -55,27 +55,33 @@ function helpFor(element) {
   return label || "";
 }
 
-/** Coloca la ventana junto al elemento, volteándola cuando no cabe debajo o a la derecha. */
-function place(element) {
-  const anchor = element.getBoundingClientRect();
+/**
+ * Coloca la ventana junto al cursor, a su derecha y por debajo.
+ * Si no cabe, salta al otro lado antes que salirse de la pantalla.
+ */
+function place() {
   const width = popup.offsetWidth;
   const height = popup.offsetHeight;
+  const maxLeft = window.innerWidth - width - EDGE;
+  const maxTop = window.innerHeight - height - EDGE;
 
-  let top = anchor.bottom + MARGIN;
-  if (top + height > window.innerHeight - EDGE) {
-    const above = anchor.top - height - MARGIN;
-    top = above >= EDGE ? above : Math.max(EDGE, window.innerHeight - height - EDGE);
-  }
+  let left = pointer.x + MARGIN + 6;
+  if (left > maxLeft) left = pointer.x - width - MARGIN;
+  let top = pointer.y + MARGIN + 8;
+  if (top > maxTop) top = pointer.y - height - MARGIN;
 
-  const left = Math.max(EDGE, Math.min(anchor.left, window.innerWidth - width - EDGE));
-  popup.style.left = `${Math.round(left)}px`;
-  popup.style.top = `${Math.round(top)}px`;
+  popup.style.left = `${Math.round(Math.max(EDGE, Math.min(left, maxLeft)))}px`;
+  popup.style.top = `${Math.round(Math.max(EDGE, Math.min(top, maxTop)))}px`;
 }
 
-function show(element, locked = false) {
+function show(element, locked = false, at = null) {
   const message = helpFor(element);
   dismiss();
   if (!message) return;
+  if (at) {
+    pointer.x = at.x;
+    pointer.y = at.y;
+  }
 
   popup = document.createElement("aside");
   popup.className = `tn-help-popover${locked ? " is-pinned" : ""}`;
@@ -84,7 +90,7 @@ function show(element, locked = false) {
   document.body.appendChild(popup);
   source = element;
   pinned = locked;
-  place(element);
+  place();
 
   // Cualquier clic fuera cierra la ayuda, también el que cierra la propia ventana.
   document.addEventListener("pointerdown", onDocumentPointerDown, true);
@@ -97,6 +103,8 @@ export function bindContextHelp(html) {
 
   root.addEventListener("pointermove", event => {
     if (pinned) return;
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
     const element = event.target.closest?.(TARGETS);
 
     // Moverse dentro del mismo elemento no reinicia nada: si no, el ratón nunca
@@ -125,7 +133,7 @@ export function bindContextHelp(html) {
     if (!element) return;
     event.preventDefault();
     event.stopPropagation();
-    show(element, true);
+    show(element, true, { x: event.clientX, y: event.clientY });
   });
 
   root.addEventListener("click", event => {
@@ -133,6 +141,6 @@ export function bindContextHelp(html) {
     if (!help) return;
     event.preventDefault();
     event.stopPropagation();
-    show(help, true);
+    show(help, true, { x: event.clientX, y: event.clientY });
   });
 }

@@ -17,6 +17,10 @@
 
     <section data-step="1" class="tn-wizard__step">
       <h2 class="tn-wizard__q">¿Quién es?</h2>
+      <div class="tn-field">
+        <label for="tn-gen-theme">Ambientación <button type="button" class="tn-help" data-tn-help="La generación aleatoria usa las tablas de esta ambientación: nombres, oficios, aspecto y objetos propios de ese mundo. Por defecto es la de la ciudad.">?</button></label>
+        <select id="tn-gen-theme" name="theme">{{{themeOptions}}}</select>
+      </div>
       <div class="tn-field-row">
         <div class="tn-field"><label for="tn-gen-name">Nombre</label><input id="tn-gen-name" name="name" type="text" /></div>
         <div class="tn-field"><label for="tn-gen-role">Función o apodo</label><input id="tn-gen-role" name="roleTag" type="text" /></div>

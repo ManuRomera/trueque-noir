@@ -1,5 +1,37 @@
 # Historial de cambios
 
+## 2.1.0
+
+### Once ambientaciones
+
+- El noir no es una época. El sistema trae once mundos con su propia ilustración de
+  portada: noir clásico, años veinte, actualidad, futuro tecnológico, replicantes,
+  después del fin, Lejano Oeste, medievo, Roma imperial, steampunk y Edo.
+- Selector visual de ambientación en el menú Trueque Noir, en el Panel de La Ciudad y
+  al construir la ciudad. Cambia el fondo de la escena de portada y ajusta sus
+  proporciones a la imagen para que nunca se deforme.
+- La generación aleatoria sigue a la ambientación: nombres, oficios, aspecto, objetos
+  representativos, personas y lugares que sostienen al detective, zonas, rasgos, quién
+  manda en cada barrio y las catorce localizaciones comunes del manual dichas con las
+  palabras de ese mundo. Las reglas no cambian; cambia el vocabulario.
+- Los asistentes de ciudad y de detective tienen su propio selector, y el de detective
+  hereda por defecto la ambientación de la ciudad.
+
+### Arte
+
+- Rótulo del juego incorporado como tile de la escena de portada, encajado sobre la
+  ilustración, y como cabecera de la pantalla de bienvenida.
+- Retrato y token incluidos: los detectives creados con el asistente ya nacen con
+  ambos puestos.
+
+### Correcciones
+
+- El botón de tirar podía quedar fuera del área pulsable al elegir un trasfondo,
+  porque el diálogo crecía sin reajustarse. Ahora el contenido se desplaza por dentro
+  y los botones quedan siempre anclados abajo.
+- La descripción del trasfondo salía dos veces en el diálogo de tirada.
+- La ayuda contextual vuelve a aparecer junto al cursor, no debajo del elemento.
+
 ## 2.0.0
 
 Rediseño integral de la interfaz y reorganización del código. Ninguna regla cambia.

@@ -5,7 +5,10 @@
 export const TN = {
   SYSTEM_ID: "trueque-noir",
   SOCKET: "system.trueque-noir",
-  COVER: "systems/trueque-noir/assets/cover.png",
+  ASSETS: "systems/trueque-noir/assets",
+  LOGO: "systems/trueque-noir/assets/logo.webp",
+  PORTRAIT: "systems/trueque-noir/assets/portrait.webp",
+  TOKEN: "systems/trueque-noir/assets/token.webp",
   SCENE_FLAG: "Trueque Noir · Portada",
   BACKGROUNDS: [
     "Intimidación",
@@ -83,6 +86,7 @@ export function registerSystemSettings() {
   register("cityData", String, "{}", { name: "Datos de la ciudad" });
   register("welcomeSeen", Boolean, false, { name: "Bienvenida mostrada" });
   register("caseArchiveImported", Boolean, false, { name: "Archivo de casos importado" });
+  register("cityTheme", String, "noir", { name: "Ambientación de la ciudad" });
 
   // Preferencias visibles en Configuración → Ajustes del sistema.
   game.settings.register(TN.SYSTEM_ID, "portraitNoir", {

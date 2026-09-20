@@ -1,6 +1,8 @@
 import { TN, getDetectives } from "./config.mjs";
 import { LegacyApplication } from "./compat.mjs";
 import { countArchive } from "./case-archive.mjs";
+import { getTheme } from "./themes.mjs";
+import { getSceneTheme } from "./scene-setup.mjs";
 
 function hasCity() {
   try {
@@ -27,7 +29,8 @@ export class TruequeNoirWelcome extends LegacyApplication {
 
   async getData() {
     return {
-      cover: TN.COVER,
+      cover: getTheme(getSceneTheme()).scene.src,
+      logo: TN.LOGO,
       isGM: game.user?.isGM,
       cityReady: hasCity(),
       cityName: game.settings.get(TN.SYSTEM_ID, "cityName"),

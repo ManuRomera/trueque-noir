@@ -1,29 +1,22 @@
 import { TN } from "./config.mjs";
 import { LegacyApplication } from "./compat.mjs";
+import { THEME_LIST, getTheme, themeTables, DEFAULT_THEME } from "./themes.mjs";
+import { applySceneTheme } from "./scene-setup.mjs";
 
+/** Las cuatro zonas del manual son puntos cardinales; la ambientación solo las viste. */
 const ZONES = ["Norte", "Sur", "Este", "Oeste"];
-const COMMON_LOCATIONS = ["Bloques de viviendas", "Comisaría", "Cementerio", "Suburbio", "Morgue", "Afueras", "Periódico local", "Pub", "Iglesia local", "Biblioteca", "Tienda de antigüedades", "Hostal", "Psiquiátrico", "Pequeño hospital"];
-const NAMES = ["Ada", "Alma", "Bruno", "Cora", "Dante", "Elena", "Félix", "Greta", "Héctor", "Inés", "Jano", "Lara", "Mara", "Nico", "Olivia", "Rocco", "Sara", "Tomás", "Vera", "Walter"];
-const SURNAMES = ["Black", "Vega", "Salvat", "Cross", "Montalbán", "Rivas", "Noir", "Doyle", "Caine", "Valdés", "Stone", "Ferrara", "Grey", "Lorca", "Marlow"];
-const LOOKS = ["gabardina gastada y mirada insomne", "traje impecable que nunca encaja con el barrio", "cicatriz en la ceja y manos de boxeador", "ropa práctica, pelo corto y ojos que no olvidan", "sombrero viejo, barba de dos días y una leve cojera", "aspecto frágil, voz firme y dedos manchados de tinta"];
-const BELIEFS = ["la bondad existe, pero siempre llega tarde", "Dios dejó de mirar esta ciudad", "toda persona tiene un precio", "la verdad importa aunque destruya a quien la encuentra", "la decadencia humana es una elección", "nadie nace culpable"];
-const TEMPERAMENTS = ["metódico y distante", "irónico y protector", "impulsivo pero leal", "paciente hasta que deja de serlo", "obstinado y compasivo", "silencioso y feroz"];
-const MOTIVATIONS = ["limpiar las calles", "cumplir una promesa", "conseguir un ascenso", "vengarse de quien arruinó a su familia", "salir algún día de la ciudad", "demostrar que un caso antiguo fue cerrado en falso"];
-const OBJECTS = ["un mechero grabado", "una placa antigua", "una cámara plegable", "un revólver heredado", "una libreta impermeable", "un reloj detenido", "una petaca de plata", "una fotografía rota", "una ganzúa artesanal", "un rosario ennegrecido"];
-const PEOPLE = ["su hermana", "un antiguo compañero", "la dueña del pub", "su padre enfermo", "una periodista local", "un confidente de los suburbios"];
-const PLACES = ["la azotea de la comisaría", "una mesa del pub", "el archivo de la biblioteca", "el banco del cementerio", "el viejo muelle", "una capilla abandonada"];
-const RUMORS = ["dejó morir a un compañero", "aceptó dinero de una banda", "falsificó una prueba para salvar a alguien", "conoce la identidad de un asesino nunca detenido", "incendió el lugar donde creció"];
-const ROLES = ["Inspectora", "Sabueso", "Forense", "Agente de homicidios", "Policía de barrio", "Detective veterano"];
-const EXTRA_LOCATIONS = ["casino clandestino", "gimnasio de boxeo", "estación de radio", "club de jazz", "matadero", "archivo municipal", "cine abandonado", "mercado nocturno", "astillero", "laboratorio privado", "hotel de lujo", "lavandería abierta de madrugada"];
-const ZONE_TRAITS = ["próspera", "industrial", "decadente", "inundada", "vigilada", "bohemia", "calcinada", "aislada", "corrupta", "superpoblada", "silenciosa", "violenta"];
-const CONTROLLERS = ["un sindicato de estibadores", "una familia de empresarios", "una banda de moteros", "un predicador y sus fieles", "la policía corrupta", "una red de contrabando", "un cacique inmobiliario", "un club de veteranos"];
-const CITY_PREFIX = ["Cape", "Grey", "Saint", "New", "Port", "Black"];
-const CITY_SUFFIX = ["Hook", "Haven", "Mercy", "Vega", "Cross", "Bay"];
-const CITY_CONTEXTS = ["Años 20, ley seca y lluvia incesante", "Años 90, ciudad portuaria aislada", "Distopía industrial bajo vigilancia", "Metrópolis costera contemporánea en decadencia", "Ciudad victoriana cubierta de niebla"];
 
 const pick = list => list[Math.floor(Math.random() * list.length)];
 const sample = (list, count) => [...list].sort(() => Math.random() - 0.5).slice(0, count);
 const escape = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
+
+function activeTheme() {
+  return game.settings?.get(TN.SYSTEM_ID, "cityTheme") ?? DEFAULT_THEME;
+}
+
+function themeOptions(selected) {
+  return THEME_LIST.map(theme => `<option value="${theme.id}" ${theme.id === selected ? "selected" : ""}>${escape(theme.label)}</option>`).join("");
+}
 
 /** Lógica común de los dos asistentes: pasos, puntos de progreso y lectura del formulario. */
 class TruequeNoirWizard extends LegacyApplication {
@@ -70,30 +63,35 @@ class TruequeNoirWizard extends LegacyApplication {
       if (field) field.value = value;
     }
   }
+
+  /** Ambientación elegida en el propio asistente, o la de la ciudad si no hay selector. */
+  get theme() {
+    return themeTables(this.value("theme") || activeTheme());
+  }
 }
 
-function randomDetective() {
+const DETECTIVE_FIELDS = ["name", "roleTag", "look", "belief", "temperament", "age", "motivation", "background1", "background2", "object1", "object2", "person", "place", "rumor"];
+
+function randomDetective(theme) {
   const backgrounds = sample(TN.BACKGROUNDS, 2);
-  const objects = sample(OBJECTS, 2);
+  const objects = sample(theme.objects, 2);
   return {
-    name: `${pick(NAMES)} ${pick(SURNAMES)}`,
-    roleTag: pick(ROLES),
-    look: pick(LOOKS),
-    belief: pick(BELIEFS),
-    temperament: pick(TEMPERAMENTS),
+    name: `${pick(theme.names)} ${pick(theme.surnames)}`,
+    roleTag: pick(theme.roles),
+    look: pick(theme.looks),
+    belief: pick(theme.beliefs),
+    temperament: pick(theme.temperaments),
     age: String(27 + Math.floor(Math.random() * 33)),
-    motivation: pick(MOTIVATIONS),
+    motivation: pick(theme.motivations),
     background1: backgrounds[0],
     background2: backgrounds[1],
     object1: objects[0],
     object2: objects[1],
-    person: pick(PEOPLE),
-    place: pick(PLACES),
-    rumor: pick(RUMORS)
+    person: pick(theme.people),
+    place: pick(theme.places),
+    rumor: pick(theme.rumors)
   };
 }
-
-const DETECTIVE_FIELDS = ["name", "roleTag", "look", "belief", "temperament", "age", "motivation", "background1", "background2", "object1", "object2", "person", "place", "rumor"];
 
 export class TruequeNoirCharacterGenerator extends TruequeNoirWizard {
   static get defaultOptions() {
@@ -103,18 +101,23 @@ export class TruequeNoirCharacterGenerator extends TruequeNoirWizard {
       title: "Crear detective",
       template: "systems/trueque-noir/templates/apps/character-generator.hbs",
       width: 720,
-      height: 700,
+      height: 720,
       resizable: true
     });
   }
 
   getData() {
-    return { backgrounds: TN.BACKGROUNDS };
+    const current = activeTheme();
+    return {
+      backgrounds: TN.BACKGROUNDS,
+      themeOptions: themeOptions(current),
+      themeLabel: getTheme(current).label
+    };
   }
 
   activateListeners(html) {
     super.activateListeners(html);
-    this._root.querySelector("[data-action='randomize']")?.addEventListener("click", () => this.fill(randomDetective()));
+    this._root.querySelector("[data-action='randomize']")?.addEventListener("click", () => this.fill(randomDetective(this.theme)));
     this._root.querySelector("[data-action='create']")?.addEventListener("click", () => this._create());
   }
 
@@ -149,7 +152,8 @@ export class TruequeNoirCharacterGenerator extends TruequeNoirWizard {
     const actor = await Actor.create({
       name: data.name,
       type: "detective",
-      img: "icons/svg/mystery-man.svg",
+      img: TN.PORTRAIT,
+      prototypeToken: { texture: { src: TN.TOKEN }, name: data.name, actorLink: true },
       system: {
         roleTag: data.roleTag,
         look: data.look,
@@ -177,14 +181,19 @@ export class TruequeNoirCityGenerator extends TruequeNoirWizard {
       classes: ["trueque-noir", "tn-app", "tn-wizard-app"],
       title: "Construir la ciudad",
       template: "systems/trueque-noir/templates/apps/city-generator.hbs",
-      width: 820,
-      height: 740,
+      width: 860,
+      height: 760,
       resizable: true
     });
   }
 
   getData() {
-    return { zones: ZONES, commonLocations: COMMON_LOCATIONS };
+    const current = activeTheme();
+    return {
+      zones: ZONES,
+      themeOptions: themeOptions(current),
+      commonLocations: getTheme(current).locations
+    };
   }
 
   activateListeners(html) {
@@ -192,12 +201,22 @@ export class TruequeNoirCityGenerator extends TruequeNoirWizard {
     this._loadExistingCity();
     this._root.querySelector("[data-action='randomize-city']")?.addEventListener("click", () => this._randomize());
     this._root.querySelector("[data-action='create-city']")?.addEventListener("click", () => this._create());
+    this._root.querySelector("[name='theme']")?.addEventListener("change", () => this._paintLocations());
+    this._paintLocations();
+  }
+
+  /** Las catorce localizaciones comunes, dichas con las palabras de la ambientación. */
+  _paintLocations() {
+    const chips = this._root.querySelector("[data-locations]");
+    if (!chips) return;
+    chips.innerHTML = this.theme.locations.map(name => `<span class="tn-chip">${escape(name)}</span>`).join("");
   }
 
   /** Editar la ciudad existente no debe obligar a reescribirla desde cero. */
   _loadExistingCity() {
     try {
       const city = JSON.parse(game.settings.get(TN.SYSTEM_ID, "cityData") || "{}");
+      if (city.theme) this.fill({ theme: city.theme });
       this.fill(Object.fromEntries(["cityName", "context", "wanted", "unwanted"].map(field => [field, city[field] || ""])));
       for (const zone of city.zones || []) {
         const prefix = String(zone.zone || "").toLowerCase();
@@ -232,7 +251,7 @@ export class TruequeNoirCityGenerator extends TruequeNoirWizard {
     if (summary) {
       summary.innerHTML = `
         <h3 class="tn-summary__name">${escape(name) || "Ciudad sin nombre"}</h3>
-        <p class="tn-summary__role">${escape(this.value("context"))}</p>
+        <p class="tn-summary__role">${escape(getTheme(this.value("theme")).label)} · ${escape(this.value("context"))}</p>
         <div class="tn-zones tn-zones--summary">
           ${this._readZones().map(zone => `
             <article class="tn-zone">
@@ -255,24 +274,32 @@ export class TruequeNoirCityGenerator extends TruequeNoirWizard {
   }
 
   _randomize() {
+    const theme = this.theme;
     this.fill({
-      cityName: `${pick(CITY_PREFIX)} ${pick(CITY_SUFFIX)}`,
-      context: pick(CITY_CONTEXTS)
+      cityName: `${pick(theme.city.prefix)} ${pick(theme.city.suffix)}`,
+      context: pick(theme.contexts),
+      wanted: pick(theme.wanted),
+      unwanted: pick(theme.unwanted)
     });
-    for (const zone of ZONES) {
+    const zoneNames = sample(theme.zones, ZONES.length);
+    const controllers = sample(theme.controllers, ZONES.length);
+    const extras = sample(theme.extras, ZONES.length);
+    ZONES.forEach((zone, index) => {
       const id = zone.toLowerCase();
       this.fill({
-        [`${id}Name`]: `${zone} · ${pick(["Muelles", "Altos", "Distrito", "Barrio", "Dársenas", "Jardines"])}`,
-        [`${id}Traits`]: sample(ZONE_TRAITS, 2).join(", "),
-        [`${id}Controller`]: pick(CONTROLLERS),
-        [`${id}Extra`]: pick(EXTRA_LOCATIONS)
+        [`${id}Name`]: `${zone} · ${zoneNames[index]}`,
+        [`${id}Traits`]: sample(theme.traits, 2).join(", "),
+        [`${id}Controller`]: controllers[index],
+        [`${id}Extra`]: extras[index]
       });
-    }
+    });
   }
 
   async _create() {
     const cityName = this.value("cityName");
     if (!cityName) return ui.notifications.warn("La ciudad necesita un nombre antes de guardarse.");
+    const themeId = this.value("theme") || activeTheme();
+    const theme = getTheme(themeId);
     const zones = this._readZones();
     const context = this.value("context");
     const wanted = this.value("wanted");
@@ -281,9 +308,9 @@ export class TruequeNoirCityGenerator extends TruequeNoirWizard {
     const zoneHtml = zones.map(zone => `<h2>${escape(zone.zone)}: ${escape(zone.name)}</h2><p><strong>Rasgos:</strong> ${escape(zone.traits)}</p><p><strong>Control:</strong> ${escape(zone.controller)}</p><p><strong>Localización propia:</strong> ${escape(zone.extra)}</p>`).join("");
     const existing = game.journal.find(entry => entry.getFlag(TN.SYSTEM_ID, "generatedCity"));
     const pages = [
-      { name: "Contexto y límites", type: "text", text: { content: `<h1>${escape(cityName)}</h1><p>${escape(context)}</p><h2>Queremos ver</h2><p>${escape(wanted)}</p><h2>No queremos ver</h2><p>${escape(unwanted)}</p>` } },
+      { name: "Contexto y límites", type: "text", text: { content: `<h1>${escape(cityName)}</h1><p><em>${escape(theme.label)}</em></p><p>${escape(context)}</p><h2>Queremos ver</h2><p>${escape(wanted)}</p><h2>No queremos ver</h2><p>${escape(unwanted)}</p>` } },
       { name: "Cuatro zonas", type: "text", text: { content: zoneHtml } },
-      { name: "Localizaciones comunes", type: "text", text: { content: `<p>${COMMON_LOCATIONS.join(" · ")}</p>` } }
+      { name: "Localizaciones comunes", type: "text", text: { content: `<p>${theme.locations.map(escape).join(" · ")}</p>` } }
     ];
 
     // Editar la ciudad actualiza su diario en lugar de acumular copias.
@@ -291,7 +318,11 @@ export class TruequeNoirCityGenerator extends TruequeNoirWizard {
     await JournalEntry.create({ name: `Ciudad · ${cityName}`, pages, flags: { [TN.SYSTEM_ID]: { generatedCity: true } } });
 
     await game.settings.set(TN.SYSTEM_ID, "cityName", cityName);
-    await game.settings.set(TN.SYSTEM_ID, "cityData", JSON.stringify({ cityName, context, wanted, unwanted, zones }));
+    await game.settings.set(TN.SYSTEM_ID, "cityData", JSON.stringify({ cityName, theme: themeId, context, wanted, unwanted, zones }));
+
+    if (this._root.querySelector("[name='applyScene']")?.checked) await applySceneTheme(themeId);
+    else await game.settings.set(TN.SYSTEM_ID, "cityTheme", themeId);
+
     ui.notifications.info(`${cityName} ya está en el Panel de La Ciudad.`);
     this.close();
     game.truequeNoir.openCaseTracker();

@@ -1,0 +1,19 @@
+<div class="tn-themes">
+  <header class="tn-themes__head">
+    <span class="tn-kicker">Ambientación</span>
+    <h1>¿En qué ciudad llueve?</h1>
+    <p>El fondo de la escena de portada y las tablas de creación aleatoria siguen a esta elección.</p>
+  </header>
+
+  <div class="tn-themes__grid">
+    {{#each themes}}
+      <button type="button" class="tn-theme {{#if active}}is-active{{/if}}" data-theme="{{id}}" style="background-image: linear-gradient(to top, rgba(8,9,11,.96) 6%, rgba(8,9,11,.35) 55%, rgba(8,9,11,.15)), url('{{scene.src}}');">
+        <span class="tn-theme__body">
+          <strong class="tn-theme__label">{{label}}</strong>
+          <small class="tn-theme__blurb">{{blurb}}</small>
+        </span>
+        {{#if active}}<span class="tn-theme__flag">En uso</span>{{/if}}
+      </button>
+    {{/each}}
+  </div>
+</div>

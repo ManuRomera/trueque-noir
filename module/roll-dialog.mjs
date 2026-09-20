@@ -168,7 +168,8 @@ export function openRollDialog(actor, type) {
       roll: {
         label: "Tirar",
         callback: async html => {
-          const form = (html[0] ?? html).querySelector("form");
+          const root = html[0] ?? html;
+          const form = (root.closest?.(".app") ?? root).querySelector("form");
           const values = readForm(form);
           if (type === "risk") await actor.rollRisk(values);
           else await actor.rollPursueCrime(values);
@@ -177,14 +178,14 @@ export function openRollDialog(actor, type) {
       cancel: { label: "Cancelar" }
     },
     default: "roll",
-    render: html => bindDialog(html, actor, type)
+    render: html => bindDialog(html, actor, type, dialog)
   }, { classes: ["trueque-noir", "tn-dialog", "tn-roll-dialog"], width: 520 });
 
   dialog.render(true);
   return dialog;
 }
 
-function bindDialog(html, actor, type) {
+function bindDialog(html, actor, type, dialog) {
   const root = html[0] ?? html;
   // Dialog entrega distintos nodos según la versión: buscamos hacia dentro y hacia fuera.
   const scope = root.closest?.(".app") ?? root;
@@ -240,6 +241,10 @@ function bindDialog(html, actor, type) {
     if (rollButton) rollButton.textContent = usingFavor ? "Gastar el favor" : "Tirar";
 
     if (summary) summary.innerHTML = `<h4>Vas a hacer esto</h4><ul>${summaryLines(actor, type, readForm(form)).join("")}</ul>`;
+
+    // El contenido cambia de alto al elegir opciones: la ventana se reajusta
+    // para que los botones nunca queden fuera del área pulsable.
+    dialog?.setPosition?.({ height: "auto" });
   };
 
   // Los campos deshabilitados por falta de recursos no deben reactivarse solos.

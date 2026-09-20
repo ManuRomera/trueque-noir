@@ -81,7 +81,18 @@ for (const rel of ["template.json", "lang/es.json", "data/adventures.json"]) {
   try { JSON.parse(read(rel)); } catch (error) { fail(`${rel}: JSON inválido · ${error.message}`); }
 }
 
-// 4. Cada data-action de una plantilla tiene quien lo escuche.
+// 4. Cada ambientación tiene su fondo de escena en el paquete.
+const themes = read("module/themes.mjs");
+const sceneFiles = [...themes.matchAll(/\$\{SCENES\}\/([\w-]+\.webp)/g)].map(match => match[1]);
+if (!sceneFiles.length) fail("module/themes.mjs: ninguna ambientación declara fondo de escena");
+for (const file of sceneFiles) {
+  if (!exists(`assets/scenes/${file}`)) fail(`module/themes.mjs: falta assets/scenes/${file}`);
+}
+for (const asset of ["assets/logo.webp", "assets/token.webp", "assets/portrait.webp", "assets/cigarette.png"]) {
+  if (!exists(asset)) fail(`falta el recurso ${asset}`);
+}
+
+// 5. Cada data-action de una plantilla tiene quien lo escuche.
 const actions = new Set();
 for (const rel of templates) {
   for (const match of read(rel).matchAll(/data-action=["']([\w-]+)["']/g)) actions.add(match[1]);
@@ -96,7 +107,7 @@ for (const action of actions) {
   if (!handled.has(action)) fail(`data-action="${action}" no tiene manejador en ningún módulo`);
 }
 
-// 5. Los ajustes que se leen están registrados.
+// 6. Los ajustes que se leen están registrados.
 const registered = new Set();
 const config = read("module/config.mjs");
 for (const match of config.matchAll(/register\("(\w+)"/g)) registered.add(match[1]);
@@ -117,4 +128,4 @@ if (problems.length) {
   console.error(`✗ ${problems.length} problema(s):\n- ${problems.join("\n- ")}`);
   process.exit(1);
 }
-console.log(`✓ ${templates.length} plantillas, ${modules.length} módulos y el manifiesto son coherentes.`);
+console.log(`✓ ${templates.length} plantillas, ${modules.length} módulos, ${sceneFiles.length} ambientaciones y el manifiesto son coherentes.`);

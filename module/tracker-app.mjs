@@ -139,6 +139,7 @@ export class TruequeNoirCaseTracker extends LegacyApplication {
     on("toggle-board", () => game.truequeNoir.toggleSharedCaseBoard());
     on("edit-city", () => game.truequeNoir.openCityGenerator());
     on("clear-city", () => this._clearCity());
+    on("scene-theme", () => game.truequeNoir.openThemePicker());
     on("quiet-drink", () => this._onQuietDrink());
     on("night-rest", () => this._onNightRest());
     on("recognition-plus", () => this._onRecognitionPlus());

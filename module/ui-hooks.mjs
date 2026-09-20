@@ -23,6 +23,7 @@ export function registerSceneControls() {
     if (game.user?.can("ACTOR_CREATE")) tools.push(button("tn-detective", "Crear detective", "fa-solid fa-user-secret", () => game.truequeNoir.openCharacterGenerator()));
     if (isGM) {
       tools.push(button("tn-city", "Construir la ciudad", "fa-solid fa-map-location-dot", () => game.truequeNoir.openCityGenerator()));
+      tools.push(button("tn-theme", "Ambientación de la portada", "fa-solid fa-image", () => game.truequeNoir.openThemePicker()));
       tools.push(button("tn-cases", "Archivo de casos", "fa-solid fa-folder-tree", () => game.truequeNoir.importCaseArchive()));
     }
     tools.push(button("tn-welcome", "Bienvenida y ayuda", "fa-solid fa-circle-question", () => game.truequeNoir.openWelcome()));

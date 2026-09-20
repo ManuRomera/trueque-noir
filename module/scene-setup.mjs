@@ -1,47 +1,80 @@
 import { TN } from "./config.mjs";
+import { getTheme, DEFAULT_THEME } from "./themes.mjs";
 
 /**
  * Escena de portada del sistema.
+ *
  * Debe abrirse siempre encuadrada: sin cuadrícula, sin niebla, sin visión de token
- * y con la imagen ocupando toda la pantalla útil.
+ * y con la imagen ocupando toda la pantalla útil. El rótulo del juego va en un tile
+ * encima del fondo, colocado para que parezca parte de la ilustración.
  */
-export const COVER_SCENE = {
-  name: TN.SCENE_FLAG,
-  src: TN.COVER,
-  width: 1920,
-  height: 1024
-};
+export const COVER_SCENE_NAME = TN.SCENE_FLAG;
 
-function coverSceneSource() {
-  const { name, src, width, height } = COVER_SCENE;
+/** Proporciones del rótulo: 2109 × 746 px. */
+const LOGO_RATIO = 746 / 2109;
+const LOGO_WIDTH = 0.58;
+const LOGO_TOP = 0.05;
+
+export function getSceneTheme() {
+  return game.settings?.get(TN.SYSTEM_ID, "cityTheme") ?? DEFAULT_THEME;
+}
+
+function coverSceneSource(themeId = getSceneTheme()) {
+  const { scene } = getTheme(themeId);
   return {
-    name,
-    width,
-    height,
+    name: COVER_SCENE_NAME,
+    width: scene.width,
+    height: scene.height,
     padding: 0,
     backgroundColor: "#000000",
-    background: { src },
+    background: { src: scene.src },
     // Cuadrícula desactivada (tipo 0 = sin cuadrícula) y además invisible.
     grid: { type: 0, size: 100, alpha: 0, distance: 1, units: "" },
     tokenVision: false,
     fog: { exploration: false },
     environment: { darknessLevel: 0, globalLight: { enabled: true } },
-    initial: { x: Math.round(width / 2), y: Math.round(height / 2), scale: null },
+    initial: { x: Math.round(scene.width / 2), y: Math.round(scene.height / 2), scale: null },
     navigation: true,
-    flags: { [TN.SYSTEM_ID]: { starterScene: name } }
+    flags: { [TN.SYSTEM_ID]: { starterScene: COVER_SCENE_NAME, theme: themeId } }
   };
 }
 
-function needsUpdate(scene) {
-  const grid = scene.grid ?? {};
-  return scene.width !== COVER_SCENE.width
-    || scene.height !== COVER_SCENE.height
+function logoTileSource(scene) {
+  const width = Math.round(scene.width * LOGO_WIDTH);
+  const height = Math.round(width * LOGO_RATIO);
+  return {
+    texture: { src: TN.LOGO },
+    width,
+    height,
+    x: Math.round((scene.width - width) / 2),
+    y: Math.round(scene.height * LOGO_TOP),
+    elevation: 0,
+    sort: 10,
+    locked: true,
+    flags: { [TN.SYSTEM_ID]: { coverLogo: true } }
+  };
+}
+
+function needsUpdate(scene, source) {
+  return scene.width !== source.width
+    || scene.height !== source.height
     || scene.padding !== 0
-    || scene.background?.src !== COVER_SCENE.src
-    || Number(grid.type) !== 0
+    || scene.background?.src !== source.background.src
+    || Number(scene.grid?.type) !== 0
     || scene.tokenVision !== false
     || scene.fog?.exploration !== false
     || scene.environment?.globalLight?.enabled !== true;
+}
+
+/** Coloca o recoloca el rótulo para que encaje con el tamaño actual de la escena. */
+async function ensureLogoTile(scene) {
+  const wanted = logoTileSource(scene);
+  const existing = scene.tiles.find(tile => tile.getFlag(TN.SYSTEM_ID, "coverLogo"));
+  if (!existing) return scene.createEmbeddedDocuments("Tile", [wanted]);
+  const changed = ["width", "height", "x", "y"].some(key => existing[key] !== wanted[key])
+    || existing.texture?.src !== TN.LOGO;
+  if (changed) await existing.update(wanted);
+  return existing;
 }
 
 /** Crea la escena de portada, o corrige la existente si alguien alteró sus ajustes clave. */
@@ -53,19 +86,41 @@ export async function ensureCoverScene() {
     await obsolete.delete();
   }
 
-  const existing = game.scenes.find(scene => scene.getFlag(TN.SYSTEM_ID, "starterScene") === COVER_SCENE.name);
-  if (!existing) return Scene.create(coverSceneSource());
-  if (needsUpdate(existing)) {
-    // Solo se corrigen los ajustes que la portada necesita; el nombre que le haya puesto
-    // el usuario y el resto de su configuración se respetan.
-    const { name, navigation, ...fixes } = coverSceneSource();
-    await existing.update(fixes);
+  const source = coverSceneSource();
+  let scene = game.scenes.find(entry => entry.getFlag(TN.SYSTEM_ID, "starterScene") === COVER_SCENE_NAME);
+  if (!scene) scene = await Scene.create(source);
+  else if (needsUpdate(scene, source)) {
+    // Solo se corrigen los ajustes que la portada necesita; el nombre que le haya
+    // puesto el usuario y el resto de su configuración se respetan.
+    const { name, navigation, ...fixes } = source;
+    await scene.update(fixes);
   }
-  return existing;
+  if (scene) await ensureLogoTile(scene);
+  return scene;
+}
+
+/** Cambia la ambientación: fondo, proporciones de la escena y rótulo. */
+export async function applySceneTheme(themeId) {
+  if (!game.user?.isGM) return ui.notifications.warn("Solo La Ciudad puede cambiar la ambientación.");
+  const theme = getTheme(themeId);
+  await game.settings.set(TN.SYSTEM_ID, "cityTheme", theme.id);
+
+  const scene = game.scenes.find(entry => entry.getFlag(TN.SYSTEM_ID, "starterScene") === COVER_SCENE_NAME);
+  if (!scene) {
+    await ensureCoverScene();
+    ui.notifications.info(`Ambientación «${theme.label}» aplicada.`);
+    return;
+  }
+
+  const { name, navigation, ...fixes } = coverSceneSource(theme.id);
+  await scene.update(fixes);
+  await ensureLogoTile(scene);
+  if (canvas?.scene?.id === scene.id) canvas.pan(coverView(scene));
+  ui.notifications.info(`Ambientación «${theme.label}» aplicada a la escena de portada.`);
 }
 
 export function isCoverScene(scene) {
-  return scene?.getFlag?.(TN.SYSTEM_ID, "starterScene") === COVER_SCENE.name;
+  return scene?.getFlag?.(TN.SYSTEM_ID, "starterScene") === COVER_SCENE_NAME;
 }
 
 /**

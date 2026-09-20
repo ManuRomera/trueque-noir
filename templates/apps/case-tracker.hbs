@@ -90,6 +90,7 @@
       <div class="tn-fold__body">
         <div class="tn-fold__actions">
           <button type="button" class="tn-btn tn-btn--contextual" data-action="edit-city"><i class="fa-solid fa-pen" aria-hidden="true"></i> {{#if city.hasContent}}Editar la ciudad{{else}}Construir la ciudad{{/if}}</button>
+          <button type="button" class="tn-btn tn-btn--ghost" data-action="scene-theme"><i class="fa-solid fa-image" aria-hidden="true"></i> Ambientación</button>
           {{#if city.hasContent}}<button type="button" class="tn-btn tn-btn--ghost" data-action="clear-city"><i class="fa-solid fa-eraser" aria-hidden="true"></i> Vaciar</button>{{/if}}
         </div>
         {{#if city.context}}

@@ -2,7 +2,7 @@
   "id": "trueque-noir",
   "title": "Trueque Noir",
   "description": "Investigaciones noir inspiradas en Balada triste de la ciudad: expediente vivo, Mesa del caso compartida y Panel de La Ciudad para dirigir.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "compatibility": {
     "minimum": 13,
     "verified": 14
@@ -44,7 +44,7 @@
   "primaryTokenAttribute": null,
   "secondaryTokenAttribute": null,
   "socket": true,
-  "background": "systems/trueque-noir/assets/cover.png",
+  "background": "systems/trueque-noir/assets/scenes/noir.webp",
   "manifest": "https://github.com/ManuRomera/trueque-noir/releases/latest/download/system.json",
   "download": "https://github.com/ManuRomera/trueque-noir/releases/latest/download/trueque-noir.zip",
   "template": "template.json"

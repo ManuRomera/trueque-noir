@@ -21,8 +21,10 @@ export function backgroundHelp(name, extra = false) {
 export function bindBackgroundHelp(html) {
   const root = html instanceof HTMLElement ? html : html?.[0];
   if (!root) return;
-  root.querySelectorAll('select[name*="background"]').forEach(select => {
+  root.querySelectorAll('select[name^="system.background"]').forEach(select => {
     const extra = select.name.endsWith('background3');
+    if (select.dataset.tnBackgroundHelp) return;
+    select.dataset.tnBackgroundHelp = 'true';
     const description = document.createElement('p');
     description.className = 'tn-background-description';
     description.setAttribute('aria-live', 'polite');

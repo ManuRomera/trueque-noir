@@ -9,7 +9,9 @@ recoge las dudas de derechos que debe resolver el autor. No es una opinión lega
 | --- | --- |
 | `trueque-noir.mjs`, `module/*.mjs` | Código del sistema. Original. |
 | `styles/*.css`, `templates/**` | Interfaz. Original. |
-| `assets/cover.png` | Ilustración de portada (1920 × 1024) creada para el sistema. |
+| `assets/scenes/*.webp` | Once ilustraciones de portada, una por ambientación. Creadas para el sistema. |
+| `assets/logo.webp` | Rótulo del juego, con transparencia. Creado para el sistema. |
+| `assets/portrait.webp`, `assets/token.webp` | Retrato y token de ejemplo. Creados para el sistema. |
 | `assets/cigarette.png` | Cigarrillo con transparencia real usado en la ficha. |
 | `lang/es.json`, `system.json`, `template.json` | Manifiestos y textos de interfaz. |
 
@@ -62,7 +64,7 @@ git si hacen falta:
 | `assets/documento-logo.png` | Rótulo «Documento del detective» del manual. Sin usar. |
 | `assets/trueque-logo.png` | Recorte de un logotipo con artefactos. Sin usar. |
 | `assets/noir-bg.png` | 2,4 MB de textura sustituida por gradientes y grano en CSS. |
-| `assets/cigarette-v1.png`, `assets/trueque-noir-cover-v1.png` | Versiones antiguas. |
+| `assets/cigarette-v1.png`, `assets/trueque-noir-cover-v1.png`, `assets/cover.png` | Versiones antiguas, sustituidas por las ilustraciones de ambientación. |
 | `assets/showcase-v1.png` | Captura de una interfaz que ya no existe. |
 | `assets/city-builder-scene.svg` | Escena retirada en la 1.3.0. |
 

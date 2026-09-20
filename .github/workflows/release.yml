@@ -23,7 +23,8 @@ jobs:
       - name: Preparar paquete
         run: |
           mkdir -p dist/trueque-noir
-          rsync -a --exclude '.git' --exclude '.github' --exclude 'dist' --exclude '*.zip' ./ dist/trueque-noir/
+          # Trueque.png es la captura del README: no debe viajar en el paquete instalable.
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'dist' --exclude '*.zip' --exclude 'Trueque.png' ./ dist/trueque-noir/
           cd dist
           zip -r trueque-noir.zip trueque-noir
           cp trueque-noir/system.json system.json

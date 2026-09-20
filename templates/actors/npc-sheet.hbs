@@ -1,41 +1,23 @@
-<form class="tn-sheet npc-sheet {{cssClass}}" autocomplete="off">
-  <section class="tn-topbar tn-panel-card tn-topbar-compact tn-topbar-npc-compact">
-    <div class="tn-topbar-main">
-      <img class="profile-img tn-portrait tn-portrait-small" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" />
-      <div class="tn-identity">
-        <input name="name" type="text" value="{{actor.name}}" placeholder="Nombre del PNJ" class="tn-name-inline tn-name-inline-small" />
-        <div class="tn-meta-row tn-meta-row-tight">
-          <input name="system.role" type="text" value="{{system.role}}" placeholder="Rol / función" class="tn-type-inline" />
-        </div>
+<form class="tn-sheet tn-npc {{cssClass}}" autocomplete="off">
+  <header class="tn-head tn-head--npc">
+    <div class="tn-head__identity">
+      <img class="profile-img tn-head__portrait tn-head__portrait--small" src="{{actor.img}}" data-edit="img" title="Cambiar el retrato de {{actor.name}}" alt="Retrato de {{actor.name}}" />
+      <div class="tn-head__names">
+        <input name="name" type="text" value="{{actor.name}}" placeholder="Nombre del PNJ" class="tn-head__name tn-head__name--small" aria-label="Nombre del PNJ" />
+        <input name="system.role" type="text" value="{{system.role}}" placeholder="Rol en la ciudad" class="tn-head__role" aria-label="Rol del PNJ" />
       </div>
     </div>
-    <div class="tn-quick-actions tn-quick-actions-compact">
-      <button type="button" data-action="save-sheet">Guardar</button>
+  </header>
+
+  <section class="tn-body tn-body--plain">
+    <div class="tn-field-row tn-field-row--3">
+      <div class="tn-field"><label for="tn-npc-zone">Zona</label><input id="tn-npc-zone" type="text" name="system.zone" value="{{system.zone}}" /></div>
+      <div class="tn-field"><label for="tn-npc-location">Localización</label><input id="tn-npc-location" type="text" name="system.location" value="{{system.location}}" /></div>
+      <div class="tn-field"><label for="tn-npc-favor">Favor que puede conceder</label><input id="tn-npc-favor" type="text" name="system.favorScope" value="{{system.favorScope}}" placeholder="Riesgo / Crimen / Libre" /></div>
     </div>
-  </section>
-
-  <section class="tn-grid tn-npc-layout tn-npc-layout-compact">
-    <section class="tn-panel-card">
-      <div class="tn-section-title">Ficha rápida</div>
-      <div class="tn-field-grid tn-three-col">
-        <div class="tn-field-group">
-          <label>Zona</label>
-          <input type="text" name="system.zone" value="{{system.zone}}" />
-        </div>
-        <div class="tn-field-group">
-          <label>Localización</label>
-          <input type="text" name="system.location" value="{{system.location}}" />
-        </div>
-        <div class="tn-field-group">
-          <label>Favor / ayuda</label>
-          <input type="text" name="system.favorScope" value="{{system.favorScope}}" />
-        </div>
-      </div>
-    </section>
-
-    <section class="tn-panel-card">
-      <div class="tn-section-title">Notas</div>
-      <textarea class="tn-npc-notes tn-npc-notes-compact" name="system.notes">{{system.notes}}</textarea>
-    </section>
+    <div class="tn-field">
+      <label for="tn-npc-notes">Notas</label>
+      <textarea id="tn-npc-notes" class="tn-textarea--tall" name="system.notes" placeholder="Qué sabe, qué quiere, qué esconde…">{{system.notes}}</textarea>
+    </div>
   </section>
 </form>

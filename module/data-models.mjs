@@ -81,6 +81,13 @@ export class TruequeNoirDetectiveData extends foundry.abstract.TypeDataModel {
         customActive: boolField(false),
         acabado: boolField(false)
       }),
+      // Expediente: cuadernos de investigación del detective.
+      dossier: new SchemaField({
+        timeline: textField(),
+        suspects: textField(),
+        hypotheses: textField(),
+        scenes: textField()
+      }),
       notes: textField()
     };
   }

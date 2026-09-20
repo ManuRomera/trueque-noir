@@ -1,6 +1,12 @@
+/**
+ * Constantes, ajustes y consultas compartidas de Trueque Noir.
+ * En este juego el director de juego es «La Ciudad»: nunca «DM» ni «GM» en textos visibles.
+ */
 export const TN = {
   SYSTEM_ID: "trueque-noir",
   SOCKET: "system.trueque-noir",
+  COVER: "systems/trueque-noir/assets/cover.png",
+  SCENE_FLAG: "Trueque Noir · Portada",
   BACKGROUNDS: [
     "Intimidación",
     "Encontrar pruebas",
@@ -46,55 +52,65 @@ export const TN = {
   ]
 };
 
+/** Pistas necesarias para bajar un punto el dado del crimen. */
+export const CLUES_PER_CRIME_STEP = 3;
+/** Pistas mínimas que el manual exige antes de una acusación. */
+export const CLUES_FOR_ACCUSATION = 6;
+
 export function registerSystemSettings() {
-  const worldNumber = (key, name, defaultValue) => {
+  const register = (key, type, defaultValue, extra = {}) => {
     game.settings.register(TN.SYSTEM_ID, key, {
-      name,
       scope: "world",
       config: false,
-      type: Number,
-      default: defaultValue
+      type,
+      default: defaultValue,
+      ...extra
     });
   };
 
-  const worldString = (key, name, defaultValue) => {
-    game.settings.register(TN.SYSTEM_ID, key, {
-      name,
-      scope: "world",
-      config: false,
-      type: String,
-      default: defaultValue
-    });
-  };
+  // Estado vivo del caso. Nunca aparece en la configuración de Foundry: se edita desde el Panel.
+  register("caseName", String, "Caso abierto", { name: "Nombre del caso" });
+  register("caseDay", Number, 1, { name: "Día del caso" });
+  register("casePhaseIndex", Number, 0, { name: "Índice de franja" });
+  register("timeLimit", Number, 4, { name: "Límite de días" });
+  register("crimeDie", Number, 1, { name: "Dado del crimen" });
+  register("groupCluesTotal", Number, 0, { name: "Pistas descubiertas" });
+  register("groupCluesSpent", Number, 0, { name: "Pistas gastadas" });
+  register("rumorBonusAvailable", Boolean, false, { name: "Rumor pendiente" });
+  register("rumorBonusText", String, "", { name: "Texto del rumor" });
+  register("tableDisplayVisible", Boolean, false, { name: "Mesa del caso visible" });
+  register("cityName", String, "La ciudad", { name: "Nombre de la ciudad" });
+  register("cityData", String, "{}", { name: "Datos de la ciudad" });
+  register("welcomeSeen", Boolean, false, { name: "Bienvenida mostrada" });
+  register("caseArchiveImported", Boolean, false, { name: "Archivo de casos importado" });
 
-  const worldBoolean = (key, name, defaultValue) => {
-    game.settings.register(TN.SYSTEM_ID, key, {
-      name,
-      scope: "world",
-      config: false,
-      type: Boolean,
-      default: defaultValue
-    });
-  };
+  // Preferencias visibles en Configuración → Ajustes del sistema.
+  game.settings.register(TN.SYSTEM_ID, "portraitNoir", {
+    name: "Retratos en blanco y negro",
+    hint: "Aplica el tratamiento de fotografía noir a los retratos de las fichas. Desactívalo para verlos en color.",
+    scope: "client",
+    config: true,
+    type: Boolean,
+    default: true,
+    onChange: () => {
+      document.body.classList.toggle("tn-portraits-color", !game.settings.get(TN.SYSTEM_ID, "portraitNoir"));
+    }
+  });
 
-  worldString("caseName", "Nombre del caso", "Caso abierto");
-  worldNumber("caseDay", "Día del caso", 1);
-  worldNumber("casePhaseIndex", "Índice de franja", 0);
-  worldNumber("timeLimit", "Límite de días", 4);
-  worldNumber("crimeDie", "Dado del crimen", 1);
-  worldNumber("groupCluesTotal", "Pistas totales del grupo", 0);
-  worldNumber("groupCluesSpent", "Pistas gastadas por reducción", 0);
-  worldBoolean("rumorBonusAvailable", "Rumor pendiente", false);
-  worldString("rumorBonusText", "Texto del rumor pendiente", "");
-  worldBoolean("tableDisplayVisible", "Mesa del caso visible", false);
-  worldString("cityName", "Nombre de la ciudad", "La ciudad");
-  worldString("cityData", "Datos de la ciudad", "{}");
+  game.settings.register(TN.SYSTEM_ID, "installMacros", {
+    name: "Instalar macros en la barra rápida",
+    hint: "Crea y coloca las macros de La Ciudad en tu barra. Desactivado por defecto: todo está también en el menú Trueque Noir de los controles de escena.",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
 }
 
 export function getRecognitionAvailable(actor) {
   const total = Number(actor.system.recognition?.total ?? 0);
   const spent = Number(actor.system.recognition?.spent ?? 0);
-  return total - spent;
+  return Math.max(total - spent, 0);
 }
 
 export function classifyResult(total) {
@@ -102,6 +118,12 @@ export function classifyResult(total) {
   if (total <= 8) return "mixed";
   return "clean";
 }
+
+export const RESULT_LABEL = {
+  clean: "Éxito limpio",
+  mixed: "Trueque",
+  hard: "Resultado duro"
+};
 
 export function phaseLabel(index) {
   return TN.PHASES[Number(index) ?? 0] ?? TN.PHASES[0];
@@ -115,13 +137,20 @@ export function getCrimeDie() {
   return Number(game.settings.get(TN.SYSTEM_ID, "crimeDie") ?? 1);
 }
 
+/** El dado del crimen «explota» al superar 4: el caso debería cerrarse. */
+export function isCrimeExploded(value = getCrimeDie()) {
+  return Number(value) > 4;
+}
+
 export function getGroupClueState() {
   const total = Number(game.settings.get(TN.SYSTEM_ID, "groupCluesTotal") ?? 0);
   const spent = Number(game.settings.get(TN.SYSTEM_ID, "groupCluesSpent") ?? 0);
+  const available = Math.max(total - spent, 0);
   return {
     total,
     spent,
-    available: Math.max(total - spent, 0)
+    available,
+    canReduceCrime: available >= CLUES_PER_CRIME_STEP && getCrimeDie() > 1
   };
 }
 
@@ -134,18 +163,37 @@ export function canUseFavorForType(scope, type) {
 }
 
 export function getActorBackgrounds(actor) {
-  const backgrounds = [
-    actor.system.background1,
-    actor.system.background2,
-    actor.system.background3
-  ].filter(Boolean);
-  return backgrounds;
+  return [actor.system.background1, actor.system.background2, actor.system.background3].filter(Boolean);
 }
 
+export function getDetectives() {
+  return game.actors?.filter(actor => actor.type === "detective") ?? [];
+}
+
+/** Estados activos de un detective, listos para pintarse como sellos en la cabecera. */
+export function getActiveStates(actor) {
+  const states = [];
+  for (const state of TN.PERSONAL_STATES) {
+    if (actor.system.personalStates?.[state.id]) states.push({ label: state.label, kind: "personal" });
+  }
+  if (actor.system.personalStates?.customActive && actor.system.personalStates?.custom) {
+    states.push({ label: actor.system.personalStates.custom, kind: "personal" });
+  }
+  for (const state of TN.CITY_STATES) {
+    if (actor.system.cityStates?.[state.id]) states.push({ label: state.label, kind: "city" });
+  }
+  if (actor.system.cityStates?.customActive && actor.system.cityStates?.custom) {
+    states.push({ label: actor.system.cityStates.custom, kind: "city" });
+  }
+  return states;
+}
+
+/** Vuelve a pintar las ventanas compartidas del sistema sin robar el foco de edición. */
 export async function refreshCrimeBoard() {
-  for (const app of Object.values(ui.windows)) {
-    if (app?.options?.id === "trueque-noir-case-tracker" || app?.options?.id === "trueque-noir-case-board") {
-      app.render(false);
-    }
+  for (const app of Object.values(ui.windows ?? {})) {
+    if (["trueque-noir-case-tracker", "trueque-noir-case-board"].includes(app?.options?.id)) app.render(false);
+  }
+  for (const sheet of Object.values(ui.windows ?? {})) {
+    if (sheet?.actor?.type === "detective") sheet.render(false);
   }
 }

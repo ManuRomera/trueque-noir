@@ -1,322 +1,340 @@
-<form class="tn-sheet detective-sheet {{cssClass}}" autocomplete="off">
-  <section class="tn-topbar tn-panel-card tn-topbar-compact">
-    <div class="tn-topbar-main">
-      <img class="profile-img tn-portrait" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" />
-      <div class="tn-identity">
-        <input name="name" type="text" value="{{actor.name}}" placeholder="Nombre del detective" class="tn-name-inline" />
-        <div class="tn-meta-row">
-          <span class="tn-badge">Detective</span>
-          <input type="text" name="system.roleTag" value="{{system.roleTag}}" placeholder="Tipo / apodo / función" class="tn-type-inline" />
+<form class="tn-sheet tn-detective {{cssClass}}" autocomplete="off">
+
+  <header class="tn-head">
+    <div class="tn-head__identity">
+      <img class="profile-img tn-head__portrait" src="{{actor.img}}" data-edit="img" title="Cambiar el retrato de {{actor.name}}" alt="Retrato de {{actor.name}}" />
+      <div class="tn-head__names">
+        <input name="name" type="text" value="{{actor.name}}" placeholder="Nombre del detective" class="tn-head__name" aria-label="Nombre del detective" />
+        <input type="text" name="system.roleTag" value="{{system.roleTag}}" placeholder="Función o apodo" class="tn-head__role" aria-label="Función o apodo" />
+        <div class="tn-stamps" aria-label="Estados activos">
+          {{#each activeStates}}
+            <span class="tn-stamp tn-stamp--{{kind}}">{{label}}</span>
+          {{else}}
+            <span class="tn-stamps__empty">Sin estados activos</span>
+          {{/each}}
         </div>
       </div>
     </div>
 
-    <div class="tn-case-strip" aria-label="Estado del caso">
-      <div class="tn-case-context" data-tn-help="Resumen del caso y estados activos del detective. Estos estados permanecen visibles durante toda la partida."><span>Expediente</span><strong>{{caseName}}</strong><small>Día {{caseDay}} · {{casePhase}}</small>{{#if activeStates.length}}<small class="tn-active-states">Estados: {{#each activeStates}}{{this}}{{#unless @last}} · {{/unless}}{{/each}}</small>{{else}}<small class="tn-active-states is-clear">Sin estados activos</small>{{/if}}</div>
-      <div class="tn-vital tn-vital-cigarettes" title="Cigarrillos disponibles">
-        <img src="systems/trueque-noir/assets/cigarette-v2.png" alt="" />
-        <span>Cig.</span><strong>{{system.cigarettes.value}}/{{system.cigarettes.max}}</strong>
-      </div>
-      <div class="tn-vital"><span>Recon.</span><strong>{{availableRecognition}}</strong></div>
-      <div class="tn-vital tn-vital-crime"><span>Crimen</span><strong>{{crimeDie}}</strong></div>
-      <div class="tn-vital"><span>Pistas</span><strong>{{groupClues}}</strong><small>{{groupCluesAvailable}} guardadas</small></div>
-    </div>
-
-    <div class="tn-quick-actions">
-      <button type="button" class="tn-primary-action" data-action="roll-risk"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Riesgo</button>
-      <button type="button" class="tn-primary-action" data-action="roll-pursue"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Crimen</button>
+    <div class="tn-head__actions">
+      <button type="button" class="tn-act tn-act--risk" data-action="roll-risk">
+        <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+        <span>Riesgo</span>
+      </button>
+      <button type="button" class="tn-act tn-act--pursue" data-action="roll-pursue">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <span>Perseguir el Crimen</span>
+      </button>
       {{#if isGM}}
-        <button type="button" data-action="open-city-tools">Ciudad</button>
-        <button type="button" data-action="open-case-board">Mesa</button>
+        <div class="tn-city-access" aria-label="Herramientas de La Ciudad">
+          <button type="button" class="tn-btn tn-btn--ghost" data-action="open-city-tools" title="Abrir el Panel de La Ciudad"><i class="fa-solid fa-city" aria-hidden="true"></i> Panel</button>
+          <button type="button" class="tn-btn tn-btn--ghost" data-action="open-case-board" title="Abrir la Mesa del caso"><i class="fa-solid fa-table-columns" aria-hidden="true"></i> Mesa</button>
+        </div>
       {{/if}}
     </div>
-  </section>
+
+    <div class="tn-strip" aria-label="Estado del caso">
+      <div class="tn-strip__case">
+        <span class="tn-strip__label">Expediente</span>
+        <strong class="tn-strip__case-name" title="{{caseName}}">{{caseName}}</strong>
+        <span class="tn-strip__case-time">Día {{caseDay}} de {{timeLimit}} · {{casePhase}}</span>
+      </div>
+      <div class="tn-strip__item tn-strip__item--cigarettes" data-tn-help="Cigarrillos disponibles. Cada uno paga una calada de sangre fría, un contacto, un rumor o una visita nocturna.">
+        <img src="systems/trueque-noir/assets/cigarette.png" alt="" aria-hidden="true" />
+        <span class="tn-strip__label">Cigarrillos</span>
+        <strong class="tn-strip__value">{{system.cigarettes.value}}<small>/{{system.cigarettes.max}}</small></strong>
+      </div>
+      <div class="tn-strip__item" data-tn-help="Reconocimiento disponible: el que aún puedes gastar en ayudas e interludios.">
+        <span class="tn-strip__label">Reconocimiento</span>
+        <strong class="tn-strip__value">{{availableRecognition}}</strong>
+      </div>
+      <div class="tn-strip__item tn-strip__item--crime {{#if crimeExploded}}is-exploded{{/if}}" data-tn-help="Dado del crimen: se resta a cada tirada de Perseguir el Crimen. Baja 1 por cada {{cluesPerStep}} pistas sin gastar.">
+        <span class="tn-strip__label">Dado del crimen</span>
+        <strong class="tn-strip__value">{{crimeDie}}</strong>
+      </div>
+      <div class="tn-strip__item" data-tn-help="Pistas descubiertas por todo el grupo en este caso y las que todavía no se han gastado en bajar el dado del crimen.">
+        <span class="tn-strip__label">Pistas del caso</span>
+        <strong class="tn-strip__value">{{caseClues}}<small> · {{caseCluesAvailable}} sin gastar</small></strong>
+      </div>
+    </div>
+  </header>
 
   <nav class="tn-tabs sheet-tabs tabs" data-group="primary">
-    <a class="item" data-tab="document">Documento</a>
-    <a class="item" data-tab="resources">Investigación</a>
-    <a class="item" data-tab="notes">Notas</a>
+    <a class="item" data-tab="character">Personaje</a>
+    <a class="item" data-tab="investigation">Investigación</a>
+    <a class="item" data-tab="dossier">Expediente</a>
   </nav>
 
-  <section class="tn-overexpose-bar {{#unless canOverexpose}}is-muted{{/unless}}" aria-label="Sobreexposición">
-    <span><strong>¿No aceptarás el resultado?</strong> Repite la última tirada aumentando la tensión de un pilar.</span>
-    <button type="button" data-action="overexpose-person" {{#unless canOverexpose}}disabled{{/unless}}>Exponer persona</button>
-    <button type="button" data-action="overexpose-place" {{#unless canOverexpose}}disabled{{/unless}}>Exponer lugar</button>
-  </section>
+  <section class="tn-body">
 
-  <section class="tn-body tn-main-body">
-    <div class="tab tn-tab-document" data-group="primary" data-tab="document">
-      <nav class="tn-document-tabs" aria-label="Secciones del documento">
-        <button type="button" class="is-active" data-doc-tab="identity">Perfil y pilares</button>
-        <button type="button" data-doc-tab="resources">Recursos y estados</button>
-        <button type="button" data-doc-tab="gear">Objetos y balada</button>
-      </nav>
-      <div class="tn-grid tn-doc-layout">
-        <section class="tn-panel-card tn-profile-card" data-doc-section="identity">
-          <div class="tn-section-title">Perfil</div>
+    <div class="tab" data-group="primary" data-tab="character">
+      <div class="tn-character">
 
-          <div class="tn-field-grid tn-bg-grid">
-            <div class="tn-field-group">
-              <label>Trasfondo 1</label>
-              <select name="system.background1" title="{{system.background1}}">
-                <option value=""></option>
-                {{#each allBackgrounds as |bg|}}
-                  <option value="{{bg}}" {{#if (eq ../system.background1 bg)}}selected{{/if}}>{{bg}}</option>
-                {{/each}}
+        <section class="tn-block tn-block--profile">
+          <h2 class="tn-block__title">Perfil</h2>
+          <div class="tn-field-row tn-field-row--3">
+            <div class="tn-field">
+              <label for="tn-bg1">Trasfondo 1 <button type="button" class="tn-help" data-tn-help="Si el trasfondo ayuda en la acción, tiras 2d10 y conservas el mejor. Solo puede ayudar un trasfondo por tirada.">?</button></label>
+              <select id="tn-bg1" name="system.background1">
+                <option value="">— Sin elegir —</option>
+                {{#each allBackgrounds as |bg|}}<option value="{{bg}}" {{#if (eq ../system.background1 bg)}}selected{{/if}}>{{bg}}</option>{{/each}}
               </select>
             </div>
-            <div class="tn-field-group">
-              <label>Trasfondo 2</label>
-              <select name="system.background2" title="{{system.background2}}">
-                <option value=""></option>
-                {{#each allBackgrounds as |bg|}}
-                  <option value="{{bg}}" {{#if (eq ../system.background2 bg)}}selected{{/if}}>{{bg}}</option>
-                {{/each}}
+            <div class="tn-field">
+              <label for="tn-bg2">Trasfondo 2</label>
+              <select id="tn-bg2" name="system.background2">
+                <option value="">— Sin elegir —</option>
+                {{#each allBackgrounds as |bg|}}<option value="{{bg}}" {{#if (eq ../system.background2 bg)}}selected{{/if}}>{{bg}}</option>{{/each}}
               </select>
             </div>
-            <div class="tn-field-group">
-              <label>Extra</label>
-              <select name="system.background3" title="{{system.background3}}">
-                <option value=""></option>
-                {{#each allBackgrounds as |bg|}}
-                  <option value="{{bg}}" {{#if (eq ../system.background3 bg)}}selected{{/if}}>{{bg}}</option>
-                {{/each}}
+            <div class="tn-field">
+              <label for="tn-bg3">Extra <button type="button" class="tn-help" data-tn-help="Tercer trasfondo: se adquiere entre casos gastando 3 puntos de reconocimiento en un interludio.">?</button></label>
+              <select id="tn-bg3" name="system.background3">
+                <option value="">— Sin elegir —</option>
+                {{#each allBackgrounds as |bg|}}<option value="{{bg}}" {{#if (eq ../system.background3 bg)}}selected{{/if}}>{{bg}}</option>{{/each}}
               </select>
             </div>
           </div>
+          <div class="tn-field-row tn-field-row--3">
+            <div class="tn-field"><label for="tn-look">Físico</label><input id="tn-look" type="text" name="system.look" value="{{system.look}}" /></div>
+            <div class="tn-field"><label for="tn-belief">Creencias</label><input id="tn-belief" type="text" name="system.belief" value="{{system.belief}}" /></div>
+            <div class="tn-field"><label for="tn-temper">Carácter</label><input id="tn-temper" type="text" name="system.temperament" value="{{system.temperament}}" /></div>
+          </div>
+          <div class="tn-field-row tn-field-row--age">
+            <div class="tn-field"><label for="tn-age">Edad</label><input id="tn-age" type="text" name="system.age" value="{{system.age}}" /></div>
+            <div class="tn-field"><label for="tn-motivation">Motivación</label><input id="tn-motivation" type="text" name="system.motivation" value="{{system.motivation}}" /></div>
+          </div>
+        </section>
 
-          <div class="tn-field-grid tn-three-col">
-            <div class="tn-field-group">
-              <label>Físico</label>
-              <input type="text" name="system.look" value="{{system.look}}" />
-            </div>
-            <div class="tn-field-group">
-              <label>Creencias</label>
-              <input type="text" name="system.belief" value="{{system.belief}}" />
-            </div>
-            <div class="tn-field-group">
-              <label>Carácter</label>
-              <input type="text" name="system.temperament" value="{{system.temperament}}" />
+        <section class="tn-block tn-block--pillars">
+          <h2 class="tn-block__title">Pilares <button type="button" class="tn-help" data-tn-help="La persona y el lugar que sostienen al detective. Sobreexponerse repite una tirada a cambio de subir su tensión. A tensión 3 el pilar se rompe.">?</button></h2>
+          <div class="tn-pillar">
+            <label for="tn-person">Persona</label>
+            <input id="tn-person" type="text" name="system.stability.person.name" value="{{system.stability.person.name}}" placeholder="¿Quién te mantiene en pie?" />
+            <div class="tn-tension">
+              <span class="tn-tension__label">Tensión</span>
+              <input type="number" data-dtype="Number" name="system.stability.person.tension" value="{{system.stability.person.tension}}" min="0" max="3" aria-label="Tensión de la persona" />
+              <button type="button" class="tn-btn tn-btn--icon" data-action="lower-person-tension" title="Bajar la tensión">−</button>
+              <button type="button" class="tn-btn tn-btn--icon" data-action="increase-person-tension" title="Subir la tensión">+</button>
             </div>
           </div>
-
-          <div class="tn-field-grid tn-two-col">
-            <div class="tn-field-group">
-              <label>Edad</label>
-              <input type="text" name="system.age" value="{{system.age}}" />
-            </div>
-            <div class="tn-field-group">
-              <label>Motivación</label>
-              <input type="text" name="system.motivation" value="{{system.motivation}}" />
+          <div class="tn-pillar">
+            <label for="tn-place">Lugar</label>
+            <input id="tn-place" type="text" name="system.stability.place.name" value="{{system.stability.place.name}}" placeholder="¿Qué lugar te da paz?" />
+            <div class="tn-tension">
+              <span class="tn-tension__label">Tensión</span>
+              <input type="number" data-dtype="Number" name="system.stability.place.tension" value="{{system.stability.place.tension}}" min="0" max="3" aria-label="Tensión del lugar" />
+              <button type="button" class="tn-btn tn-btn--icon" data-action="lower-place-tension" title="Bajar la tensión">−</button>
+              <button type="button" class="tn-btn tn-btn--icon" data-action="increase-place-tension" title="Subir la tensión">+</button>
             </div>
           </div>
         </section>
 
-        <section class="tn-panel-card tn-stability-card" data-doc-section="identity">
-          <div class="tn-section-title">Pilares</div>
-          <div class="tn-field-grid tn-one-col">
-            <div class="tn-compact-box">
-              <label>Persona</label>
-              <input type="text" name="system.stability.person.name" value="{{system.stability.person.name}}" />
-              <div class="tn-inline-controls tn-compact-controls tn-mini-controls">
-                <span class="tn-inline-label">Tensión</span>
-                <input type="number" data-dtype="Number" name="system.stability.person.tension" value="{{system.stability.person.tension}}" min="0" max="3" />
-                <button type="button" data-action="increase-person-tension">+1</button>
-              </div>
+        <section class="tn-block tn-block--resources">
+          <h2 class="tn-block__title">Recursos</h2>
+          <div class="tn-resource">
+            <div class="tn-resource__head">
+              <span class="tn-resource__name">Cigarrillos</span>
+              <span class="tn-resource__readout">{{system.cigarettes.value}} <small>/ {{system.cigarettes.max}}</small></span>
             </div>
-            <div class="tn-compact-box">
-              <label>Lugar</label>
-              <input type="text" name="system.stability.place.name" value="{{system.stability.place.name}}" />
-              <div class="tn-inline-controls tn-compact-controls tn-mini-controls">
-                <span class="tn-inline-label">Tensión</span>
-                <input type="number" data-dtype="Number" name="system.stability.place.tension" value="{{system.stability.place.tension}}" min="0" max="3" />
-                <button type="button" data-action="increase-place-tension">+1</button>
-              </div>
+            <div class="tn-resource__actions">
+              <button type="button" class="tn-btn" data-action="spend-cigarette" title="Gastar un cigarrillo">−1</button>
+              <button type="button" class="tn-btn" data-action="recover-cigarette" title="Recuperar un cigarrillo">+1</button>
+            </div>
+          </div>
+
+          <div class="tn-resource">
+            <div class="tn-resource__head">
+              <span class="tn-resource__name">Reconocimiento</span>
+              <span class="tn-resource__readout">{{availableRecognition}} <small>disp.</small></span>
+            </div>
+            <div class="tn-resource__actions">
+              <button type="button" class="tn-btn" data-action="add-recognition">+1 ganado</button>
+              <button type="button" class="tn-btn" data-action="spend-recognition">Gastar 1</button>
+            </div>
+          </div>
+
+          <div class="tn-resource tn-resource--inline">
+            <label for="tn-drinks">Tragos tranquilos <button type="button" class="tn-help" data-tn-help="Un trago tranquilo recupera 2 cigarrillos o 1 estado personal. Máximo 2 por caso y por detective.">?</button></label>
+            <input id="tn-drinks" type="number" data-dtype="Number" name="system.caseStats.quietDrinksUsed" value="{{system.caseStats.quietDrinksUsed}}" min="0" max="2" />
+            <span class="tn-resource__hint">de 2</span>
+          </div>
+
+          <details class="tn-fold tn-fold--tight">
+            <summary>Ajuste manual</summary>
+            <div class="tn-field-row">
+              <div class="tn-field"><label for="tn-cig-value">Cigarrillos</label><input id="tn-cig-value" type="number" data-dtype="Number" name="system.cigarettes.value" value="{{system.cigarettes.value}}" min="0" /></div>
+              <div class="tn-field"><label for="tn-cig-max">Cajetilla</label><input id="tn-cig-max" type="number" data-dtype="Number" name="system.cigarettes.max" value="{{system.cigarettes.max}}" min="0" /></div>
+            </div>
+            <div class="tn-resource__actions">
+              <button type="button" class="tn-btn tn-btn--ghost" data-action="set-pack-9">Cajetilla de 9</button>
+              <button type="button" class="tn-btn tn-btn--ghost" data-action="set-pack-6">Media de 6</button>
+            </div>
+            <div class="tn-field-row">
+              <div class="tn-field"><label for="tn-rec-total">Reconocimiento ganado</label><input id="tn-rec-total" type="number" data-dtype="Number" name="system.recognition.total" value="{{system.recognition.total}}" min="0" /></div>
+              <div class="tn-field"><label for="tn-rec-spent">Gastado</label><input id="tn-rec-spent" type="number" data-dtype="Number" name="system.recognition.spent" value="{{system.recognition.spent}}" min="0" /></div>
+            </div>
+          </details>
+        </section>
+
+        <section class="tn-block tn-block--gear">
+          <h2 class="tn-block__title">Objetos y favores</h2>
+          <div class="tn-field-row tn-field-row--4">
+            <div class="tn-slot">
+              <label for="tn-obj1">Objeto representativo 1 <button type="button" class="tn-help" data-tn-help="Al perseguir el crimen, un objeto representativo ignora el dado del crimen. Cada objeto sirve una sola vez por caso.">?</button></label>
+              <input id="tn-obj1" type="text" name="system.representativeObjects.slot1.name" value="{{system.representativeObjects.slot1.name}}" />
+              <label class="tn-state tn-state--switch"><input type="checkbox" name="system.representativeObjects.slot1.used" {{checked system.representativeObjects.slot1.used}} /><span>Usado</span></label>
+            </div>
+            <div class="tn-slot">
+              <label for="tn-obj2">Objeto representativo 2</label>
+              <input id="tn-obj2" type="text" name="system.representativeObjects.slot2.name" value="{{system.representativeObjects.slot2.name}}" />
+              <label class="tn-state tn-state--switch"><input type="checkbox" name="system.representativeObjects.slot2.used" {{checked system.representativeObjects.slot2.used}} /><span>Usado</span></label>
+            </div>
+            <div class="tn-slot">
+              <label for="tn-fav1">Favor 1 <button type="button" class="tn-help" data-tn-help="Un favor resuelve la acción sin tirar dados. Indica para qué sirve —Riesgo, Crimen o Libre— y se gasta una sola vez por caso.">?</button></label>
+              <input id="tn-fav1" type="text" name="system.favors.slot1.name" value="{{system.favors.slot1.name}}" placeholder="Nombre o deuda" />
+              <input type="text" name="system.favors.slot1.scope" value="{{system.favors.slot1.scope}}" placeholder="Riesgo / Crimen / Libre" aria-label="Alcance del favor 1" />
+              <label class="tn-state tn-state--switch"><input type="checkbox" name="system.favors.slot1.used" {{checked system.favors.slot1.used}} /><span>Gastado</span></label>
+            </div>
+            <div class="tn-slot">
+              <label for="tn-fav2">Favor 2</label>
+              <input id="tn-fav2" type="text" name="system.favors.slot2.name" value="{{system.favors.slot2.name}}" placeholder="Nombre o deuda" />
+              <input type="text" name="system.favors.slot2.scope" value="{{system.favors.slot2.scope}}" placeholder="Riesgo / Crimen / Libre" aria-label="Alcance del favor 2" />
+              <label class="tn-state tn-state--switch"><input type="checkbox" name="system.favors.slot2.used" {{checked system.favors.slot2.used}} /><span>Gastado</span></label>
             </div>
           </div>
         </section>
 
-        <section class="tn-panel-card tn-resources-card" data-doc-section="resources" hidden>
-          <div class="tn-section-title">Recursos</div>
-
-          <div class="tn-counter-card tn-counter-card-compact">
-            <div class="tn-counter-label">Cigarrillos</div>
-            <div class="tn-counter-readout tn-counter-readout-compact">
-              <input type="number" data-dtype="Number" name="system.cigarettes.value" value="{{system.cigarettes.value}}" min="0" />
-              <span>/</span>
-              <input type="number" data-dtype="Number" name="system.cigarettes.max" value="{{system.cigarettes.max}}" min="0" />
+        <section class="tn-block tn-block--states tn-block--narrative">
+          <h2 class="tn-block__title">Estados</h2>
+          <fieldset class="tn-states">
+            <legend>Personales</legend>
+            <div class="tn-states__grid">
+              {{#each personalStates as |state|}}
+                <label class="tn-state"><input type="checkbox" name="system.personalStates.{{state.id}}" {{checked (lookup ../system.personalStates state.id)}} /><span>{{state.label}}</span></label>
+              {{/each}}
             </div>
-            <div class="tn-action-grid-2 tn-tight-buttons">
-              <button type="button" data-action="spend-cigarette">-1</button>
-              <button type="button" data-action="recover-cigarette">+1</button>
-              <button type="button" data-action="set-pack-9">Pack 9</button>
-              <button type="button" data-action="set-pack-6">Pack 6</button>
+            <div class="tn-states__custom">
+              <input type="text" name="system.personalStates.custom" value="{{system.personalStates.custom}}" placeholder="Estado libre" aria-label="Estado personal libre" />
+              <label class="tn-state tn-state--switch"><input type="checkbox" name="system.personalStates.customActive" {{checked system.personalStates.customActive}} /><span>Activo</span></label>
             </div>
-          </div>
-
-          <div class="tn-counter-card tn-counter-card-compact">
-            <div class="tn-counter-label">Reconocimiento</div>
-            <div class="tn-rec-readout tn-rec-readout-compact">
-              <div>
-                <span>Total</span>
-                <input type="number" data-dtype="Number" name="system.recognition.total" value="{{system.recognition.total}}" />
-              </div>
-              <div>
-                <span>Gastado</span>
-                <input type="number" data-dtype="Number" name="system.recognition.spent" value="{{system.recognition.spent}}" />
-              </div>
+          </fieldset>
+          <fieldset class="tn-states">
+            <legend>Con la ciudad</legend>
+            <div class="tn-states__grid">
+              {{#each cityStates as |state|}}
+                <label class="tn-state tn-state--city"><input type="checkbox" name="system.cityStates.{{state.id}}" {{checked (lookup ../system.cityStates state.id)}} /><span>{{state.label}}</span></label>
+              {{/each}}
             </div>
-            <p class="tn-small">Disponible: {{availableRecognition}}</p>
-            <div class="tn-action-grid-2 tn-tight-buttons">
-              <button type="button" data-action="add-recognition">+1</button>
-              <button type="button" data-action="spend-recognition">Gastar</button>
+            <div class="tn-states__custom">
+              <input type="text" name="system.cityStates.custom" value="{{system.cityStates.custom}}" placeholder="Estado libre" aria-label="Estado con la ciudad libre" />
+              <label class="tn-state tn-state--switch"><input type="checkbox" name="system.cityStates.customActive" {{checked system.cityStates.customActive}} /><span>Activo</span></label>
             </div>
-          </div>
-
-          <div class="tn-control-mini">
-            <label>Tragos tranquilos</label>
-            <input type="number" data-dtype="Number" name="system.caseStats.quietDrinksUsed" value="{{system.caseStats.quietDrinksUsed}}" min="0" max="2" />
-          </div>
-        </section>
-        <!-- Estados personales se muestran tras Recursos en su propia tarjeta -->
-        <section class="tn-panel-card tn-state-card tn-state-card-personal" data-doc-section="resources" hidden>
-          <div class="tn-section-title">Estados personales</div>
-          <div class="tn-state-list tn-state-single-col">
-            {{#each personalStates as |state|}}
-              <label class="tn-check"><input type="checkbox" name="system.personalStates.{{state.id}}" {{checked (lookup ../system.personalStates state.id)}} /> {{state.label}}</label>
-            {{/each}}
-          </div>
-          <div class="tn-inline-fields tn-inline-fields-stacked">
-            <input type="text" name="system.personalStates.custom" value="{{system.personalStates.custom}}" placeholder="Estado libre" />
-            <label class="tn-check tn-check-inline"><input type="checkbox" name="system.personalStates.customActive" {{checked system.personalStates.customActive}} /> Activo</label>
-          </div>
+          </fieldset>
         </section>
 
-
-        <section class="tn-panel-card tn-gear-card" data-doc-section="gear" hidden>
-          <div class="tn-section-title">Objetos y favores</div>
-
-          <div class="tn-field-grid tn-two-col">
-            <div class="tn-compact-box">
-              <label>Objeto 1</label>
-              <input type="text" name="system.representativeObjects.slot1.name" value="{{system.representativeObjects.slot1.name}}" />
-              <label class="tn-check tn-check-inline"><input type="checkbox" name="system.representativeObjects.slot1.used" {{checked system.representativeObjects.slot1.used}} /> Usado</label>
-            </div>
-            <div class="tn-compact-box">
-              <label>Objeto 2</label>
-              <input type="text" name="system.representativeObjects.slot2.name" value="{{system.representativeObjects.slot2.name}}" />
-              <label class="tn-check tn-check-inline"><input type="checkbox" name="system.representativeObjects.slot2.used" {{checked system.representativeObjects.slot2.used}} /> Usado</label>
-            </div>
+        <section class="tn-block tn-block--balada tn-block--narrative">
+          <h2 class="tn-block__title">Balada triste</h2>
+          <div class="tn-field">
+            <label for="tn-balada-target">¿Qué triste historia has escuchado de…?</label>
+            <input id="tn-balada-target" type="text" name="system.baladaTarget" value="{{system.baladaTarget}}" />
           </div>
-
-          <div class="tn-field-grid tn-two-col tn-tight-grid">
-            <div class="tn-favor-card tn-compact-box">
-              <label>Favor 1</label>
-              <input type="text" name="system.favors.slot1.name" value="{{system.favors.slot1.name}}" placeholder="Nombre o deuda" />
-              <input type="text" name="system.favors.slot1.scope" value="{{system.favors.slot1.scope}}" placeholder="Riesgo / Crimen / Libre" />
-              <label class="tn-check tn-check-inline"><input type="checkbox" name="system.favors.slot1.used" {{checked system.favors.slot1.used}} /> Gastado</label>
+          <div class="tn-field-row">
+            <div class="tn-field">
+              <label for="tn-balada-rumor">El rumor</label>
+              <textarea id="tn-balada-rumor" name="system.baladaRumor">{{system.baladaRumor}}</textarea>
             </div>
-            <div class="tn-favor-card tn-compact-box">
-              <label>Favor 2</label>
-              <input type="text" name="system.favors.slot2.name" value="{{system.favors.slot2.name}}" placeholder="Nombre o deuda" />
-              <input type="text" name="system.favors.slot2.scope" value="{{system.favors.slot2.scope}}" placeholder="Riesgo / Crimen / Libre" />
-              <label class="tn-check tn-check-inline"><input type="checkbox" name="system.favors.slot2.used" {{checked system.favors.slot2.used}} /> Gastado</label>
+            <div class="tn-field">
+              <label for="tn-balada-truth">La verdad</label>
+              <textarea id="tn-balada-truth" name="system.baladaTruth">{{system.baladaTruth}}</textarea>
+              <label class="tn-state tn-state--switch"><input type="checkbox" name="system.baladaBelieve" {{checked system.baladaBelieve}} /><span>¿La crees?</span></label>
             </div>
-          </div>
-        </section>
-
-        <section class="tn-panel-card tn-balada-card" data-doc-section="gear" hidden>
-          <div class="tn-section-title">Balada triste</div>
-          <div class="tn-field-group">
-            <label>¿Qué triste historia has escuchado de...?</label>
-            <input type="text" name="system.baladaTarget" value="{{system.baladaTarget}}" />
-          </div>
-          <div class="tn-field-grid tn-two-col">
-            <div class="tn-field-group">
-              <label>Rumor</label>
-              <textarea class="tn-compact-area" name="system.baladaRumor">{{system.baladaRumor}}</textarea>
-            </div>
-            <div class="tn-field-group">
-              <label class="tn-check tn-check-inline"><input type="checkbox" name="system.baladaBelieve" {{checked system.baladaBelieve}} /> ¿La crees?</label>
-              <label>Verdad</label>
-              <textarea class="tn-compact-area" name="system.baladaTruth">{{system.baladaTruth}}</textarea>
-            </div>
-          </div>
-        </section>
-        <!-- La sección de estados de la ciudad se ubicará tras la Balada triste -->
-        <section class="tn-panel-card tn-state-card tn-state-card-city" data-doc-section="resources" hidden>
-          <div class="tn-section-title">Estados de la ciudad</div>
-          <div class="tn-state-list tn-state-single-col">
-            {{#each cityStates as |state|}}
-              <label class="tn-check"><input type="checkbox" name="system.cityStates.{{state.id}}" {{checked (lookup ../system.cityStates state.id)}} /> {{state.label}}</label>
-            {{/each}}
-          </div>
-          <div class="tn-inline-fields tn-inline-fields-stacked">
-            <input type="text" name="system.cityStates.custom" value="{{system.cityStates.custom}}" placeholder="Estado libre" />
-            <label class="tn-check tn-check-inline"><input type="checkbox" name="system.cityStates.customActive" {{checked system.cityStates.customActive}} /> Activo</label>
           </div>
         </section>
 
       </div>
     </div>
 
-    <div class="tab tn-tab-investigation" data-group="primary" data-tab="resources">
-      <div class="tn-grid tn-investigation-layout">
-        <section class="tn-panel-card">
-          <div class="tn-section-title">Pistas y contactos</div>
-          <div class="tn-field-grid tn-two-col tn-top-gap">
-            <div class="tn-clue-count-card">
-              <label>Pistas de este detective</label>
-              <input type="number" data-dtype="Number" name="system.clues.count" value="{{system.clues.count}}" min="0" />
+    <div class="tab" data-group="primary" data-tab="investigation">
+      <div class="tn-investigation">
+
+        <section class="tn-block">
+          <h2 class="tn-block__title">Pistas</h2>
+          <div class="tn-clue-head">
+            <div class="tn-clue-count">
+              <label for="tn-clue-count">Pistas de este detective</label>
+              <input id="tn-clue-count" type="number" data-dtype="Number" name="system.clues.count" value="{{system.clues.count}}" min="0" />
             </div>
-            <div class="tn-rule-pill">Cada 3 pistas del grupo, el dado del crimen baja en 1.</div>
+            <p class="tn-rule">Cada <strong>{{cluesPerStep}} pistas sin gastar</strong> del caso bajan automáticamente el dado del crimen en 1 en cuanto alguien consigue una pista nueva. El caso lleva {{caseClues}} pistas y {{caseCluesAvailable}} sin gastar.</p>
           </div>
-          <div class="tn-action-grid-2 tn-top-gap">
-            <button type="button" data-action="create-contact">Conozco a un tipo que...</button>
-            <button type="button" data-action="create-rumor">Aquí han pasado cosas turbias</button>
+          <div class="tn-field">
+            <label for="tn-clue-notes">Notas de pistas</label>
+            <textarea id="tn-clue-notes" class="tn-textarea--tall" name="system.clues.notes" placeholder="Indicios, contradicciones, vínculos…">{{system.clues.notes}}</textarea>
           </div>
+        </section>
+
+        <section class="tn-block">
+          <h2 class="tn-block__title">Contactos</h2>
+          <div class="tn-cig-actions">
+            <button type="button" class="tn-btn tn-btn--contextual" data-action="create-contact"><i class="fa-solid fa-user-tie" aria-hidden="true"></i> Conozco a un tipo que…</button>
+            <button type="button" class="tn-btn tn-btn--contextual" data-action="create-rumor"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Aquí han pasado cosas turbias</button>
+            <p class="tn-cig-actions__cost">Cada una cuesta 1 cigarrillo · quedan {{cigarettesLeft}}</p>
+          </div>
+          <div class="tn-field">
+            <label for="tn-contact-notes">Agenda y deudas</label>
+            <textarea id="tn-contact-notes" class="tn-textarea--tall" name="system.contacts.notes" placeholder="Quién te debe qué, dónde encontrarle…">{{system.contacts.notes}}</textarea>
+          </div>
+        </section>
+
+        <aside class="tn-side">
           {{#if rumorBonusAvailable}}
-            <p class="tn-small tn-emphasis tn-top-gap">Rumor pendiente: {{rumorBonusText}}</p>
+            <section class="tn-rumor">
+              <span class="tn-rumor__kicker">Rumor pendiente</span>
+              <p>{{rumorBonusText}}</p>
+              <small>Cualquier detective puede consumirlo como +2 en una tirada.</small>
+            </section>
           {{/if}}
-          <div class="tn-field-grid tn-two-col tn-top-gap">
-            <div class="tn-field-group">
-              <label>Notas de pistas</label>
-              <textarea class="tn-mid-area" name="system.clues.notes" placeholder="Secretos, indicios, vínculos...">{{system.clues.notes}}</textarea>
-            </div>
-            <div class="tn-field-group">
-              <label>Contactos y deudas</label>
-              <textarea class="tn-mid-area" name="system.contacts.notes" placeholder="PNJ, favores, redirecciones...">{{system.contacts.notes}}</textarea>
-            </div>
-          </div>
-        </section>
-
-        <aside class="tn-panel-card tn-investigation-side">
-          <div class="tn-section-title">Ayudas</div>
-          <div class="tn-rule-card">
-            <h4>Tirada de riesgo</h4>
-            <p>1d10. Si un trasfondo aplica, tira 2d10 y quédate el mejor. Cigarrillo o reconocimiento: +2.</p>
-          </div>
-          <div class="tn-rule-card">
-            <h4>Perseguir el crimen</h4>
-            <p>Igual que riesgo, pero restando el dado del crimen salvo que uses un objeto representativo.</p>
-          </div>
-          <div class="tn-rule-card">
-            <h4>Cigarrillos</h4>
-            <p>1) Conozco a un tipo. 2) Aquí han pasado cosas turbias. 3) Una calada me da la sangre fría.</p>
-          </div>
-          <div class="tn-rule-card">
-            <h4>Un trago tranquilo</h4>
-            <p>Recupera 2 cigarrillos o 1 estado personal. Máximo 2 veces por caso.</p>
-          </div>
+          <details class="tn-fold tn-fold--rules">
+            <summary>Cómo funcionan las tiradas</summary>
+            <p><strong>Riesgo.</strong> 1d10. Con un trasfondo que ayude, 2d10 conservando el mejor. Con penalizador, 2d10 conservando el peor.</p>
+            <p><strong>Perseguir el crimen.</strong> Igual, restando el dado del crimen. Siempre consigues la pista: lo que cambia es el precio.</p>
+            <p><strong>Resultados.</strong> 9 o más, éxito limpio. De 5 a 8, trueque. 4 o menos, resultado duro.</p>
+          </details>
+          <details class="tn-fold tn-fold--rules">
+            <summary>Los tres usos del cigarrillo</summary>
+            <p>1. «Conozco a un tipo que…» crea un contacto.</p>
+            <p>2. «Aquí han pasado cosas turbias» deja un rumor de +2 para el grupo.</p>
+            <p>3. «Una calada me da la sangre fría» suma +2 a una tirada.</p>
+          </details>
         </aside>
+
       </div>
     </div>
 
-    <div class="tab tn-tab-notes" data-group="primary" data-tab="notes">
-      <section class="tn-panel-card tn-expediente-card">
-        <div class="tn-section-title">Expediente del detective</div>
-        <textarea class="tn-large-notes" name="system.notes" placeholder="Cronología, sospechosos, hipótesis, escenas clave...">{{system.notes}}</textarea>
-      </section>
+    <div class="tab" data-group="primary" data-tab="dossier">
+      <div class="tn-dossier">
+        <section class="tn-file">
+          <h2 class="tn-file__title">Cronología</h2>
+          <textarea name="system.dossier.timeline" placeholder="Qué ocurrió y cuándo…">{{system.dossier.timeline}}</textarea>
+        </section>
+        <section class="tn-file">
+          <h2 class="tn-file__title">Sospechosos</h2>
+          <textarea name="system.dossier.suspects" placeholder="Quién pudo hacerlo y por qué…">{{system.dossier.suspects}}</textarea>
+        </section>
+        <section class="tn-file">
+          <h2 class="tn-file__title">Hipótesis</h2>
+          <textarea name="system.dossier.hypotheses" placeholder="Lo que crees que pasó…">{{system.dossier.hypotheses}}</textarea>
+        </section>
+        <section class="tn-file">
+          <h2 class="tn-file__title">Escenas importantes</h2>
+          <textarea name="system.dossier.scenes" placeholder="Lo que no quieres olvidar…">{{system.dossier.scenes}}</textarea>
+        </section>
+        <section class="tn-file tn-file--wide">
+          <h2 class="tn-file__title">Notas generales</h2>
+          <textarea name="system.notes" placeholder="Todo lo demás…">{{system.notes}}</textarea>
+        </section>
+      </div>
     </div>
+
   </section>
 </form>

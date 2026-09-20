@@ -1,0 +1,45 @@
+<div class="tn-welcome">
+  <header class="tn-welcome__hero" style="background-image: linear-gradient(to bottom, rgba(8,9,11,.25), rgba(8,9,11,.95)), url('{{cover}}');">
+    <p class="tn-welcome__kicker">Sistema para Foundry VTT</p>
+    <h1 class="tn-welcome__title">Trueque Noir</h1>
+    <p class="tn-welcome__tagline">La ciudad no duerme: solo cierra los ojos mientras alguien paga el precio.</p>
+  </header>
+
+  <div class="tn-welcome__body">
+    <p class="tn-welcome__intro">Tres decisiones y la investigación está en marcha.</p>
+
+    <div class="tn-welcome__steps">
+      <button type="button" class="tn-step {{#if cityReady}}is-done{{/if}}" data-action="build-city">
+        <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+        <strong>Construir la ciudad</strong>
+        <small>{{#if cityReady}}{{cityName}} está en pie · editar{{else}}Contexto, cuatro zonas y localizaciones{{/if}}</small>
+      </button>
+      <button type="button" class="tn-step {{#if detectiveCount}}is-done{{/if}}" data-action="create-detective">
+        <i class="fa-solid fa-user-secret" aria-hidden="true"></i>
+        <strong>Crear detectives</strong>
+        <small>{{#if detectiveCount}}{{detectiveCount}} en la ciudad · crear otro{{else}}Identidad, objetos, pilares y balada{{/if}}</small>
+      </button>
+      <button type="button" class="tn-step" data-action="start-case">
+        <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+        <strong>Empezar un caso</strong>
+        <small>Panel de La Ciudad: tiempo, crimen y pistas</small>
+      </button>
+    </div>
+
+    {{#if archiveCount}}
+      <button type="button" class="tn-welcome__archive" data-action="browse-cases">
+        <i class="fa-solid fa-folder-tree" aria-hidden="true"></i>
+        <span>{{#if archiveImported}}Revisar los {{archiveCount}} casos disponibles{{else}}Explorar los {{archiveCount}} casos disponibles{{/if}}</span>
+        <small>Material de aventura de sus autores. Se importa como diarios privados solo si lo pides.</small>
+      </button>
+    {{/if}}
+
+    <footer class="tn-welcome__foot">
+      <label class="tn-state tn-state--switch">
+        <input type="checkbox" name="hideOnStart" {{#if hideOnStart}}checked{{/if}} />
+        <span>No abrir esta pantalla al iniciar</span>
+      </label>
+      <p class="tn-welcome__hint">Puedes volver aquí desde el menú <strong>Trueque Noir</strong> de los controles de escena.</p>
+    </footer>
+  </div>
+</div>

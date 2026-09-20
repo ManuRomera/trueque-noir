@@ -1,7 +1,76 @@
-<form class="tn-wizard">
-  <header class="tn-wizard-header"><span>ASISTENTE DEL MANUAL</span><h2>Construir la ciudad</h2><p>Tres bloques: contexto, cuatro zonas y localizaciones.</p></header>
-  <div class="tn-stepper"><span class="is-active" data-step-dot="1">1 · Contexto</span><span data-step-dot="2">2 · Zonas</span><span data-step-dot="3">3 · Localizaciones</span></div>
-  <section data-step="1" class="tn-panel-card"><div class="tn-section-title">1. Contexto y límites</div><label>Nombre de la ciudad</label><input name="cityName"><label>Año, lugar y temática</label><textarea name="context"></textarea><div class="tn-field-grid tn-two-col"><div><label>Queremos ver</label><textarea name="wanted"></textarea></div><div><label>No queremos ver</label><textarea name="unwanted"></textarea></div></div><div class="tn-wizard-actions"><button type="button" data-action="randomize-city">Generar propuesta aleatoria</button><button type="button" data-next="2">Siguiente</button></div></section>
-  <section data-step="2" class="tn-panel-card" hidden><div class="tn-section-title">2. Las cuatro zonas</div><p>Nombra cada zona, dale dos rasgos y decide quién la controla.</p>{{#each zones}}<fieldset class="tn-zone-box"><legend>{{this}}</legend><div class="tn-field-grid tn-three-col"><div><label>Nombre</label><input name="{{lowercase this}}Name"></div><div><label>Dos rasgos</label><input name="{{lowercase this}}Traits"></div><div><label>Grupo o persona que controla</label><input name="{{lowercase this}}Controller"></div></div></fieldset>{{/each}}<div class="tn-wizard-actions"><button type="button" data-prev="1">Atrás</button><button type="button" data-next="3">Siguiente</button></div></section>
-  <section data-step="3" class="tn-panel-card" hidden><div class="tn-section-title">3. Localizaciones</div><p>El manual incorpora las localizaciones comunes. La mesa añade una propia por zona.</p><div class="tn-location-cloud">{{#each commonLocations}}<span>{{this}}</span>{{/each}}</div><div class="tn-field-grid tn-two-col">{{#each zones}}<div><label>Extra de {{this}}</label><input name="{{lowercase this}}Extra"></div>{{/each}}</div><div class="tn-wizard-actions"><button type="button" data-prev="2">Atrás</button><button type="button" class="tn-primary-action" data-action="create-city">Guardar ciudad</button></div></section>
-</form>
+<div class="tn-wizard">
+  <header class="tn-wizard__head">
+    <span class="tn-kicker">Asistente</span>
+    <h1>Construir la ciudad</h1>
+    <p>Contexto y límites, cuatro zonas y las localizaciones donde ocurre todo.</p>
+  </header>
+
+  <ol class="tn-stepper">
+    <li><button type="button" data-step-dot="1"><span>1</span> Contexto</button></li>
+    <li><button type="button" data-step-dot="2"><span>2</span> Zonas</button></li>
+    <li><button type="button" data-step-dot="3"><span>3</span> Localizaciones</button></li>
+    <li><button type="button" data-step-dot="4"><span>4</span> Resumen</button></li>
+  </ol>
+
+  <form class="tn-wizard__form" autocomplete="off">
+
+    <section data-step="1" class="tn-wizard__step">
+      <h2 class="tn-wizard__q">Contexto y límites</h2>
+      <div class="tn-field"><label for="tn-city-name">Nombre de la ciudad</label><input id="tn-city-name" name="cityName" type="text" /></div>
+      <div class="tn-field"><label for="tn-city-context">Año, lugar y temática</label><textarea id="tn-city-context" name="context"></textarea></div>
+      <div class="tn-field-row">
+        <div class="tn-field"><label for="tn-city-wanted">Queremos ver</label><textarea id="tn-city-wanted" name="wanted"></textarea></div>
+        <div class="tn-field"><label for="tn-city-unwanted">No queremos ver</label><textarea id="tn-city-unwanted" name="unwanted"></textarea></div>
+      </div>
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn tn-btn--ghost" data-action="randomize-city"><i class="fa-solid fa-dice" aria-hidden="true"></i> Generar propuesta al azar</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-next="2">Siguiente</button>
+      </div>
+    </section>
+
+    <section data-step="2" class="tn-wizard__step" hidden>
+      <h2 class="tn-wizard__q">Las cuatro zonas</h2>
+      <p class="tn-wizard__hint">Nombra cada zona, dale dos rasgos y decide quién manda allí.</p>
+      {{#each zones}}
+        <fieldset class="tn-zone-form">
+          <legend>{{this}}</legend>
+          <div class="tn-field-row tn-field-row--3">
+            <div class="tn-field"><label>Nombre</label><input name="{{lowercase this}}Name" type="text" /></div>
+            <div class="tn-field"><label>Dos rasgos</label><input name="{{lowercase this}}Traits" type="text" /></div>
+            <div class="tn-field"><label>Quién controla</label><input name="{{lowercase this}}Controller" type="text" /></div>
+          </div>
+        </fieldset>
+      {{/each}}
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn" data-prev="1">Atrás</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-next="3">Siguiente</button>
+      </div>
+    </section>
+
+    <section data-step="3" class="tn-wizard__step" hidden>
+      <h2 class="tn-wizard__q">Localizaciones</h2>
+      <p class="tn-wizard__hint">Estas existen en toda la ciudad. Añade una propia en cada zona.</p>
+      <div class="tn-chips">{{#each commonLocations}}<span class="tn-chip">{{this}}</span>{{/each}}</div>
+      <div class="tn-field-row tn-field-row--3">
+        {{#each zones}}
+          <div class="tn-field"><label>Propia de {{this}}</label><input name="{{lowercase this}}Extra" type="text" /></div>
+        {{/each}}
+      </div>
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn" data-prev="2">Atrás</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-next="4">Ver el resumen</button>
+      </div>
+    </section>
+
+    <section data-step="4" class="tn-wizard__step" hidden>
+      <h2 class="tn-wizard__q">Resumen de la ciudad</h2>
+      <div class="tn-summary" data-summary></div>
+      <p class="tn-wizard__warning" data-summary-warning hidden>Falta el nombre de la ciudad: vuelve al primer paso.</p>
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn" data-prev="3">Atrás</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-action="create-city">Guardar ciudad</button>
+      </div>
+    </section>
+
+  </form>
+</div>

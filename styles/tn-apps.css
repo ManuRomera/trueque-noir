@@ -1,0 +1,396 @@
+/* ==========================================================================
+   Trueque Noir · Panel de La Ciudad, Mesa del caso, asistentes y bienvenida
+   ========================================================================== */
+
+/* -------------------------------------------------- Panel de La Ciudad */
+
+.trueque-noir .tn-panel { padding: 16px 18px 20px; }
+
+.trueque-noir .tn-panel__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--tn-line);
+}
+.trueque-noir .tn-panel__title { min-width: 0; }
+.trueque-noir .tn-panel__title h1 { margin: 4px 0 2px; font-size: 27px; }
+.trueque-noir .tn-panel__time { margin: 0; color: var(--tn-muted); font-size: 13.5px; }
+.trueque-noir .tn-panel__quick { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Nivel 1: los datos del caso viven sobre la superficie, sin tarjeta. */
+.trueque-noir .tn-case-edit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px 96px 120px;
+  gap: 11px;
+  align-items: end;
+  padding: 15px 0 13px;
+  border-bottom: 1px solid var(--tn-line-soft);
+}
+.trueque-noir .tn-case-edit .tn-field--num { max-width: none; }
+.trueque-noir .tn-autosave {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--tn-faint);
+  font-size: 12px;
+}
+.trueque-noir .tn-autosave i { color: var(--tn-green); }
+
+.trueque-noir .tn-panel__row {
+  display: grid;
+  grid-template-columns: minmax(230px, .9fr) minmax(0, 1.1fr);
+  gap: var(--tn-gap);
+  margin: 15px 0;
+  align-items: start;
+}
+
+/* El dado del crimen manda en el panel. */
+.trueque-noir .tn-crime {
+  padding: 14px 15px 15px;
+  border: 1px solid var(--tn-line-soft);
+  border-top: 2px solid var(--tn-red);
+  border-radius: var(--tn-radius);
+  background: linear-gradient(180deg, rgba(34, 24, 24, .9), rgba(15, 17, 20, .9));
+  text-align: center;
+}
+.trueque-noir .tn-crime__label {
+  display: block;
+  color: var(--tn-muted);
+  font: 600 11px/1 var(--tn-mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.trueque-noir .tn-crime__control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 8px 0 12px;
+}
+.trueque-noir .tn-crime__value {
+  min-width: 78px;
+  color: var(--tn-red-bright);
+  font: 700 62px/1 var(--tn-serif);
+  text-shadow: 0 0 26px rgba(180, 52, 46, .35);
+}
+.trueque-noir .tn-crime__spend { width: 100%; }
+.trueque-noir .tn-crime__hint { margin: 0; color: var(--tn-faint); font-size: 12px; line-height: 1.45; }
+.trueque-noir .tn-crime__set { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.trueque-noir .tn-crime__set .tn-btn { width: 100%; }
+.trueque-noir .tn-crime.is-exploded {
+  border-top-color: #ff6a5c;
+  background: linear-gradient(180deg, rgba(88, 26, 22, .92), rgba(20, 12, 12, .95));
+  box-shadow: inset 0 0 40px rgba(180, 52, 46, .22);
+}
+.trueque-noir .tn-crime.is-exploded .tn-crime__value { color: #ff8d80; text-shadow: 0 0 34px rgba(255, 106, 92, .5); }
+.trueque-noir .tn-crime__boom {
+  margin: 10px 0 0;
+  color: #ff9d92;
+  font: 700 12px/1.4 var(--tn-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.trueque-noir .tn-clues-panel {
+  padding: 14px 15px;
+  border: 1px solid var(--tn-line-soft);
+  border-radius: var(--tn-radius);
+  background: rgba(23, 27, 33, .75);
+}
+.trueque-noir .tn-clues-panel__label {
+  display: block;
+  margin-bottom: 11px;
+  color: var(--tn-muted);
+  font: 600 11px/1 var(--tn-mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.trueque-noir .tn-clues-panel__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.trueque-noir .tn-clues-panel__grid > div {
+  padding: 11px 8px;
+  border: 1px solid var(--tn-line-soft);
+  border-radius: 2px;
+  text-align: center;
+}
+.trueque-noir .tn-clues-panel__grid strong { display: block; color: #fff6e6; font: 700 26px/1 var(--tn-serif); }
+.trueque-noir .tn-clues-panel__grid span { display: block; margin-top: 5px; color: var(--tn-muted); font-size: 11.5px; }
+.trueque-noir .tn-clues-panel__grid .is-key { border-color: var(--tn-gold-dim); background: rgba(207, 169, 99, .08); }
+.trueque-noir .tn-clues-panel__grid .is-key strong { color: var(--tn-gold); }
+.trueque-noir .tn-rumor--panel { margin-top: 11px; }
+
+.trueque-noir .tn-folds { display: grid; gap: 9px; }
+.trueque-noir .tn-fold--admin > summary { color: var(--tn-muted); }
+
+.trueque-noir .tn-city__context { margin: 0 0 11px; color: var(--tn-text); font-family: var(--tn-serif); font-size: 15px; }
+.trueque-noir .tn-city__limits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 11px; }
+.trueque-noir .tn-city__limits p { margin: 0; color: var(--tn-muted); font-size: 12.5px; }
+.trueque-noir .tn-city__limits strong { color: var(--tn-gold); }
+
+.trueque-noir .tn-zones { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+.trueque-noir .tn-zone {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--tn-line-soft);
+  border-radius: 2px;
+  background: rgba(8, 10, 13, .45);
+}
+.trueque-noir .tn-zone__compass {
+  display: block;
+  color: var(--tn-red-bright);
+  font: 700 10.5px/1 var(--tn-mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.trueque-noir .tn-zone__name { display: block; margin: 6px 0 4px; color: var(--tn-ivory); font: 700 16px/1.2 var(--tn-serif); }
+.trueque-noir .tn-zone__traits,
+.trueque-noir .tn-zone__controller { display: block; color: var(--tn-muted); font-size: 12px; }
+.trueque-noir .tn-zone__extra { display: block; margin-top: 7px; color: #e3d8bf; font-size: 12.5px; }
+
+.trueque-noir .tn-trueque { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; margin-top: 11px; }
+.trueque-noir .tn-trueque h3 { margin-bottom: 7px; color: var(--tn-gold); font-size: 14px; }
+.trueque-noir .tn-trueque ul { margin: 0; padding-left: 17px; color: var(--tn-muted); font-size: 12.5px; line-height: 1.55; }
+
+/* ---------------------------------------------------- Mesa del caso */
+
+.trueque-noir .tn-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  align-content: center;
+  padding: 18px 22px;
+}
+.trueque-noir .tn-board__case { min-width: 0; }
+.trueque-noir .tn-board__name {
+  margin: 6px 0 4px;
+  font-size: 27px;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+.trueque-noir .tn-board__time { margin: 0; color: var(--tn-muted); font-size: 14px; }
+.trueque-noir .tn-board__time strong { color: var(--tn-ivory); }
+
+.trueque-noir .tn-board__crime {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  padding: 14px 24px;
+  border: 1px solid #4a2b28;
+  border-radius: 3px;
+  background: radial-gradient(70% 70% at 50% 40%, rgba(180, 52, 46, .22), rgba(10, 12, 15, .9));
+}
+.trueque-noir .tn-board__crime-label {
+  color: var(--tn-muted);
+  font: 600 10.5px/1 var(--tn-mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.trueque-noir .tn-board__crime-value {
+  color: var(--tn-red-bright);
+  font: 700 86px/1 var(--tn-serif);
+  text-shadow: 0 0 34px rgba(180, 52, 46, .4);
+}
+.trueque-noir .tn-board__crime.is-exploded { border-color: #ff6a5c; box-shadow: inset 0 0 50px rgba(180, 52, 46, .3); }
+.trueque-noir .tn-board__crime.is-exploded .tn-board__crime-value { color: #ff8d80; }
+.trueque-noir .tn-board__crime-boom {
+  margin-top: 4px;
+  color: #ff9d92;
+  font: 700 11px/1 var(--tn-mono);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.trueque-noir .tn-board__clues { display: grid; gap: 9px; min-width: 0; }
+.trueque-noir .tn-board__clue {
+  display: flex;
+  align-items: baseline;
+  gap: 11px;
+  padding: 9px 12px;
+  border: 1px solid var(--tn-line-soft);
+  border-radius: 2px;
+  background: rgba(8, 10, 13, .45);
+}
+.trueque-noir .tn-board__clue strong { color: #fff6e6; font: 700 26px/1 var(--tn-serif); }
+.trueque-noir .tn-board__clue span { color: var(--tn-muted); font-size: 12.5px; }
+.trueque-noir .tn-board__clue.is-key { border-color: var(--tn-gold-dim); }
+.trueque-noir .tn-board__clue.is-key strong { color: var(--tn-gold); }
+.trueque-noir .tn-board__rumor {
+  padding: 9px 12px;
+  border-left: 3px solid var(--tn-gold);
+  background: rgba(207, 169, 99, .1);
+}
+.trueque-noir .tn-board__rumor p { margin: 3px 0 0; color: #f1e3c6; font-family: var(--tn-serif); font-size: 14px; }
+
+/* ------------------------------------------------------- Asistentes */
+
+.trueque-noir .tn-wizard { padding: 18px 20px 22px; }
+.trueque-noir .tn-wizard__head { padding-bottom: 13px; border-bottom: 1px solid var(--tn-line); }
+.trueque-noir .tn-wizard__head h1 { margin: 5px 0 4px; font-size: 28px; }
+.trueque-noir .tn-wizard__head p { margin: 0; color: var(--tn-muted); font-size: 13.5px; }
+
+.trueque-noir .tn-stepper {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0;
+  margin: 15px 0 18px;
+  padding: 0;
+  list-style: none;
+}
+.trueque-noir .tn-stepper button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 8px;
+  border: 0;
+  border-bottom: 2px solid var(--tn-line-soft);
+  background: transparent;
+  color: var(--tn-faint);
+  font: 600 12px/1 var(--tn-sans);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition: color var(--tn-speed) ease, border-color var(--tn-speed) ease;
+}
+.trueque-noir .tn-stepper button span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--tn-mono);
+  font-size: 11px;
+}
+.trueque-noir .tn-stepper button:hover { color: var(--tn-text); }
+.trueque-noir .tn-stepper .is-done { color: var(--tn-muted); border-bottom-color: var(--tn-gold-dim); }
+.trueque-noir .tn-stepper .is-active { color: #fff6e6; border-bottom-color: var(--tn-red); }
+
+.trueque-noir .tn-wizard__q { margin-bottom: 6px; font-size: 21px; }
+.trueque-noir .tn-wizard__hint { margin: 0 0 13px; color: var(--tn-muted); font-size: 13px; }
+.trueque-noir .tn-wizard__warning { margin: 11px 0 0; color: var(--tn-gold); font-size: 13px; }
+.trueque-noir .tn-wizard__actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; }
+.trueque-noir .tn-wizard__actions .tn-btn--ghost { margin-right: auto; }
+.trueque-noir .tn-wizard__actions .tn-btn { min-height: 38px; padding: 8px 20px; }
+
+.trueque-noir .tn-zone-form { margin: 0 0 11px; padding: 11px 13px; border: 1px solid var(--tn-line-soft); border-radius: 2px; }
+.trueque-noir .tn-zone-form legend { padding: 0 7px; color: var(--tn-red-bright); font: 700 11px/1 var(--tn-mono); letter-spacing: .2em; text-transform: uppercase; }
+
+.trueque-noir .tn-summary {
+  padding: 16px 18px;
+  border: 1px solid #3c362b;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(40, 36, 28, .95), rgba(24, 22, 18, .95));
+}
+.trueque-noir .tn-summary__name { font-size: 25px; }
+.trueque-noir .tn-summary__role { margin: 3px 0 14px; color: var(--tn-gold); font: 13px/1.4 var(--tn-mono); letter-spacing: .05em; }
+.trueque-noir .tn-summary__list { margin: 0; }
+.trueque-noir .tn-summary__row { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 10px; padding: 7px 0; border-top: 1px dashed #4a4234; }
+.trueque-noir .tn-summary__row dt { color: var(--tn-muted); font: 600 11px/1.6 var(--tn-mono); letter-spacing: .12em; text-transform: uppercase; }
+.trueque-noir .tn-summary__row dd { margin: 0; color: var(--tn-ivory); font-family: var(--tn-serif); font-size: 15px; }
+.trueque-noir .tn-summary__row em { color: var(--tn-faint); font-family: var(--tn-sans); font-size: 13px; }
+.trueque-noir .tn-zones--summary { margin-top: 13px; }
+
+/* ------------------------------------------------------- Bienvenida */
+
+.trueque-noir .tn-welcome { padding: 0; }
+.trueque-noir .tn-welcome__hero {
+  padding: 46px 32px 26px;
+  background-position: center 38%;
+  background-size: cover;
+  border-bottom: 2px solid var(--tn-red);
+  text-align: center;
+}
+.trueque-noir .tn-welcome__kicker {
+  margin: 0;
+  color: var(--tn-gold);
+  font: 700 10.5px/1 var(--tn-mono);
+  letter-spacing: .3em;
+  text-transform: uppercase;
+}
+.trueque-noir .tn-welcome__title {
+  margin: 12px 0 8px;
+  color: #fff8ea;
+  font: 700 46px/1 var(--tn-serif);
+  letter-spacing: .04em;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, .8);
+}
+.trueque-noir .tn-welcome__tagline { margin: 0 auto; max-width: 480px; color: #ded4c2; font-family: var(--tn-serif); font-size: 15px; font-style: italic; }
+
+.trueque-noir .tn-welcome__body { padding: 20px 26px 24px; }
+.trueque-noir .tn-welcome__intro { margin: 0 0 15px; color: var(--tn-muted); font-size: 13.5px; text-align: center; }
+.trueque-noir .tn-welcome__steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; }
+.trueque-noir .tn-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  min-height: 132px;
+  padding: 18px 14px;
+  border: 1px solid var(--tn-line);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(29, 34, 42, .92), rgba(15, 18, 22, .92));
+  color: var(--tn-text);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--tn-speed) ease, transform var(--tn-speed) ease, background var(--tn-speed) ease;
+}
+.trueque-noir .tn-step i { font-size: 23px; color: var(--tn-gold); }
+.trueque-noir .tn-step strong { color: #fff6e6; font: 700 15px/1.2 var(--tn-serif); letter-spacing: .04em; }
+.trueque-noir .tn-step small { color: var(--tn-muted); font-size: 12px; line-height: 1.45; }
+.trueque-noir .tn-step:hover { border-color: var(--tn-red-bright); background: linear-gradient(180deg, rgba(43, 32, 32, .95), rgba(18, 15, 17, .95)); transform: translateY(-2px); }
+.trueque-noir .tn-step.is-done { border-color: var(--tn-gold-dim); }
+.trueque-noir .tn-step.is-done i { color: var(--tn-green); }
+
+.trueque-noir .tn-welcome__archive {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  margin-top: 13px;
+  padding: 12px 15px;
+  border: 1px dashed var(--tn-line-strong);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--tn-text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--tn-speed) ease, background var(--tn-speed) ease;
+}
+.trueque-noir .tn-welcome__archive span { font-weight: 600; }
+.trueque-noir .tn-welcome__archive i { color: var(--tn-gold); margin-right: 7px; }
+.trueque-noir .tn-welcome__archive small { color: var(--tn-muted); font-size: 12px; }
+.trueque-noir .tn-welcome__archive:hover { border-color: var(--tn-gold-dim); background: rgba(207, 169, 99, .07); }
+
+.trueque-noir .tn-welcome__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 13px;
+  border-top: 1px solid var(--tn-line-soft);
+}
+.trueque-noir .tn-welcome__foot .tn-state--switch { margin: 0; }
+.trueque-noir .tn-welcome__hint { margin: 0; color: var(--tn-faint); font-size: 12px; text-align: right; }
+
+/* ------------------------------------------------ Ventanas más estrechas */
+
+@media (max-width: 860px) {
+  .trueque-noir .tn-panel__head { flex-direction: column; align-items: stretch; }
+  .trueque-noir .tn-case-edit { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .trueque-noir .tn-panel__row,
+  .trueque-noir .tn-trueque,
+  .trueque-noir .tn-city__limits,
+  .trueque-noir .tn-welcome__steps { grid-template-columns: minmax(0, 1fr); }
+  .trueque-noir .tn-zones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .trueque-noir .tn-board { grid-template-columns: minmax(0, 1fr); text-align: center; }
+  .trueque-noir .tn-board__crime { margin: 0 auto; }
+}

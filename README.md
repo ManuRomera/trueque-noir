@@ -1,76 +1,139 @@
-![Trueque Noir](assets/trueque-noir-cover-v1.png)
+<p align="center">
+  <img src="assets/cover.png" alt="Trueque Noir" width="900">
+</p>
 
-# Trueque Noir para Foundry VTT
+<h1 align="center">Trueque Noir</h1>
 
-Un sistema de investigación noir para Foundry VTT 13 y 14, inspirado en las reglas de *Balada triste de la ciudad*. La interfaz funciona como un expediente vivo: mantiene visibles las decisiones que importan sin convertir la mesa en un panel administrativo.
+<p align="center">
+  <strong>Un expediente vivo para investigaciones noir en Foundry VTT.</strong><br>
+  Llueve, alguien miente y el crimen corre más que vosotros.
+</p>
 
-## Galería
+<p align="center">
+  <a href="#instalación">Instalación</a> ·
+  <a href="#la-primera-partida-en-cinco-minutos">Primera partida</a> ·
+  <a href="#las-dos-mesas">Las dos mesas</a> ·
+  <a href="CONTENIDO.md">Qué incluye</a>
+</p>
 
-![Ficha del detective y herramientas de La Ciudad](assets/showcase-v1.png)
+---
 
-La portada y la captura de la ficha se incluyen directamente en el repositorio y en cada paquete instalable.
+Trueque Noir lleva las reglas de *Balada triste de la ciudad* a Foundry sin convertirlas en un
+formulario. La ficha no es una hoja escaneada: es el documento que el detective lleva encima.
+La pantalla compartida no es un panel de control: es la mesa donde se amontonan las pistas.
 
-> Este proyecto es una implementación no oficial. No incluye el texto, las ilustraciones ni los casos del libro. Para jugar necesitas una copia legítima del manual.
-
-## Lo esencial, siempre a la vista
-
-La cabecera de cada detective muestra el caso y la franja actuales, cigarrillos, reconocimiento, dado del crimen y pistas del grupo. Desde el mismo lugar se accede a las dos acciones centrales: **Riesgo** y **Perseguir el crimen**.
-
-- Tiradas con trasfondo, penalizador, noche, cigarrillos, reconocimiento, rumores, objetos y favores.
-- Trueques y consecuencias explicados directamente en el chat.
-- Sobreexposición de pilares: repite la última tirada una sola vez, aumenta tensión y sustituye sus efectos.
-- Pistas compartidas, reducción automática del dado del crimen y explosión del crimen.
-- Contactos, historias turbias, descansos nocturnos y tragos tranquilos.
-- Acusación guiada con las preguntas «¿Quién?», «¿Qué?» y «¿Por qué?».
-- Interludios completos, incluidos estados, tensión, cajetillas, favores y tercer trasfondo.
-- Creación guiada de ciudad siguiendo contexto, cuatro zonas y localizaciones.
-- Creación guiada de detectives y generación aleatoria instantánea.
-- Veinte casos del archivo del manual preparados como diarios privados para La Ciudad.
-- Escena inicial de portada a pantalla completa, sin cuadrícula ni visión de token.
-
-## Dos espacios, una sola investigación
-
-**Mesa del caso** ofrece al grupo una lectura limpia del tiempo, las pistas, el rumor pendiente y el dado del crimen.
-
-**Panel de la Ciudad** concentra las herramientas de dirección: franjas, límite del caso, consecuencias, descanso, acusación, interludios y reinicio de recursos por caso.
-
-Ambos se abren desde las macros que el sistema instala automáticamente en la barra rápida. El Panel de la Ciudad también está disponible desde la ficha del detective.
-
-## Dirección artística y accesibilidad
-
-El diseño emplea una paleta de carbón, papel envejecido, ámbar y rojo de cuarto oscuro. El arte de portada y el cigarrillo de la interfaz son recursos originales creados para este sistema.
-
-- Contraste alto y foco de teclado visible.
-- Interfaz adaptable a ventanas estrechas.
-- Movimiento reducido cuando el sistema operativo así lo solicita.
-- Corrección explícita de pestañas para ApplicationV1 en Foundry 14.
-- Los iconos decorativos no sustituyen ninguna etiqueta textual.
+- **Dos acciones y ninguna duda.** Riesgo y Perseguir el Crimen mandan en la cabecera. Todo lo
+  demás aparece cuando hace falta y desaparece cuando no.
+- **Diálogos que preguntan cómo afrontas la escena**, no cómo configuras una tirada. Cigarrillo y
+  reconocimiento no se pueden acumular porque ni siquiera se dejan marcar a la vez; un favor
+  anuncia «éxito automático» y apaga lo que ya no tiene efecto; antes de tirar ves exactamente
+  qué vas a hacer.
+- **Sobreexposición donde ocurre.** Aparece dentro de la tarjeta del resultado, y desaparece en
+  cuanto esa tirada deja de ser la última.
+- **El dado del crimen como personaje.** Domina la Mesa y el Panel, y avisa cuando explota.
+- **La interfaz impide el error antes de que ocurra.** Objetos gastados, favores usados, tragos
+  agotados o cigarrillos que no llegan: el control se desactiva y explica por qué.
 
 ## Compatibilidad
 
 | Foundry VTT | Estado |
 | --- | --- |
-| 13 | Probado en Build 351 |
-| 14 | Compatible mediante el puente `foundry.appv1`; manifiesto verificado para v14 |
+| 13 | Probado en la build 351 |
+| 14 | Verificado en el manifiesto; el puente heredado vive aislado en `module/compat.mjs` |
 
-La capa heredada ApplicationV1 continúa disponible durante Foundry 14. El puente está aislado en `module/compat.mjs` para que la futura migración a ApplicationV2 no contamine la lógica de juego.
+Pensado para **escritorio, pantalla mediana o grande, ratón y teclado**. Se adapta a ventanas
+estrechas, pero no compromete la vista de escritorio para imitar una interfaz táctil.
 
 ## Instalación
 
-Usa este manifiesto en **Configuración → Sistemas de juego → Instalar sistema**:
+En **Configuración → Sistemas de juego → Instalar sistema**, pega este manifiesto:
 
 ```text
 https://github.com/ManuRomera/trueque-noir/releases/latest/download/system.json
 ```
 
-También puedes descargar `trueque-noir.zip` desde la última versión publicada y descomprimirlo en `Data/systems/trueque-noir`.
+También puedes descargar `trueque-noir.zip` de la última versión y descomprimirlo en
+`Data/systems/trueque-noir`.
 
-## Desarrollo y pruebas
+## La primera partida en cinco minutos
 
-El repositorio no necesita dependencias de ejecución. Antes de una publicación se validan la sintaxis de todos los módulos, los JSON y la estructura del paquete. Las versiones etiquetadas crean automáticamente un ZIP instalable y un manifiesto independiente.
+Al crear el mundo, La Ciudad ve una pantalla de bienvenida con tres decisiones. No hay que
+buscar nada por el menú.
 
-## Créditos y licencia
+1. **Construir la ciudad.** Un asistente de cuatro pasos: contexto y límites, las cuatro zonas,
+   las localizaciones y un resumen antes de guardar. Hay generación aleatoria completa si
+   prefieres partir de una propuesta.
+2. **Crear detectives.** Cinco pasos: identidad, objetos representativos, pilares, balada triste
+   y un resumen del detective antes de crearlo. También se genera entero al azar.
+3. **Empezar un caso.** Abre el Panel de La Ciudad: nombre del caso, día, límite y franja. Todo
+   se guarda solo.
 
-Sistema para Foundry VTT desarrollado por [Manu Romera](https://github.com/ManuRomera). Código distribuido bajo la licencia incluida en [LICENSE](LICENSE).
+La bienvenida vuelve a abrirse cuando quieras desde el menú **Trueque Noir** de los controles de
+escena. Ahí están también el Panel, la Mesa, los asistentes y el archivo de casos.
 
-*Balada triste de la ciudad*, Trueque Noir y sus contenidos editoriales pertenecen a sus respectivos titulares. Este repositorio no redistribuye el manual.
+El sistema prepara además una **escena de portada de 1920 × 1024**, sin cuadrícula, sin niebla de
+guerra y sin visión de token: al activarla aparece encuadrada y a pantalla completa sin tocar el
+zoom. Solo esa escena se reencuadra sola; las tuyas conservan su cámara.
+
+## Las dos mesas
+
+**Mesa del caso** es el HUD compartido. Muestra el caso, el día y la franja, el dado del crimen
+en grande, las pistas descubiertas y las que quedan sin gastar, y el rumor pendiente si lo hay.
+Nada más. La Ciudad la muestra u oculta para todo el grupo con un clic.
+
+**Panel de La Ciudad** dirige la investigación. Arriba, lo que se toca cada franja: caso, día,
+límite, dado del crimen y pistas. Debajo, plegado hasta que hace falta: la ciudad, los
+detectives, el trueque, la acusación y la administración. Reiniciar el caso pide confirmación
+explícita y vive separado del resto.
+
+## La ficha del detective
+
+Tres secciones, sin subpestañas:
+
+- **Personaje** · identidad, trasfondos, pilares y su tensión, recursos, estados y objetos,
+  favores y la balada triste.
+- **Investigación** · pistas y sus notas, contactos, los tres usos del cigarrillo y el rumor
+  pendiente del caso.
+- **Expediente** · cronología, sospechosos, hipótesis, escenas importantes y notas generales.
+
+La cabecera mantiene siempre a la vista lo que se consulta jugando: retrato, nombre, función,
+estados activos como sellos, caso y franja, cigarrillos, reconocimiento disponible, dado del
+crimen y pistas del caso.
+
+## Ayuda y preferencias
+
+Reposa el ratón sobre cualquier control y la explicación aparece sola; el clic derecho la fija
+hasta que pulses fuera. Donde la regla no es evidente hay un `?` discreto.
+
+En **Configuración → Ajustes del sistema**:
+
+- **Retratos en blanco y negro** · activado por defecto, desactivable.
+- **Instalar macros en la barra rápida** · desactivado por defecto. Todo está en el menú
+  Trueque Noir.
+
+## Qué incluye realmente
+
+El sistema trae su código, su interfaz, la ilustración de portada y el cigarrillo de la ficha.
+Incluye además un archivo de **veinte casos escritos por Pepe Pedraz, Jorge Serrano y Mirella
+Machancoses**, que **no se importa solo**: La Ciudad decide si quiere crearlos como diarios
+privados. [CONTENIDO.md](CONTENIDO.md) detalla qué se distribuye, qué se retiró y qué decisión
+de derechos queda pendiente.
+
+## Desarrollo
+
+Sin dependencias de ejecución. Antes de publicar:
+
+```bash
+node tools/check.mjs
+```
+
+Comprueba plantillas, rutas, imports, manifiesto, ajustes y que ningún botón se quede sin acción.
+Las etiquetas `v*` publican automáticamente el ZIP instalable y el manifiesto.
+
+## Créditos
+
+Sistema para Foundry VTT de [Manu Romera](https://github.com/ManuRomera). Código bajo la licencia
+de [LICENSE](LICENSE).
+
+Implementación **no oficial**. *Balada triste de la ciudad*, sus textos e ilustraciones
+pertenecen a sus titulares. Para jugar necesitas una copia legítima del manual.

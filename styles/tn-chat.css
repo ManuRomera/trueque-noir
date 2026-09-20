@@ -1,0 +1,325 @@
+/* ==========================================================================
+   Trueque Noir · tarjetas de chat y diálogos de tirada
+   Las tarjetas viven fuera de las ventanas del sistema: no se anidan en .trueque-noir.
+   ========================================================================== */
+
+.tn-chat-card {
+  --tn-card-accent: var(--tn-line-strong, #4a535e);
+  position: relative;
+  margin: -3px 0;
+  padding: 13px 15px 14px;
+  border: 1px solid var(--tn-line, #333a43);
+  border-left: 3px solid var(--tn-card-accent);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #1a1f26, #12161b);
+  color: var(--tn-text, #e6e0d4);
+  font: 13.5px/1.5 var(--tn-sans, sans-serif);
+}
+
+.tn-chat-card * { box-sizing: border-box; }
+
+.tn-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--tn-line-soft, #23282f);
+}
+.tn-card__kind {
+  color: var(--tn-muted, #a29b8b);
+  font: 700 10.5px/1 var(--tn-mono, monospace);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.tn-card__actor {
+  overflow: hidden;
+  color: var(--tn-ivory, #f1ebdf);
+  font: 700 14px/1.2 var(--tn-serif, serif);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* El veredicto no depende solo del color: icono, palabra y peso tipográfico. */
+.tn-card__verdict {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 11px 0 3px;
+}
+.tn-card__verdict i { font-size: 19px; color: var(--tn-card-accent); }
+.tn-card__verdict-label {
+  flex: 1;
+  color: var(--tn-ivory, #f1ebdf);
+  font: 700 17px/1.1 var(--tn-serif, serif);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.tn-card__total {
+  min-width: 42px;
+  padding: 2px 9px;
+  border: 1px solid var(--tn-card-accent);
+  border-radius: 2px;
+  color: var(--tn-ivory, #f1ebdf);
+  font: 700 21px/1.25 var(--tn-serif, serif);
+  text-align: center;
+}
+
+.tn-card--clean { --tn-card-accent: #7f9a74; }
+.tn-card--clean .tn-card__verdict-label { color: #d8e8cf; }
+.tn-card--mixed { --tn-card-accent: #cfa963; }
+.tn-card--mixed .tn-card__verdict-label { color: #f3e0b8; }
+.tn-card--mixed .tn-card__verdict-label::after { content: "eliges el precio"; display: block; margin-top: 3px; font: 400 11.5px/1.2 var(--tn-sans, sans-serif); letter-spacing: 0; text-transform: none; opacity: .75; }
+.tn-card--hard { --tn-card-accent: #b4342e; }
+.tn-card--hard { background: linear-gradient(180deg, #241a1a, #14100f); }
+.tn-card--hard .tn-card__verdict-label { color: #f3c2bc; }
+.tn-card--auto { --tn-card-accent: #cfa963; }
+
+.tn-card__mods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tn-tag {
+  padding: 3px 8px;
+  border: 1px solid var(--tn-line, #333a43);
+  border-radius: 999px;
+  color: var(--tn-muted, #a29b8b);
+  font-size: 11.5px;
+}
+.tn-tag i { margin-right: 4px; opacity: .8; }
+.tn-tag--plus { border-color: #4e6349; color: #c4d8ba; }
+.tn-tag--minus { border-color: #6b3a36; color: #eba9a2; }
+.tn-tag--favor { border-color: var(--tn-gold-dim, #8a7343); color: #eed8a6; }
+
+.tn-card__gain {
+  margin: 11px 0 0;
+  padding: 7px 10px;
+  border-left: 2px solid var(--tn-gold, #cfa963);
+  background: rgba(207, 169, 99, .09);
+  color: #f0dcb2;
+  font-size: 13px;
+}
+.tn-card__gain i { margin-right: 6px; }
+
+.tn-card__outcome { margin: 11px 0 0; color: var(--tn-text, #e6e0d4); }
+.tn-card__outcome em { color: var(--tn-gold, #cfa963); font-style: normal; }
+
+.tn-card__overexposed {
+  margin: 10px 0 0;
+  padding: 7px 10px;
+  border-left: 2px solid var(--tn-red, #b4342e);
+  background: rgba(180, 52, 46, .12);
+  color: #f0c4be;
+  font-size: 12.5px;
+}
+.tn-card__overexposed i { margin-right: 6px; }
+
+/* Sobreexposición: acción contextual, solo mientras la tirada siga siendo la última. */
+.tn-card__actions {
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px dashed var(--tn-line, #333a43);
+}
+.tn-card__actions-hint {
+  margin: 0 0 8px;
+  color: var(--tn-muted, #a29b8b);
+  font: 12px/1.4 var(--tn-sans, sans-serif);
+}
+.tn-card__actions-row { display: flex; flex-wrap: wrap; gap: 7px; }
+.tn-card__actions .tn-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 1px solid var(--tn-line-strong, #4a535e);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #262c34, #1a1f25);
+  color: var(--tn-text, #e6e0d4);
+  font: 600 12.5px/1 var(--tn-sans, sans-serif);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.tn-card__actions .tn-btn:hover:not(:disabled) { border-color: var(--tn-gold-dim, #8a7343); }
+.tn-card__actions .tn-btn--contextual { border-color: var(--tn-gold-dim, #8a7343); background: rgba(207, 169, 99, .1); color: #f0dcb2; }
+.tn-card__actions .tn-btn--contextual:hover:not(:disabled) { border-color: var(--tn-gold, #cfa963); background: rgba(207, 169, 99, .18); }
+.tn-card__actions .tn-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Avisos narrativos de La Ciudad. */
+.tn-note {
+  border-left-color: var(--tn-gold, #cfa963);
+  background: linear-gradient(180deg, #211f1a, #15140f);
+}
+.tn-note__title {
+  color: var(--tn-gold, #cfa963);
+  font: 700 11px/1 var(--tn-mono, monospace);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.tn-note__body { margin-top: 9px; }
+.tn-note__body p { margin: 0 0 7px; }
+.tn-note__body p:last-child { margin-bottom: 0; }
+.tn-note__body strong { color: var(--tn-ivory, #f1ebdf); }
+.tn-note__foot { color: var(--tn-muted, #a29b8b); font-size: 12.5px; }
+.tn-note__warning { color: #eba9a2; }
+.tn-note--warning { border-left-color: var(--tn-red, #b4342e); }
+
+/* La tirada de Foundry acompaña, pero no compite con la tarjeta. */
+.chat-message:has(.tn-chat-card) .dice-formula,
+.chat-message:has(.tn-chat-card) .dice-total {
+  border-color: var(--tn-line-soft, #23282f);
+  background: rgba(8, 10, 13, .5);
+  color: var(--tn-muted, #a29b8b);
+  font-size: 12px;
+  font-weight: 500;
+}
+.chat-message:has(.tn-chat-card) .dice-total { font-size: 15px; }
+
+/* ------------------------------------------------------ Diálogos */
+
+.trueque-noir.tn-dialog .window-content,
+.trueque-noir.tn-dialog .dialog-content {
+  background: linear-gradient(180deg, var(--tn-bg), var(--tn-void));
+}
+.trueque-noir.tn-dialog .dialog-content { padding: 16px 18px; }
+.trueque-noir.tn-dialog .dialog-buttons {
+  gap: 9px;
+  padding: 0 18px 16px;
+}
+.trueque-noir.tn-dialog .dialog-button {
+  min-height: 36px;
+  border: 1px solid var(--tn-line-strong);
+  border-radius: var(--tn-radius);
+  background: linear-gradient(180deg, #262c34, #1a1f25);
+  color: var(--tn-text);
+  font: 600 13.5px/1 var(--tn-sans);
+  transition: border-color var(--tn-speed) ease, background var(--tn-speed) ease;
+}
+.trueque-noir.tn-dialog .dialog-button:hover { border-color: var(--tn-gold-dim); }
+.trueque-noir.tn-dialog .dialog-button.roll,
+.trueque-noir.tn-dialog .dialog-button.ok,
+.trueque-noir.tn-dialog .dialog-button.apply,
+.trueque-noir.tn-dialog .dialog-button.post,
+.trueque-noir.tn-dialog .dialog-button.confirm,
+.trueque-noir.tn-dialog .dialog-button.yes {
+  border-color: var(--tn-red-bright);
+  background: linear-gradient(180deg, var(--tn-red), var(--tn-red-dark));
+  color: #fff6ee;
+}
+
+/* Lo destructivo se separa del resto y no se parece a una acción corriente. */
+.trueque-noir.tn-dialog--danger .dialog-buttons { justify-content: space-between; }
+.trueque-noir.tn-dialog--danger .dialog-button.confirm,
+.trueque-noir.tn-dialog--danger .dialog-button.yes {
+  border-color: #7d322c;
+  background: linear-gradient(180deg, #4a1c19, #2c100e);
+  color: #f0b9b3;
+  letter-spacing: .08em;
+}
+.trueque-noir.tn-dialog--danger .dialog-button.confirm:hover { border-color: var(--tn-red-bright); background: linear-gradient(180deg, #5d221e, #38110f); }
+
+.trueque-noir .tn-confirm p { margin: 0 0 9px; }
+.trueque-noir .tn-confirm p:last-child { margin-bottom: 0; }
+.trueque-noir .tn-confirm strong { color: var(--tn-ivory); }
+.trueque-noir .tn-dialog__detail { color: var(--tn-muted); font-size: 12.5px; line-height: 1.5; }
+
+/* Diálogo de tirada: primero la decisión, después el resumen. */
+.trueque-noir .tn-roll__question { margin: 0; color: var(--tn-ivory); font: 700 19px/1.25 var(--tn-serif); }
+.trueque-noir .tn-roll__blurb { margin: 5px 0 14px; color: var(--tn-muted); font-size: 13px; }
+.trueque-noir .tn-roll__warning { margin: 0 0 12px; color: var(--tn-gold); font-size: 13px; }
+.trueque-noir .tn-roll__empty { margin: 0; color: var(--tn-faint); font-size: 12.5px; }
+
+.trueque-noir .tn-roll__auto {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 14px;
+  padding: 11px 13px;
+  border: 1px solid var(--tn-gold-dim);
+  border-left: 3px solid var(--tn-gold);
+  border-radius: 2px;
+  background: rgba(207, 169, 99, .12);
+}
+.trueque-noir .tn-roll__auto strong {
+  color: var(--tn-gold);
+  font: 700 12px/1 var(--tn-mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.trueque-noir .tn-roll__auto span { color: #f1e3c6; font-size: 13px; }
+
+.trueque-noir .tn-roll__blocks { display: grid; gap: 13px; }
+.trueque-noir .tn-roll__block { min-width: 0; transition: opacity var(--tn-speed) ease; }
+.trueque-noir .tn-roll__block.is-inactive { opacity: .38; }
+.trueque-noir .tn-roll__block--muted .tn-roll__legend { color: var(--tn-faint); }
+.trueque-noir .tn-roll__legend {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin: 0 0 7px;
+  color: var(--tn-muted);
+  font: 600 11px/1 var(--tn-mono);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.trueque-noir .tn-roll__legend span {
+  color: var(--tn-gold-dim);
+  font-family: var(--tn-sans);
+  font-size: 11px;
+  letter-spacing: .02em;
+  text-transform: none;
+}
+.trueque-noir .tn-roll__hint { margin: 6px 0 0; color: var(--tn-faint); font-size: 12px; line-height: 1.45; }
+
+.trueque-noir .tn-choice-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.trueque-noir .tn-choice-col { display: grid; gap: 7px; }
+.trueque-noir .tn-choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 3px 9px;
+  align-items: center;
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid var(--tn-line-soft);
+  border-radius: 2px;
+  background: rgba(8, 10, 13, .45);
+  cursor: pointer;
+  transition: border-color var(--tn-speed) ease, background var(--tn-speed) ease;
+}
+.trueque-noir .tn-choice input { width: 15px; height: 15px; min-height: 0; margin: 0; accent-color: var(--tn-red); }
+.trueque-noir .tn-choice__label { color: var(--tn-text); font-size: 13px; font-weight: 600; }
+.trueque-noir .tn-choice__detail { grid-column: 2; color: var(--tn-faint); font-size: 11.5px; line-height: 1.4; }
+.trueque-noir .tn-choice:hover:not(.is-disabled) { border-color: var(--tn-line-strong); }
+.trueque-noir .tn-choice:has(input:checked) { border-color: var(--tn-gold-dim); background: rgba(207, 169, 99, .12); }
+.trueque-noir .tn-choice.is-disabled { opacity: .42; cursor: not-allowed; }
+
+.trueque-noir .tn-roll__summary {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px dashed var(--tn-line-strong);
+  border-radius: 2px;
+  background: rgba(8, 10, 13, .5);
+}
+.trueque-noir .tn-roll__summary h4 {
+  margin: 0 0 8px;
+  color: var(--tn-muted);
+  font: 600 10.5px/1 var(--tn-mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.trueque-noir .tn-roll__summary ul { margin: 0; padding: 0; list-style: none; }
+.trueque-noir .tn-roll__summary li { color: var(--tn-text); font-size: 13px; line-height: 1.7; }
+.trueque-noir .tn-roll__summary .is-formula { color: #fff6e6; font: 700 15px/1.5 var(--tn-serif); }
+.trueque-noir .tn-roll__summary .is-plus { color: #c4d8ba; }
+.trueque-noir .tn-roll__summary .is-minus { color: #eba9a2; }
+.trueque-noir .tn-roll__summary .is-gain { color: var(--tn-gold); }
+.trueque-noir .tn-roll__summary .is-auto { color: var(--tn-gold); font-family: var(--tn-serif); font-size: 15px; }
+
+.trueque-noir .tn-background-description { margin: 6px 0 0; color: var(--tn-faint); font-size: 12px; line-height: 1.45; }
+.trueque-noir .tn-case-clue { padding-left: 12px; border-left: 2px solid var(--tn-red); }

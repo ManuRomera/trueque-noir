@@ -1,43 +1,30 @@
-<form class="tn-case-board-sheet">
-  <section class="tn-app-header tn-panel-card tn-board-header-card">
-    <div class="tn-app-title-wrap">
-      <div class="tn-app-kicker">Mesa del caso</div>
-      <h2>{{caseName}}</h2>
-      <div class="tn-app-meta">Día {{day}} / {{timeLimit}} · {{phase}}</div>
-    </div>
-  </section>
+<div class="tn-board">
+  <div class="tn-board__case">
+    <span class="tn-kicker">Mesa del caso</span>
+    <h1 class="tn-board__name">{{caseName}}</h1>
+    <p class="tn-board__time"><strong>Día {{day}}</strong> de {{timeLimit}} · {{phase}}</p>
+  </div>
 
-  <section class="tn-grid tn-board-layout">
-    <div class="tn-panel-card tn-board-die {{#if exploded}}exploded{{/if}}">
-      <span class="tn-board-die-label">Dado del crimen</span>
-      <div class="tn-board-die-value">{{crimeDie}}</div>
-      {{#if exploded}}
-        <div class="tn-board-warning">Explosión</div>
-      {{/if}}
-    </div>
+  <div class="tn-board__crime {{#if exploded}}is-exploded{{/if}}">
+    <span class="tn-board__crime-label">Dado del crimen</span>
+    <span class="tn-board__crime-value">{{crimeDie}}</span>
+    {{#if exploded}}<span class="tn-board__crime-boom">Ha explotado</span>{{/if}}
+  </div>
 
-    <div class="tn-panel-card">
-      <div class="tn-clue-summary tn-clue-summary-compact">
-        <div>
-          <span>Pistas del grupo</span>
-          <strong>{{clueTotal}}</strong>
-        </div>
-        <div>
-          <span>Pistas guardadas</span>
-          <strong>{{clueAvailable}}</strong>
-        </div>
-        <div>
-          <span>Rumor pendiente</span>
-          <strong>{{#if rumorBonusAvailable}}Sí{{else}}No{{/if}}</strong>
-        </div>
+  <div class="tn-board__clues">
+    <div class="tn-board__clue">
+      <strong>{{clueTotal}}</strong>
+      <span>pistas descubiertas</span>
+    </div>
+    <div class="tn-board__clue is-key">
+      <strong>{{clueAvailable}}</strong>
+      <span>sin gastar · {{cluesPerStep}} bajan el dado</span>
+    </div>
+    {{#if rumorBonusAvailable}}
+      <div class="tn-board__rumor">
+        <span class="tn-rumor__kicker">Rumor pendiente</span>
+        <p>{{rumorBonusText}}</p>
       </div>
-    </div>
-  </section>
-
-  {{#if rumorBonusAvailable}}
-    <section class="tn-panel-card tn-board-rumor">
-      <div class="tn-section-title">Aquí han pasado cosas turbias</div>
-      <p>{{rumorBonusText}}</p>
-    </section>
-  {{/if}}
-</form>
+    {{/if}}
+  </div>
+</div>

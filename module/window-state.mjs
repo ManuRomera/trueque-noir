@@ -1,8 +1,15 @@
 const PREFIX = "trueque-noir.window.";
 
+/**
+ * Solo persisten las ventanas con identidad propia: fichas y aplicaciones del sistema.
+ * Los diálogos efímeros comparten clase y no deben heredar el tamaño de otros.
+ */
 function keyFor(app) {
-  const id = app?.options?.id || app?.id || app?.constructor?.name;
-  return id ? `${PREFIX}${id}` : null;
+  if (app?.options?.popOut === false) return null;
+  if (app?.actor?.uuid) return `${PREFIX}${app.actor.uuid}`;
+  const id = app?.options?.id;
+  if (typeof id === "string" && id.startsWith("trueque-noir")) return `${PREFIX}${id}`;
+  return null;
 }
 
 export function restoreWindowState(app) {
@@ -25,10 +32,16 @@ export function restoreWindowState(app) {
 export function persistWindowState(app) {
   const key = keyFor(app);
   if (!key) return;
-  const p = app.position || {};
+  const position = app.position || {};
   const saved = {};
   for (const field of ["left", "top", "width", "height"]) {
-    if (Number.isFinite(p[field])) saved[field] = p[field];
+    if (Number.isFinite(position[field])) saved[field] = position[field];
   }
-  if (Object.keys(saved).length) localStorage.setItem(key, JSON.stringify(saved));
+  if (Object.keys(saved).length) {
+    try {
+      localStorage.setItem(key, JSON.stringify(saved));
+    } catch (error) {
+      console.warn("trueque-noir | No se pudo guardar la posición de la ventana", error);
+    }
+  }
 }

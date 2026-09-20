@@ -14,13 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validar JavaScript y manifiestos
+      - name: Validar sintaxis y coherencia del paquete
         run: |
           node --check trueque-noir.mjs
-          for file in module/*.mjs; do node --check "$file"; done
-          python -m json.tool system.json >/dev/null
-          python -m json.tool template.json >/dev/null
-          python -m json.tool lang/es.json >/dev/null
+          for file in module/*.mjs tools/*.mjs; do node --check "$file"; done
+          node tools/check.mjs
 
       - name: Preparar paquete
         run: |

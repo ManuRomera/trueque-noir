@@ -1,8 +1,92 @@
-<form class="tn-wizard">
-  <header class="tn-wizard-header"><span>ASISTENTE DEL MANUAL</span><h2>Crear un detective</h2><p>Presentación cinematográfica, objetos, pilares, motivación y balada triste.</p></header>
-  <div class="tn-stepper"><span class="is-active" data-step-dot="1">1 · Identidad</span><span data-step-dot="2">2 · Objetos</span><span data-step-dot="3">3 · Pilares</span><span data-step-dot="4">4 · Balada</span></div>
-  <section data-step="1" class="tn-panel-card"><div class="tn-section-title">1. ¿Quién es?</div><div class="tn-field-grid tn-two-col"><div><label>Nombre</label><input name="name"></div><div><label>Función o apodo</label><input name="roleTag"></div></div><div class="tn-field-grid tn-two-col"><div><label>Físico</label><input name="look"></div><div><label>Edad</label><input name="age"></div><div><label>Creencias</label><input name="belief"></div><div><label>Carácter</label><input name="temperament"></div></div><div class="tn-field-grid tn-two-col"><div><label>Trasfondo 1</label><select name="background1">{{#each backgrounds}}<option>{{this}}</option>{{/each}}</select></div><div><label>Trasfondo 2</label><select name="background2">{{#each backgrounds}}<option>{{this}}</option>{{/each}}</select></div></div><div class="tn-wizard-actions"><button type="button" data-action="randomize">Generar todo al azar</button><button type="button" data-next="2">Siguiente</button></div></section>
-  <section data-step="2" class="tn-panel-card" hidden><div class="tn-section-title">2. ¿Qué lleva siempre consigo?</div><p>Dos objetos importantes que le definan como detective y persona.</p><label>Objeto representativo 1</label><input name="object1"><label>Objeto representativo 2</label><input name="object2"><div class="tn-wizard-actions"><button type="button" data-prev="1">Atrás</button><button type="button" data-next="3">Siguiente</button></div></section>
-  <section data-step="3" class="tn-panel-card" hidden><div class="tn-section-title">3. ¿A qué se encomienda?</div><label>Persona que le mantiene en pie</label><input name="person"><label>Lugar de la ciudad que le trae paz</label><input name="place"><label>¿Qué le obliga a seguir investigando?</label><input name="motivation"><div class="tn-wizard-actions"><button type="button" data-prev="2">Atrás</button><button type="button" data-next="4">Siguiente</button></div></section>
-  <section data-step="4" class="tn-panel-card" hidden><div class="tn-section-title">4. La triste historia</div><label>¿Qué historia se cuenta sobre este detective?</label><textarea name="rumor"></textarea><p class="tn-small">La verdad podrá completarse después en su ficha.</p><div class="tn-wizard-actions"><button type="button" data-prev="3">Atrás</button><button type="button" class="tn-primary-action" data-action="create">Crear detective</button></div></section>
-</form>
+<div class="tn-wizard">
+  <header class="tn-wizard__head">
+    <span class="tn-kicker">Asistente</span>
+    <h1>Crear un detective</h1>
+    <p>Quién es, qué lleva encima, quién le sostiene y qué se cuenta de él.</p>
+  </header>
+
+  <ol class="tn-stepper">
+    <li><button type="button" data-step-dot="1"><span>1</span> Identidad</button></li>
+    <li><button type="button" data-step-dot="2"><span>2</span> Objetos</button></li>
+    <li><button type="button" data-step-dot="3"><span>3</span> Pilares</button></li>
+    <li><button type="button" data-step-dot="4"><span>4</span> Balada</button></li>
+    <li><button type="button" data-step-dot="5"><span>5</span> Resumen</button></li>
+  </ol>
+
+  <form class="tn-wizard__form" autocomplete="off">
+
+    <section data-step="1" class="tn-wizard__step">
+      <h2 class="tn-wizard__q">¿Quién es?</h2>
+      <div class="tn-field-row">
+        <div class="tn-field"><label for="tn-gen-name">Nombre</label><input id="tn-gen-name" name="name" type="text" /></div>
+        <div class="tn-field"><label for="tn-gen-role">Función o apodo</label><input id="tn-gen-role" name="roleTag" type="text" /></div>
+      </div>
+      <div class="tn-field-row">
+        <div class="tn-field"><label for="tn-gen-look">Físico</label><input id="tn-gen-look" name="look" type="text" /></div>
+        <div class="tn-field tn-field--num"><label for="tn-gen-age">Edad</label><input id="tn-gen-age" name="age" type="text" /></div>
+      </div>
+      <div class="tn-field-row">
+        <div class="tn-field"><label for="tn-gen-belief">Creencias</label><input id="tn-gen-belief" name="belief" type="text" /></div>
+        <div class="tn-field"><label for="tn-gen-temper">Carácter</label><input id="tn-gen-temper" name="temperament" type="text" /></div>
+      </div>
+      <div class="tn-field-row">
+        <div class="tn-field">
+          <label for="tn-gen-bg1">Trasfondo 1</label>
+          <select id="tn-gen-bg1" name="background1">{{#each backgrounds}}<option>{{this}}</option>{{/each}}</select>
+        </div>
+        <div class="tn-field">
+          <label for="tn-gen-bg2">Trasfondo 2</label>
+          <select id="tn-gen-bg2" name="background2">{{#each backgrounds}}<option>{{this}}</option>{{/each}}</select>
+        </div>
+      </div>
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn tn-btn--ghost" data-action="randomize"><i class="fa-solid fa-dice" aria-hidden="true"></i> Generar todo al azar</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-next="2">Siguiente</button>
+      </div>
+    </section>
+
+    <section data-step="2" class="tn-wizard__step" hidden>
+      <h2 class="tn-wizard__q">¿Qué lleva siempre consigo?</h2>
+      <p class="tn-wizard__hint">Dos objetos que le definan. Al perseguir el crimen, cada uno puede ignorar el dado del crimen una vez por caso.</p>
+      <div class="tn-field"><label for="tn-gen-obj1">Objeto representativo 1</label><input id="tn-gen-obj1" name="object1" type="text" /></div>
+      <div class="tn-field"><label for="tn-gen-obj2">Objeto representativo 2</label><input id="tn-gen-obj2" name="object2" type="text" /></div>
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn" data-prev="1">Atrás</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-next="3">Siguiente</button>
+      </div>
+    </section>
+
+    <section data-step="3" class="tn-wizard__step" hidden>
+      <h2 class="tn-wizard__q">¿A qué se encomienda?</h2>
+      <p class="tn-wizard__hint">Su persona y su lugar son los pilares que la sobreexposición pone en riesgo.</p>
+      <div class="tn-field"><label for="tn-gen-person">Persona que le mantiene en pie</label><input id="tn-gen-person" name="person" type="text" /></div>
+      <div class="tn-field"><label for="tn-gen-place">Lugar de la ciudad que le da paz</label><input id="tn-gen-place" name="place" type="text" /></div>
+      <div class="tn-field"><label for="tn-gen-motivation">¿Qué le obliga a seguir investigando?</label><input id="tn-gen-motivation" name="motivation" type="text" /></div>
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn" data-prev="2">Atrás</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-next="4">Siguiente</button>
+      </div>
+    </section>
+
+    <section data-step="4" class="tn-wizard__step" hidden>
+      <h2 class="tn-wizard__q">La triste historia</h2>
+      <p class="tn-wizard__hint">Lo que la ciudad murmura sobre él. La verdad podrá escribirse después en su ficha.</p>
+      <div class="tn-field"><label for="tn-gen-rumor">¿Qué se cuenta de este detective?</label><textarea id="tn-gen-rumor" name="rumor"></textarea></div>
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn" data-prev="3">Atrás</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-next="5">Ver el resumen</button>
+      </div>
+    </section>
+
+    <section data-step="5" class="tn-wizard__step" hidden>
+      <h2 class="tn-wizard__q">Resumen del detective</h2>
+      <div class="tn-summary" data-summary></div>
+      <p class="tn-wizard__warning" data-summary-warning hidden>Falta el nombre: vuelve al primer paso para escribirlo.</p>
+      <div class="tn-wizard__actions">
+        <button type="button" class="tn-btn" data-prev="4">Atrás</button>
+        <button type="button" class="tn-btn tn-btn--primary" data-action="create">Crear detective</button>
+      </div>
+    </section>
+
+  </form>
+</div>

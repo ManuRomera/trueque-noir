@@ -12,74 +12,288 @@ const MOTIVATIONS = ["limpiar las calles", "cumplir una promesa", "conseguir un 
 const OBJECTS = ["un mechero grabado", "una placa antigua", "una cámara plegable", "un revólver heredado", "una libreta impermeable", "un reloj detenido", "una petaca de plata", "una fotografía rota", "una ganzúa artesanal", "un rosario ennegrecido"];
 const PEOPLE = ["su hermana", "un antiguo compañero", "la dueña del pub", "su padre enfermo", "una periodista local", "un confidente de los suburbios"];
 const PLACES = ["la azotea de la comisaría", "una mesa del pub", "el archivo de la biblioteca", "el banco del cementerio", "el viejo muelle", "una capilla abandonada"];
+const RUMORS = ["dejó morir a un compañero", "aceptó dinero de una banda", "falsificó una prueba para salvar a alguien", "conoce la identidad de un asesino nunca detenido", "incendió el lugar donde creció"];
+const ROLES = ["Inspectora", "Sabueso", "Forense", "Agente de homicidios", "Policía de barrio", "Detective veterano"];
 const EXTRA_LOCATIONS = ["casino clandestino", "gimnasio de boxeo", "estación de radio", "club de jazz", "matadero", "archivo municipal", "cine abandonado", "mercado nocturno", "astillero", "laboratorio privado", "hotel de lujo", "lavandería abierta de madrugada"];
 const ZONE_TRAITS = ["próspera", "industrial", "decadente", "inundada", "vigilada", "bohemia", "calcinada", "aislada", "corrupta", "superpoblada", "silenciosa", "violenta"];
 const CONTROLLERS = ["un sindicato de estibadores", "una familia de empresarios", "una banda de moteros", "un predicador y sus fieles", "la policía corrupta", "una red de contrabando", "un cacique inmobiliario", "un club de veteranos"];
+const CITY_PREFIX = ["Cape", "Grey", "Saint", "New", "Port", "Black"];
+const CITY_SUFFIX = ["Hook", "Haven", "Mercy", "Vega", "Cross", "Bay"];
+const CITY_CONTEXTS = ["Años 20, ley seca y lluvia incesante", "Años 90, ciudad portuaria aislada", "Distopía industrial bajo vigilancia", "Metrópolis costera contemporánea en decadencia", "Ciudad victoriana cubierta de niebla"];
 
 const pick = list => list[Math.floor(Math.random() * list.length)];
-const sample = (list, count) => [...list].sort(() => Math.random() - .5).slice(0, count);
-const value = (html, name) => String(html.find(`[name='${name}']`).val() || "").trim();
+const sample = (list, count) => [...list].sort(() => Math.random() - 0.5).slice(0, count);
+const escape = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]));
+
+/** Lógica común de los dos asistentes: pasos, puntos de progreso y lectura del formulario. */
+class TruequeNoirWizard extends LegacyApplication {
+  activateListeners(html) {
+    super.activateListeners(html);
+    const root = html[0] ?? html;
+    this._root = root;
+    this._step = 1;
+
+    for (const button of root.querySelectorAll("[data-next]")) {
+      button.addEventListener("click", () => this.goTo(Number(button.dataset.next)));
+    }
+    for (const button of root.querySelectorAll("[data-prev]")) {
+      button.addEventListener("click", () => this.goTo(Number(button.dataset.prev)));
+    }
+    for (const dot of root.querySelectorAll("[data-step-dot]")) {
+      dot.addEventListener("click", () => this.goTo(Number(dot.dataset.stepDot)));
+    }
+    this.goTo(1);
+  }
+
+  goTo(step) {
+    const root = this._root;
+    if (!root) return;
+    this._step = step;
+    for (const section of root.querySelectorAll("[data-step]")) {
+      section.hidden = Number(section.dataset.step) !== step;
+    }
+    for (const dot of root.querySelectorAll("[data-step-dot]")) {
+      const index = Number(dot.dataset.stepDot);
+      dot.classList.toggle("is-active", index === step);
+      dot.classList.toggle("is-done", index < step);
+    }
+    this.onStep?.(step);
+  }
+
+  value(name) {
+    return String(this._root?.querySelector(`[name='${name}']`)?.value ?? "").trim();
+  }
+
+  fill(values) {
+    for (const [name, value] of Object.entries(values)) {
+      const field = this._root?.querySelector(`[name='${name}']`);
+      if (field) field.value = value;
+    }
+  }
+}
 
 function randomDetective() {
   const backgrounds = sample(TN.BACKGROUNDS, 2);
   const objects = sample(OBJECTS, 2);
   return {
     name: `${pick(NAMES)} ${pick(SURNAMES)}`,
-    roleTag: pick(["Inspectora", "Sabueso", "Forense", "Agente de homicidios", "Policía de barrio", "Detective veterano"]),
-    look: pick(LOOKS), belief: pick(BELIEFS), temperament: pick(TEMPERAMENTS), age: String(27 + Math.floor(Math.random() * 33)),
-    motivation: pick(MOTIVATIONS), background1: backgrounds[0], background2: backgrounds[1],
-    object1: objects[0], object2: objects[1], person: pick(PEOPLE), place: pick(PLACES),
-    rumor: pick(["dejó morir a un compañero", "aceptó dinero de una banda", "falsificó una prueba para salvar a alguien", "conoce la identidad de un asesino nunca detenido", "incendió el lugar donde creció"])
+    roleTag: pick(ROLES),
+    look: pick(LOOKS),
+    belief: pick(BELIEFS),
+    temperament: pick(TEMPERAMENTS),
+    age: String(27 + Math.floor(Math.random() * 33)),
+    motivation: pick(MOTIVATIONS),
+    background1: backgrounds[0],
+    background2: backgrounds[1],
+    object1: objects[0],
+    object2: objects[1],
+    person: pick(PEOPLE),
+    place: pick(PLACES),
+    rumor: pick(RUMORS)
   };
 }
 
-export class TruequeNoirCharacterGenerator extends LegacyApplication {
+const DETECTIVE_FIELDS = ["name", "roleTag", "look", "belief", "temperament", "age", "motivation", "background1", "background2", "object1", "object2", "person", "place", "rumor"];
+
+export class TruequeNoirCharacterGenerator extends TruequeNoirWizard {
   static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, { id: "trueque-noir-character-generator", classes: ["trueque-noir", "tn-generator"], title: "Crear detective", template: "systems/trueque-noir/templates/apps/character-generator.hbs", width: 760, height: 690, resizable: true });
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "trueque-noir-character-generator",
+      classes: ["trueque-noir", "tn-app", "tn-wizard-app"],
+      title: "Crear detective",
+      template: "systems/trueque-noir/templates/apps/character-generator.hbs",
+      width: 720,
+      height: 700,
+      resizable: true
+    });
   }
-  getData() { return { backgrounds: TN.BACKGROUNDS }; }
+
+  getData() {
+    return { backgrounds: TN.BACKGROUNDS };
+  }
+
   activateListeners(html) {
     super.activateListeners(html);
-    const show = step => { html.find("[data-step]").attr("hidden", true); html.find(`[data-step='${step}']`).removeAttr("hidden"); html.find("[data-step-dot]").removeClass("is-active"); html.find(`[data-step-dot='${step}']`).addClass("is-active"); };
-    html.find("[data-next]").on("click", event => show(Number(event.currentTarget.dataset.next)));
-    html.find("[data-prev]").on("click", event => show(Number(event.currentTarget.dataset.prev)));
-    html.find("[data-action='randomize']").on("click", () => this._fill(html, randomDetective()));
-    html.find("[data-action='create']").on("click", () => this._create(html));
+    this._root.querySelector("[data-action='randomize']")?.addEventListener("click", () => this.fill(randomDetective()));
+    this._root.querySelector("[data-action='create']")?.addEventListener("click", () => this._create());
   }
-  _fill(html, d) { for (const [k,v] of Object.entries(d)) html.find(`[name='${k}']`).val(v); }
-  async _create(html) {
-    const d = Object.fromEntries(["name","roleTag","look","belief","temperament","age","motivation","background1","background2","object1","object2","person","place","rumor"].map(k => [k,value(html,k)]));
-    if (!d.name) return ui.notifications.warn("El detective necesita un nombre.");
-    const actor = await Actor.create({ name: d.name, type: "detective", img: "icons/svg/mystery-man.svg", system: { roleTag:d.roleTag, look:d.look, belief:d.belief, temperament:d.temperament, age:d.age, motivation:d.motivation, background1:d.background1, background2:d.background2, representativeObjects:{slot1:{name:d.object1,used:false},slot2:{name:d.object2,used:false}}, stability:{person:{name:d.person,tension:0},place:{name:d.place,tension:0}}, baladaRumor:d.rumor }});
-    actor.sheet.render(true); this.close(); ui.notifications.info(`${d.name} está listo para entrar en la ciudad.`);
+
+  onStep(step) {
+    if (step !== 5) return;
+    const data = Object.fromEntries(DETECTIVE_FIELDS.map(field => [field, this.value(field)]));
+    const row = (label, value) => `<div class="tn-summary__row"><dt>${label}</dt><dd>${escape(value) || "<em>sin definir</em>"}</dd></div>`;
+    const summary = this._root.querySelector("[data-summary]");
+    if (summary) {
+      summary.innerHTML = `
+        <h3 class="tn-summary__name">${escape(data.name) || "Detective sin nombre"}</h3>
+        <p class="tn-summary__role">${escape(data.roleTag)}</p>
+        <dl class="tn-summary__list">
+          ${row("Físico", data.look)}
+          ${row("Trasfondos", [data.background1, data.background2].filter(Boolean).join(" · "))}
+          ${row("Objetos", [data.object1, data.object2].filter(Boolean).join(" · "))}
+          ${row("Persona", data.person)}
+          ${row("Lugar", data.place)}
+          ${row("Motivación", data.motivation)}
+          ${row("Rumor", data.rumor)}
+        </dl>`;
+    }
+    const create = this._root.querySelector("[data-action='create']");
+    const warning = this._root.querySelector("[data-summary-warning]");
+    if (create) create.disabled = !data.name;
+    if (warning) warning.hidden = Boolean(data.name);
+  }
+
+  async _create() {
+    const data = Object.fromEntries(DETECTIVE_FIELDS.map(field => [field, this.value(field)]));
+    if (!data.name) return ui.notifications.warn("El detective necesita un nombre antes de entrar en la ciudad.");
+    const actor = await Actor.create({
+      name: data.name,
+      type: "detective",
+      img: "icons/svg/mystery-man.svg",
+      system: {
+        roleTag: data.roleTag,
+        look: data.look,
+        belief: data.belief,
+        temperament: data.temperament,
+        age: data.age,
+        motivation: data.motivation,
+        background1: data.background1,
+        background2: data.background2,
+        representativeObjects: { slot1: { name: data.object1, used: false }, slot2: { name: data.object2, used: false } },
+        stability: { person: { name: data.person, tension: 0 }, place: { name: data.place, tension: 0 } },
+        baladaRumor: data.rumor
+      }
+    });
+    actor?.sheet?.render(true);
+    this.close();
+    ui.notifications.info(`${data.name} ya camina por la ciudad.`);
   }
 }
 
-export class TruequeNoirCityGenerator extends LegacyApplication {
+export class TruequeNoirCityGenerator extends TruequeNoirWizard {
   static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, { id: "trueque-noir-city-generator", classes: ["trueque-noir", "tn-generator"], title: "Construir la ciudad", template: "systems/trueque-noir/templates/apps/city-generator.hbs", width: 900, height: 740, resizable: true });
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: "trueque-noir-city-generator",
+      classes: ["trueque-noir", "tn-app", "tn-wizard-app"],
+      title: "Construir la ciudad",
+      template: "systems/trueque-noir/templates/apps/city-generator.hbs",
+      width: 820,
+      height: 740,
+      resizable: true
+    });
   }
-  getData() { return { zones: ZONES, commonLocations: COMMON_LOCATIONS }; }
+
+  getData() {
+    return { zones: ZONES, commonLocations: COMMON_LOCATIONS };
+  }
+
   activateListeners(html) {
     super.activateListeners(html);
-    const show = step => { html.find("[data-step]").attr("hidden", true); html.find(`[data-step='${step}']`).removeAttr("hidden"); html.find("[data-step-dot]").removeClass("is-active"); html.find(`[data-step-dot='${step}']`).addClass("is-active"); };
-    html.find("[data-next]").on("click", e => show(Number(e.currentTarget.dataset.next)));
-    html.find("[data-prev]").on("click", e => show(Number(e.currentTarget.dataset.prev)));
-    html.find("[data-action='randomize-city']").on("click", () => this._randomize(html));
-    html.find("[data-action='create-city']").on("click", () => this._create(html));
+    this._loadExistingCity();
+    this._root.querySelector("[data-action='randomize-city']")?.addEventListener("click", () => this._randomize());
+    this._root.querySelector("[data-action='create-city']")?.addEventListener("click", () => this._create());
   }
-  _randomize(html) {
-    html.find("[name='cityName']").val(`${pick(["Cape","Grey","Saint","New","Port","Black"])} ${pick(["Hook","Haven","Mercy","Vega","Cross","Bay"])}`);
-    html.find("[name='context']").val(pick(["Años 20, ley seca y lluvia incesante", "Años 90, ciudad portuaria aislada", "Distopía industrial bajo vigilancia", "Metrópolis costera contemporánea en decadencia", "Ciudad victoriana cubierta de niebla"]));
-    for (const zone of ZONES) { const id=zone.toLowerCase(); html.find(`[name='${id}Name']`).val(`${zone} · ${pick(["Muelles","Altos","Distrito","Barrio","Dársenas","Jardines"])}`); html.find(`[name='${id}Traits']`).val(sample(ZONE_TRAITS,2).join(", ")); html.find(`[name='${id}Controller']`).val(pick(CONTROLLERS)); html.find(`[name='${id}Extra']`).val(pick(EXTRA_LOCATIONS)); }
+
+  /** Editar la ciudad existente no debe obligar a reescribirla desde cero. */
+  _loadExistingCity() {
+    try {
+      const city = JSON.parse(game.settings.get(TN.SYSTEM_ID, "cityData") || "{}");
+      this.fill(Object.fromEntries(["cityName", "context", "wanted", "unwanted"].map(field => [field, city[field] || ""])));
+      for (const zone of city.zones || []) {
+        const prefix = String(zone.zone || "").toLowerCase();
+        if (!prefix) continue;
+        this.fill(Object.fromEntries(["name", "traits", "controller", "extra"].map(field => [
+          `${prefix}${field[0].toUpperCase()}${field.slice(1)}`,
+          zone[field] || ""
+        ])));
+      }
+    } catch (error) {
+      console.warn("trueque-noir | Datos de ciudad no válidos", error);
+    }
   }
-  async _create(html) {
-    const cityName=value(html,"cityName"); if (!cityName) return ui.notifications.warn("La ciudad necesita un nombre.");
-    const zones=ZONES.map(zone=>{const id=zone.toLowerCase(); return {zone,name:value(html,`${id}Name`),traits:value(html,`${id}Traits`),controller:value(html,`${id}Controller`),extra:value(html,`${id}Extra`)};});
-    const context=value(html,"context"), wanted=value(html,"wanted"), unwanted=value(html,"unwanted");
-    const zoneHtml=zones.map(z=>`<h2>${z.zone}: ${z.name}</h2><p><strong>Rasgos:</strong> ${z.traits}</p><p><strong>Control:</strong> ${z.controller}</p><p><strong>Localización propia:</strong> ${z.extra}</p>`).join("");
-    await JournalEntry.create({name:`Ciudad · ${cityName}`, pages:[{name:"Contexto y límites",type:"text",text:{content:`<h1>${cityName}</h1><p>${context}</p><h2>Queremos ver</h2><p>${wanted}</p><h2>No queremos ver</h2><p>${unwanted}</p>`}},{name:"Cuatro zonas",type:"text",text:{content:zoneHtml}},{name:"Localizaciones comunes",type:"text",text:{content:`<p>${COMMON_LOCATIONS.join(" · ")}</p>`}}], flags:{[TN.SYSTEM_ID]:{generatedCity:true}}});
-    await game.settings.set(TN.SYSTEM_ID,"cityName",cityName); await game.settings.set(TN.SYSTEM_ID,"cityData",JSON.stringify({cityName,context,wanted,unwanted,zones}));
-    ui.notifications.info(`${cityName} se ha guardado en el Panel de la Ciudad.`); this.close(); game.truequeNoir.openCaseTracker();
+
+  _readZones() {
+    return ZONES.map(zone => {
+      const id = zone.toLowerCase();
+      return {
+        zone,
+        name: this.value(`${id}Name`),
+        traits: this.value(`${id}Traits`),
+        controller: this.value(`${id}Controller`),
+        extra: this.value(`${id}Extra`)
+      };
+    });
+  }
+
+  onStep(step) {
+    if (step !== 4) return;
+    const summary = this._root.querySelector("[data-summary]");
+    const name = this.value("cityName");
+    if (summary) {
+      summary.innerHTML = `
+        <h3 class="tn-summary__name">${escape(name) || "Ciudad sin nombre"}</h3>
+        <p class="tn-summary__role">${escape(this.value("context"))}</p>
+        <div class="tn-zones tn-zones--summary">
+          ${this._readZones().map(zone => `
+            <article class="tn-zone">
+              <span class="tn-zone__compass">${zone.zone}</span>
+              <strong class="tn-zone__name">${escape(zone.name) || "—"}</strong>
+              <small class="tn-zone__traits">${escape(zone.traits)}</small>
+              <small class="tn-zone__controller">Controla: ${escape(zone.controller) || "—"}</small>
+              <em class="tn-zone__extra">${escape(zone.extra)}</em>
+            </article>`).join("")}
+        </div>
+        <div class="tn-city__limits">
+          <p><strong>Queremos ver.</strong> ${escape(this.value("wanted")) || "—"}</p>
+          <p><strong>No queremos ver.</strong> ${escape(this.value("unwanted")) || "—"}</p>
+        </div>`;
+    }
+    const create = this._root.querySelector("[data-action='create-city']");
+    const warning = this._root.querySelector("[data-summary-warning]");
+    if (create) create.disabled = !name;
+    if (warning) warning.hidden = Boolean(name);
+  }
+
+  _randomize() {
+    this.fill({
+      cityName: `${pick(CITY_PREFIX)} ${pick(CITY_SUFFIX)}`,
+      context: pick(CITY_CONTEXTS)
+    });
+    for (const zone of ZONES) {
+      const id = zone.toLowerCase();
+      this.fill({
+        [`${id}Name`]: `${zone} · ${pick(["Muelles", "Altos", "Distrito", "Barrio", "Dársenas", "Jardines"])}`,
+        [`${id}Traits`]: sample(ZONE_TRAITS, 2).join(", "),
+        [`${id}Controller`]: pick(CONTROLLERS),
+        [`${id}Extra`]: pick(EXTRA_LOCATIONS)
+      });
+    }
+  }
+
+  async _create() {
+    const cityName = this.value("cityName");
+    if (!cityName) return ui.notifications.warn("La ciudad necesita un nombre antes de guardarse.");
+    const zones = this._readZones();
+    const context = this.value("context");
+    const wanted = this.value("wanted");
+    const unwanted = this.value("unwanted");
+
+    const zoneHtml = zones.map(zone => `<h2>${escape(zone.zone)}: ${escape(zone.name)}</h2><p><strong>Rasgos:</strong> ${escape(zone.traits)}</p><p><strong>Control:</strong> ${escape(zone.controller)}</p><p><strong>Localización propia:</strong> ${escape(zone.extra)}</p>`).join("");
+    const existing = game.journal.find(entry => entry.getFlag(TN.SYSTEM_ID, "generatedCity"));
+    const pages = [
+      { name: "Contexto y límites", type: "text", text: { content: `<h1>${escape(cityName)}</h1><p>${escape(context)}</p><h2>Queremos ver</h2><p>${escape(wanted)}</p><h2>No queremos ver</h2><p>${escape(unwanted)}</p>` } },
+      { name: "Cuatro zonas", type: "text", text: { content: zoneHtml } },
+      { name: "Localizaciones comunes", type: "text", text: { content: `<p>${COMMON_LOCATIONS.join(" · ")}</p>` } }
+    ];
+
+    // Editar la ciudad actualiza su diario en lugar de acumular copias.
+    if (existing) await existing.delete();
+    await JournalEntry.create({ name: `Ciudad · ${cityName}`, pages, flags: { [TN.SYSTEM_ID]: { generatedCity: true } } });
+
+    await game.settings.set(TN.SYSTEM_ID, "cityName", cityName);
+    await game.settings.set(TN.SYSTEM_ID, "cityData", JSON.stringify({ cityName, context, wanted, unwanted, zones }));
+    ui.notifications.info(`${cityName} ya está en el Panel de La Ciudad.`);
+    this.close();
+    game.truequeNoir.openCaseTracker();
   }
 }

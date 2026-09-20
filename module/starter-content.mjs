@@ -15,12 +15,16 @@ function caseHtml(entry) {
 
 async function ensureScenes() {
   const specs = [
-    { name: "Trueque Noir · Portada", src: "systems/trueque-noir/assets/trueque-noir-cover-v1.png", width: 1536, height: 1024 },
-    { name: "Trueque Noir · Construcción de la ciudad", src: "systems/trueque-noir/assets/city-builder-scene.svg", width: 1600, height: 1000 }
+    { name: "Trueque Noir · Portada", src: "systems/trueque-noir/assets/trueque-noir-cover-v1.png", width: 1536, height: 1024 }
   ];
+  for (const obsolete of game.scenes.filter(scene => scene.getFlag(TN.SYSTEM_ID, "starterScene") === "Trueque Noir · Construcción de la ciudad")) {
+    await obsolete.delete();
+  }
   for (const spec of specs) {
-    if (game.scenes.find(scene => scene.getFlag(TN.SYSTEM_ID, "starterScene") === spec.name)) continue;
-    await Scene.create({ name: spec.name, width: spec.width, height: spec.height, padding: 0, background: { src: spec.src }, navigation: true, flags: { [TN.SYSTEM_ID]: { starterScene: spec.name } } });
+    const existing = game.scenes.find(scene => scene.getFlag(TN.SYSTEM_ID, "starterScene") === spec.name);
+    const source = { name: spec.name, width: spec.width, height: spec.height, padding: 0, grid: { type: 0, size: 100, distance: 1, units: "" }, tokenVision: false, fogExploration: false, globalLight: true, background: { src: spec.src }, navigation: true, flags: { [TN.SYSTEM_ID]: { starterScene: spec.name } } };
+    if (existing) await existing.update(source);
+    else await Scene.create(source);
   }
 }
 

@@ -80,6 +80,6 @@ export class TruequeNoirCityGenerator extends LegacyApplication {
     const zoneHtml=zones.map(z=>`<h2>${z.zone}: ${z.name}</h2><p><strong>Rasgos:</strong> ${z.traits}</p><p><strong>Control:</strong> ${z.controller}</p><p><strong>Localización propia:</strong> ${z.extra}</p>`).join("");
     await JournalEntry.create({name:`Ciudad · ${cityName}`, pages:[{name:"Contexto y límites",type:"text",text:{content:`<h1>${cityName}</h1><p>${context}</p><h2>Queremos ver</h2><p>${wanted}</p><h2>No queremos ver</h2><p>${unwanted}</p>`}},{name:"Cuatro zonas",type:"text",text:{content:zoneHtml}},{name:"Localizaciones comunes",type:"text",text:{content:`<p>${COMMON_LOCATIONS.join(" · ")}</p>`}}], flags:{[TN.SYSTEM_ID]:{generatedCity:true}}});
     await game.settings.set(TN.SYSTEM_ID,"cityName",cityName); await game.settings.set(TN.SYSTEM_ID,"cityData",JSON.stringify({cityName,context,wanted,unwanted,zones}));
-    ui.notifications.info(`${cityName} se ha guardado como diario.`); this.close();
+    ui.notifications.info(`${cityName} se ha guardado en el Panel de la Ciudad.`); this.close(); game.truequeNoir.openCaseTracker();
   }
 }

@@ -12,7 +12,7 @@
     </div>
 
     <div class="tn-case-strip" aria-label="Estado del caso">
-      <div class="tn-case-context"><span>Expediente</span><strong>{{caseName}}</strong><small>Día {{caseDay}} · {{casePhase}}</small></div>
+      <div class="tn-case-context" data-tn-help="Resumen del caso y estados activos del detective. Estos estados permanecen visibles durante toda la partida."><span>Expediente</span><strong>{{caseName}}</strong><small>Día {{caseDay}} · {{casePhase}}</small>{{#if activeStates.length}}<small class="tn-active-states">Estados: {{#each activeStates}}{{this}}{{#unless @last}} · {{/unless}}{{/each}}</small>{{else}}<small class="tn-active-states is-clear">Sin estados activos</small>{{/if}}</div>
       <div class="tn-vital tn-vital-cigarettes" title="Cigarrillos disponibles">
         <img src="systems/trueque-noir/assets/cigarette-v2.png" alt="" />
         <span>Cig.</span><strong>{{system.cigarettes.value}}/{{system.cigarettes.max}}</strong>

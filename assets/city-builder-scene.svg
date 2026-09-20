@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
-  <defs><radialGradient id="bg"><stop stop-color="#23282e"/><stop offset="1" stop-color="#090b0d"/></radialGradient><filter id="grain"><feTurbulence baseFrequency=".6" numOctaves="3" seed="8" result="n"/><feBlend in="SourceGraphic" in2="n" mode="soft-light"/></filter></defs>
-  <rect width="1600" height="1000" fill="url(#bg)"/><g filter="url(#grain)" opacity=".2"><rect width="1600" height="1000" fill="#777"/></g>
-  <g fill="none" stroke="#9b3430" stroke-width="5" opacity=".85"><circle cx="800" cy="530" r="330"/><line x1="800" y1="200" x2="800" y2="860"/><line x1="470" y1="530" x2="1130" y2="530"/></g>
-  <g fill="#efe6d4" font-family="Georgia,serif" text-anchor="middle"><text x="800" y="72" font-size="42" letter-spacing="8">CONSTRUIR LA CIUDAD</text><text x="800" y="115" font-size="19" fill="#caa55e">CONTEXTO · CUATRO ZONAS · LOCALIZACIONES</text>
-  <text x="800" y="290" font-size="32">NORTE</text><text x="800" y="785" font-size="32">SUR</text><text x="1030" y="540" font-size="32">ESTE</text><text x="570" y="540" font-size="32">OESTE</text>
-  <text x="800" y="480" font-size="26">NOMBRE Y CONTEXTO</text><text x="800" y="520" font-size="18" fill="#aaa493">Año · lugar · temática · límites</text><text x="800" y="555" font-size="18" fill="#aaa493">Cada zona: nombre · 2 rasgos · quién controla</text><text x="800" y="590" font-size="18" fill="#aaa493">Después: lugares comunes + 1 localización propia</text></g>
-  <g fill="#caa55e" font-family="Arial,sans-serif" font-size="16"><text x="55" y="905">1. Acordad qué queréis y qué no queréis ver.</text><text x="55" y="935">2. Completad las cuatro zonas entre toda la mesa.</text><text x="55" y="965">3. Usad el asistente de Trueque Noir para guardar la ciudad.</text></g>
-</svg>

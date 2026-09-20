@@ -12,6 +12,16 @@ function detectiveOptions() {
   return game.actors.filter(actor => actor.type === "detective").map(actor => ({ id: actor.id, name: actor.name }));
 }
 
+function readCityData() {
+  try {
+    const data = JSON.parse(game.settings.get(TN.SYSTEM_ID, "cityData") || "{}");
+    const zones = Array.isArray(data.zones) ? data.zones : [];
+    return { cityName: data.cityName || game.settings.get(TN.SYSTEM_ID, "cityName") || "La ciudad", context: data.context || "", wanted: data.wanted || "", unwanted: data.unwanted || "", zones, hasZones: zones.length > 0 };
+  } catch (_error) {
+    return { cityName: game.settings.get(TN.SYSTEM_ID, "cityName") || "La ciudad", context: "", wanted: "", unwanted: "", zones: [], hasZones: false };
+  }
+}
+
 export class TruequeNoirCaseTracker extends LegacyApplication {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
@@ -43,7 +53,8 @@ export class TruequeNoirCaseTracker extends LegacyApplication {
       displayVisible: Boolean(game.settings.get(TN.SYSTEM_ID, "tableDisplayVisible")),
       cityConsequences: TN.TRUEQUE_CITY,
       priceConsequences: TN.TRUEQUE_PRICE,
-      detectives: detectiveOptions()
+      detectives: detectiveOptions(),
+      city: readCityData()
     };
   }
 

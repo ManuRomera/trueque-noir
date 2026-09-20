@@ -1,5 +1,13 @@
 # Historial de cambios
 
+## 1.3.0
+
+- Retirada la escena de construcción de ciudad; toda la información creada se muestra ahora en el Panel de la Ciudad.
+- Escena de portada corregida: sin cuadrícula, niebla ni visión de token y con las proporciones nativas de la imagen.
+- Estados activos visibles permanentemente junto al expediente de la cabecera.
+- Ayuda contextual común: aparece tras dos segundos sobre cualquier control y se fija con clic derecho hasta pulsar fuera.
+- Galería de GitHub centrada en la portada y la ficha, sin la escena de ciudad.
+
 ## 1.2.0
 
 - Documento del detective repartido en tres subpestañas para eliminar el desplazamiento vertical innecesario.

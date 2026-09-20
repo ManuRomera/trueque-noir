@@ -20,6 +20,7 @@ import { LegacyActorSheet, LegacyDialog, openWindows } from "./module/compat.mjs
 import { TruequeNoirCityGenerator, TruequeNoirCharacterGenerator } from "./module/generators.mjs";
 import { ensureStarterContent } from "./module/starter-content.mjs";
 import { restoreWindowState, persistWindowState } from "./module/window-state.mjs";
+import { bindContextHelp } from "./module/context-help.mjs";
 
 class TruequeNoirDetectiveSheet extends LegacyActorSheet {
   constructor(...args) {
@@ -66,6 +67,12 @@ class TruequeNoirDetectiveSheet extends LegacyActorSheet {
     data.caseDay = Number(game.settings.get(TN.SYSTEM_ID, "caseDay") ?? 1);
     data.casePhase = phaseLabel(game.settings.get(TN.SYSTEM_ID, "casePhaseIndex"));
     data.canOverexpose = Boolean(this.actor.getFlag(TN.SYSTEM_ID, "lastRoll")?.formula);
+    data.activeStates = [
+      ...TN.PERSONAL_STATES.filter(state => this.actor.system.personalStates?.[state.id]).map(state => state.label),
+      ...TN.CITY_STATES.filter(state => this.actor.system.cityStates?.[state.id]).map(state => state.label)
+    ];
+    if (this.actor.system.personalStates?.customActive && this.actor.system.personalStates?.custom) data.activeStates.push(this.actor.system.personalStates.custom);
+    if (this.actor.system.cityStates?.customActive && this.actor.system.cityStates?.custom) data.activeStates.push(this.actor.system.cityStates.custom);
     data.isGM = game.user?.isGM;
     return data;
   }
@@ -535,9 +542,12 @@ Hooks.once("ready", async function() {
 });
 
 Hooks.on("renderActorDirectory", ensureDirectoryButtons);
-Hooks.on("renderApplication", app => {
+Hooks.on("renderApplication", (app, html) => {
   const classes = app?.options?.classes ?? [];
-  if (classes.includes("trueque-noir")) restoreWindowState(app);
+  if (classes.includes("trueque-noir")) {
+    restoreWindowState(app);
+    bindContextHelp(html);
+  }
 });
 Hooks.on("closeApplication", app => {
   const classes = app?.options?.classes ?? [];

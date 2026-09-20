@@ -13,6 +13,15 @@
     </div>
   </section>
 
+  <section class="tn-panel-card tn-city-profile" data-tn-help="La ciudad creada por la mesa. El asistente de ciudad guarda aquí el contexto, los límites y las cuatro zonas.">
+    <div class="tn-section-title">La ciudad · {{city.cityName}}</div>
+    {{#if city.context}}<p class="tn-city-context">{{city.context}}</p>{{else}}<p class="tn-small">Aún no has creado una ciudad. Usa «Crear ciudad» en el directorio de Actores.</p>{{/if}}
+    {{#if city.hasZones}}
+      <div class="tn-city-zones">{{#each city.zones}}<article><strong>{{zone}}</strong><span>{{name}}</span><small>{{traits}} · {{controller}}</small><em>{{extra}}</em></article>{{/each}}</div>
+      <div class="tn-city-limits"><span><strong>Queremos:</strong> {{city.wanted}}</span><span><strong>No queremos:</strong> {{city.unwanted}}</span></div>
+    {{/if}}
+  </section>
+
   <section class="tn-grid tn-tools-layout">
     <section class="tn-panel-card tn-die-panel">
       <div class="tn-section-title">Dado del crimen</div>

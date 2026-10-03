@@ -1,11 +1,11 @@
 {
   "id": "trueque-noir",
   "title": "Trueque Noir",
-  "description": "Investigaciones noir inspiradas en Balada triste de la ciudad: expediente vivo, Mesa del caso compartida y Panel de La Ciudad para dirigir.",
-  "version": "2.1.0",
+  "description": "Investigaciones noir inspiradas en Balada triste de la ciudad: ficha de detective compacta, Panel de La Ciudad con reloj, dado del crimen y trueque automatizado, y Mesa del caso compartida.",
+  "version": "3.0.0",
   "compatibility": {
-    "minimum": 13,
-    "verified": 14
+    "minimum": "13",
+    "verified": "13.351"
   },
   "authors": [
     {
@@ -14,6 +14,10 @@
     }
   ],
   "url": "https://github.com/ManuRomera/trueque-noir",
+  "readme": "https://github.com/ManuRomera/trueque-noir#readme",
+  "changelog": "https://github.com/ManuRomera/trueque-noir/blob/main/CHANGELOG.md",
+  "bugs": "https://github.com/ManuRomera/trueque-noir/issues",
+  "license": "LICENSE",
   "esmodules": [
     "trueque-noir.mjs"
   ],
@@ -41,11 +45,10 @@
     "units": "slot"
   },
   "initiative": "1d10",
-  "primaryTokenAttribute": null,
+  "primaryTokenAttribute": "cigarettes",
   "secondaryTokenAttribute": null,
   "socket": true,
   "background": "systems/trueque-noir/assets/scenes/noir.webp",
   "manifest": "https://github.com/ManuRomera/trueque-noir/releases/latest/download/system.json",
-  "download": "https://github.com/ManuRomera/trueque-noir/releases/latest/download/trueque-noir.zip",
-  "template": "template.json"
+  "download": "https://github.com/ManuRomera/trueque-noir/releases/latest/download/trueque-noir.zip"
 }

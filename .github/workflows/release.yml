@@ -9,30 +9,38 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  publicar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Validar sintaxis y coherencia del paquete
-        run: |
-          node --check trueque-noir.mjs
-          for file in module/*.mjs tools/*.mjs; do node --check "$file"; done
-          node tools/check.mjs
-
-      - name: Preparar paquete
-        run: |
-          mkdir -p dist/trueque-noir
-          # Trueque.png es la captura del README: no debe viajar en el paquete instalable.
-          rsync -a --exclude '.git' --exclude '.github' --exclude 'dist' --exclude '*.zip' --exclude 'Trueque.png' ./ dist/trueque-noir/
-          cd dist
-          zip -r trueque-noir.zip trueque-noir
-          cp trueque-noir/system.json system.json
-
-      - name: Publicar versión
-        uses: softprops/action-gh-release@v2
+      - uses: actions/setup-node@v5
         with:
-          generate_release_notes: true
-          files: |
-            dist/trueque-noir.zip
-            dist/system.json
+          node-version: "22"
+
+      - name: Validar etiqueta, manifiesto y código
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: npm run check
+
+      - name: Pruebas de las reglas
+        run: npm test
+
+      - name: Empaquetar
+        run: |
+          mkdir -p dist
+          # Solo lo que Foundry necesita: sin pruebas, herramientas ni la captura del README.
+          zip -r dist/trueque-noir.zip system.json trueque-noir.mjs module templates styles fonts lang assets data LICENSE README.md CHANGELOG.md CONTENIDO.md
+          cp system.json dist/system.json
+          unzip -l dist/trueque-noir.zip | tail -1
+
+      - name: Notas de la versión
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="## $version" '$0==v{p=1;next} /^## /{p=0} p' CHANGELOG.md > dist/notas.md
+          test -s dist/notas.md || echo "Versión $version." > dist/notas.md
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/trueque-noir.zip dist/system.json --title "Trueque Noir $GITHUB_REF_NAME" --notes-file dist/notas.md

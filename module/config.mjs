@@ -2,27 +2,25 @@
  * Constantes, ajustes y consultas compartidas de Trueque Noir.
  * En este juego el director de juego es «La Ciudad»: nunca «DM» ni «GM» en textos visibles.
  */
+import { ApplicationV2, ventanas } from "./compat.mjs";
+import { olvidarTodo } from "./memoria.mjs";
+import * as R from "./reglas.mjs";
+
+export const ID = "trueque-noir";
+export const RUTA = `systems/${ID}`;
+
 export const TN = {
-  SYSTEM_ID: "trueque-noir",
-  SOCKET: "system.trueque-noir",
-  ASSETS: "systems/trueque-noir/assets",
-  LOGO: "systems/trueque-noir/assets/logo.webp",
-  PORTRAIT: "systems/trueque-noir/assets/portrait.webp",
-  TOKEN: "systems/trueque-noir/assets/token.webp",
+  SYSTEM_ID: ID,
+  SOCKET: `system.${ID}`,
+  ASSETS: `${RUTA}/assets`,
+  LOGO: `${RUTA}/assets/logo.webp`,
+  PORTRAIT: `${RUTA}/assets/portrait.webp`,
+  TOKEN: `${RUTA}/assets/token.webp`,
+  CIGARETTE: `${RUTA}/assets/cigarette.png`,
   SCENE_FLAG: "Trueque Noir · Portada",
   BACKGROUNDS: [
-    "Intimidación",
-    "Encontrar pruebas",
-    "Negociación",
-    "Bajos fondos",
-    "Uso de armas",
-    "Buscar información",
-    "Detectar mentiras",
-    "Medicina forense",
-    "Forzar cerraduras",
-    "Pelea a puñetazos",
-    "Pasar inadvertido",
-    "Enérgico"
+    "Intimidación", "Encontrar pruebas", "Negociación", "Bajos fondos", "Uso de armas", "Buscar información",
+    "Detectar mentiras", "Medicina forense", "Forzar cerraduras", "Pelea a puñetazos", "Pasar inadvertido", "Enérgico"
   ],
   PERSONAL_STATES: [
     { id: "magullado", label: "Magullado" },
@@ -40,164 +38,186 @@ export const TN = {
     { id: "observado", label: "Observado" },
     { id: "acabado", label: "Acabado" }
   ],
-  PHASES: ["mañana", "tarde", "noche"],
-  TRUEQUE_CITY: [
-    "El crimen se propaga: el dado del crimen aumenta en 1.",
-    "Indeseables: aparece un grupo hostil, una alarma o una amenaza visible.",
-    "Señalado: un contacto o PNJ queda expuesto, marcado o muere.",
-    "Descuido: el tiempo se acorta y el culpable se aleja."
-  ],
-  TRUEQUE_PRICE: [
-    "En problemas: un detective adquiere un estado personal.",
-    "La ciudad recuerda: un detective adquiere un estado con la ciudad.",
-    "Sacrificio: media cajetilla menos, más tiempo aquí o -1 reconocimiento.",
-    "Tu cara me suena: +1 tensión a un pilar de estabilidad."
-  ]
+  PHASES: R.FRANJAS,
+  PILLARS: { person: "Persona", place: "Lugar" },
+  RESULT_LABEL: { clean: "Éxito limpio", mixed: "Trueque", hard: "Resultado duro" }
 };
 
-/** Pistas necesarias para bajar un punto el dado del crimen. */
-export const CLUES_PER_CRIME_STEP = 3;
-/** Pistas mínimas que el manual exige antes de una acusación. */
-export const CLUES_FOR_ACCUSATION = 6;
+/** Estados que sacan al detective de la partida al terminar el caso (p. 26). */
+export const ESTADOS_FINALES = ["quebrado", "acabado"];
 
-export function registerSystemSettings() {
-  const register = (key, type, defaultValue, extra = {}) => {
-    game.settings.register(TN.SYSTEM_ID, key, {
-      scope: "world",
-      config: false,
-      type,
-      default: defaultValue,
-      ...extra
-    });
-  };
+/** Claves del estado compartido del caso. Los jugadores no escriben ajustes de mundo: piden el cambio por socket. */
+const ESTADO = {
+  caseName: ["Caso abierto", String],
+  caseDay: [1, Number],
+  casePhaseIndex: [0, Number],
+  timeLimit: [4, Number],
+  crimeDie: [1, Number],
+  groupCluesTotal: [0, Number],
+  groupCluesSpent: [0, Number],
+  rumorBonusAvailable: [false, Boolean],
+  rumorBonusText: ["", String],
+  rumorBy: ["", String],
+  tableDisplayVisible: [false, Boolean],
+  cityName: ["La ciudad", String],
+  cityData: ["{}", String],
+  welcomeSeen: [false, Boolean],
+  caseArchiveImported: [false, Boolean],
+  cityTheme: ["noir", String],
+  floatingScenes: ["[]", String],
+  chronicleCase: [1, Number],
+  caseResult: ["", String]
+};
 
-  // Estado vivo del caso. Nunca aparece en la configuración de Foundry: se edita desde el Panel.
-  register("caseName", String, "Caso abierto", { name: "Nombre del caso" });
-  register("caseDay", Number, 1, { name: "Día del caso" });
-  register("casePhaseIndex", Number, 0, { name: "Índice de franja" });
-  register("timeLimit", Number, 4, { name: "Límite de días" });
-  register("crimeDie", Number, 1, { name: "Dado del crimen" });
-  register("groupCluesTotal", Number, 0, { name: "Pistas descubiertas" });
-  register("groupCluesSpent", Number, 0, { name: "Pistas gastadas" });
-  register("rumorBonusAvailable", Boolean, false, { name: "Rumor pendiente" });
-  register("rumorBonusText", String, "", { name: "Texto del rumor" });
-  register("tableDisplayVisible", Boolean, false, { name: "Mesa del caso visible" });
-  register("cityName", String, "La ciudad", { name: "Nombre de la ciudad" });
-  register("cityData", String, "{}", { name: "Datos de la ciudad" });
-  register("welcomeSeen", Boolean, false, { name: "Bienvenida mostrada" });
-  register("caseArchiveImported", Boolean, false, { name: "Archivo de casos importado" });
-  register("cityTheme", String, "noir", { name: "Ambientación de la ciudad" });
+/** Abrir el ajuste desde el menú borra la memoria de ventanas sin abrir nada. */
+class RestablecerVentanas extends ApplicationV2 {
+  async render() {
+    olvidarTodo();
+    ui.notifications.info("Posiciones, tamaños y pestañas de las ventanas olvidadas en este navegador.");
+    return this;
+  }
+}
 
-  // Preferencias visibles en Configuración → Ajustes del sistema.
-  game.settings.register(TN.SYSTEM_ID, "portraitNoir", {
+export function registrarAjustes() {
+  for (const [clave, [valor, tipo]] of Object.entries(ESTADO)) {
+    game.settings.register(ID, clave, { scope: "world", config: false, type: tipo, default: valor });
+  }
+
+  game.settings.register(ID, "portraitNoir", {
     name: "Retratos en blanco y negro",
     hint: "Aplica el tratamiento de fotografía noir a los retratos de las fichas. Desactívalo para verlos en color.",
-    scope: "client",
-    config: true,
-    type: Boolean,
-    default: true,
-    onChange: () => {
-      document.body.classList.toggle("tn-portraits-color", !game.settings.get(TN.SYSTEM_ID, "portraitNoir"));
-    }
+    scope: "client", config: true, type: Boolean, default: true,
+    onChange: aplicarPreferenciaRetratos
   });
-
-  game.settings.register(TN.SYSTEM_ID, "installMacros", {
+  game.settings.register(ID, "installMacros", {
     name: "Instalar macros en la barra rápida",
     hint: "Crea y coloca las macros de La Ciudad en tu barra. Desactivado por defecto: todo está también en el menú Trueque Noir de los controles de escena.",
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: false
+    scope: "world", config: true, type: Boolean, default: false
+  });
+  game.settings.registerMenu(ID, "ventanas", {
+    name: "Memoria de ventanas",
+    label: "Olvidar posiciones",
+    hint: "Las ventanas del sistema recuerdan posición, tamaño, pestaña y secciones plegadas en este navegador.",
+    icon: "fa-solid fa-window-restore",
+    type: RestablecerVentanas,
+    restricted: false
   });
 }
 
-export function getRecognitionAvailable(actor) {
-  const total = Number(actor.system.recognition?.total ?? 0);
-  const spent = Number(actor.system.recognition?.spent ?? 0);
-  return Math.max(total - spent, 0);
+export function aplicarPreferenciaRetratos() {
+  document.body.classList.toggle("tn-portraits-color", !game.settings.get(ID, "portraitNoir"));
 }
 
-export function classifyResult(total) {
-  if (total <= 4) return "hard";
-  if (total <= 8) return "mixed";
-  return "clean";
-}
+const ajuste = clave => game.settings.get(ID, clave);
 
-export const RESULT_LABEL = {
-  clean: "Éxito limpio",
-  mixed: "Trueque",
-  hard: "Resultado duro"
-};
-
-export function phaseLabel(index) {
-  return TN.PHASES[Number(index) ?? 0] ?? TN.PHASES[0];
-}
-
-export function clampCrimeDie(value) {
-  return Math.max(1, Math.min(Number(value || 1), 5));
-}
-
-export function getCrimeDie() {
-  return Number(game.settings.get(TN.SYSTEM_ID, "crimeDie") ?? 1);
-}
-
-/** El dado del crimen «explota» al superar 4: el caso debería cerrarse. */
-export function isCrimeExploded(value = getCrimeDie()) {
-  return Number(value) > 4;
-}
-
-export function getGroupClueState() {
-  const total = Number(game.settings.get(TN.SYSTEM_ID, "groupCluesTotal") ?? 0);
-  const spent = Number(game.settings.get(TN.SYSTEM_ID, "groupCluesSpent") ?? 0);
-  const available = Math.max(total - spent, 0);
+/** Todo lo que las ventanas necesitan saber del caso en curso, ya calculado. */
+export function estadoCaso() {
+  const dado = R.limitarDado(ajuste("crimeDie"));
+  const total = Number(ajuste("groupCluesTotal"));
+  const gastadas = Number(ajuste("groupCluesSpent"));
+  const disponibles = Math.max(total - gastadas, 0);
+  const franja = Number(ajuste("casePhaseIndex"));
+  const dia = Number(ajuste("caseDay"));
+  const limite = Number(ajuste("timeLimit"));
   return {
-    total,
-    spent,
-    available,
-    canReduceCrime: available >= CLUES_PER_CRIME_STEP && getCrimeDie() > 1
+    nombre: ajuste("caseName"),
+    dia, limite, franja,
+    franjaNombre: R.FRANJAS[franja] ?? R.FRANJAS[0],
+    esNoche: franja === 2,
+    finTiempo: dia > limite,
+    dado,
+    explotado: R.dadoExplotado(dado),
+    puedeSubir: dado <= R.DADO_MAXIMO,
+    puedeBajar: dado > 1,
+    pistas: {
+      total, gastadas, disponibles,
+      progreso: Math.min(disponibles, R.PISTAS_POR_PASO),
+      puedeGastar: disponibles >= R.PISTAS_POR_PASO && dado > 1,
+      puedeAcusar: total >= R.PISTAS_ACUSACION
+    },
+    rumor: { activo: Boolean(ajuste("rumorBonusAvailable")), texto: ajuste("rumorBonusText"), por: ajuste("rumorBy") },
+    mesaVisible: Boolean(ajuste("tableDisplayVisible")),
+    cronica: Number(ajuste("chronicleCase")),
+    resultado: ajuste("caseResult")
   };
 }
 
-export function canUseFavorForType(scope, type) {
-  const normalized = String(scope ?? "").trim().toLowerCase();
-  if (!normalized || normalized === "libre") return true;
-  if (type === "risk") return ["riesgo", "risk", "cualquiera"].includes(normalized);
-  if (type === "pursue") return ["crimen", "investigación", "investigacion", "información", "informacion", "pursue", "clue"].includes(normalized);
-  return true;
+export const DADO_TEXTO = [
+  "La policía se hace fuerte: la honradez impera.",
+  "Algunos polis corruptos: el día a día de la ciudad.",
+  "El crimen ya no teme a la policía.",
+  "La ciudad está condenada: están todos comprados."
+];
+
+const ICONO_FRANJA = ["fa-solid fa-sun", "fa-solid fa-cloud-sun", "fa-solid fa-moon"];
+
+/** La rejilla de días y franjas del caso, con cada casilla marcada como pasada, actual o futura. */
+export function diasDelCaso(caso) {
+  return Array.from({ length: caso.limite }, (_, i) => {
+    const n = i + 1;
+    return {
+      n,
+      franjas: R.FRANJAS.map((nombre, f) => {
+        const ahora = n === caso.dia && f === caso.franja;
+        const pasada = n < caso.dia || (n === caso.dia && f < caso.franja);
+        return { i: f, nombre, icono: ICONO_FRANJA[f], estado: caso.finTiempo || pasada ? "es-pasada" : ahora ? "es-actual" : "es-futura" };
+      })
+    };
+  });
 }
 
-export function getActorBackgrounds(actor) {
-  return [actor.system.background1, actor.system.background2, actor.system.background3].filter(Boolean);
+export function leerCiudad() {
+  const vacia = { cityName: ajuste("cityName") || "La ciudad", context: "", wanted: "", unwanted: "", zones: [], hasZones: false, hasContent: false };
+  try {
+    const data = JSON.parse(ajuste("cityData") || "{}");
+    const zones = Array.isArray(data.zones) ? data.zones : [];
+    return {
+      cityName: data.cityName || vacia.cityName,
+      context: data.context || "", wanted: data.wanted || "", unwanted: data.unwanted || "",
+      zones, hasZones: zones.length > 0, hasContent: Boolean(data.context || zones.length)
+    };
+  } catch (error) {
+    console.warn("trueque-noir | Datos de ciudad ilegibles", error);
+    return vacia;
+  }
 }
 
-export function getDetectives() {
-  return game.actors?.filter(actor => actor.type === "detective") ?? [];
+export function leerEscenasFlotantes() {
+  try {
+    const lista = JSON.parse(ajuste("floatingScenes") || "[]");
+    return Array.isArray(lista) ? lista : [];
+  } catch {
+    return [];
+  }
 }
+
+/**
+ * Los detectives de la crónica: todos los del mundo, también los que lleva La Ciudad.
+ * Cuentan para el reparto de cigarrillos (18 en el grupo) y para el reconocimiento al cerrar un caso.
+ */
+export const getDetectives = () => game.actors?.filter(actor => actor.type === "detective") ?? [];
+
+export const getRecognitionAvailable = actor =>
+  Number(actor.system.recognition?.total ?? 0) - Number(actor.system.recognition?.spent ?? 0);
+
+export const getActorBackgrounds = actor =>
+  [actor.system.background1, actor.system.background2, actor.system.background3].filter(Boolean);
 
 /** Estados activos de un detective, listos para pintarse como sellos en la cabecera. */
 export function getActiveStates(actor) {
-  const states = [];
-  for (const state of TN.PERSONAL_STATES) {
-    if (actor.system.personalStates?.[state.id]) states.push({ label: state.label, kind: "personal" });
-  }
-  if (actor.system.personalStates?.customActive && actor.system.personalStates?.custom) {
-    states.push({ label: actor.system.personalStates.custom, kind: "personal" });
-  }
-  for (const state of TN.CITY_STATES) {
-    if (actor.system.cityStates?.[state.id]) states.push({ label: state.label, kind: "city" });
-  }
-  if (actor.system.cityStates?.customActive && actor.system.cityStates?.custom) {
-    states.push({ label: actor.system.cityStates.custom, kind: "city" });
-  }
-  return states;
+  const estados = [];
+  const { personalStates: p, cityStates: c } = actor.system;
+  for (const s of TN.PERSONAL_STATES) if (p?.[s.id]) estados.push({ id: s.id, label: s.label, kind: "personal", final: ESTADOS_FINALES.includes(s.id) });
+  if (p?.customActive && p.custom) estados.push({ id: "custom", label: p.custom, kind: "personal" });
+  for (const s of TN.CITY_STATES) if (c?.[s.id]) estados.push({ id: s.id, label: s.label, kind: "city", final: ESTADOS_FINALES.includes(s.id) });
+  if (c?.customActive && c.custom) estados.push({ id: "custom", label: c.custom, kind: "city" });
+  return estados;
 }
 
-/** Vuelve a pintar las ventanas compartidas del sistema sin robar el foco de edición. */
-export async function refreshCrimeBoard() {
-  for (const app of Object.values(ui.windows ?? {})) {
-    if (["trueque-noir-case-tracker", "trueque-noir-case-board"].includes(app?.options?.id)) app.render(false);
-  }
-  for (const sheet of Object.values(ui.windows ?? {})) {
-    if (sheet?.actor?.type === "detective") sheet.render(false);
-  }
-}
+/**
+ * Vuelve a pintar las ventanas del sistema que dependen del estado compartido.
+ * Cada ajuste dispara su propio aviso: se agrupan para pintar una sola vez por cambio.
+ */
+export const refrescar = foundry.utils.debounce(() => {
+  for (const app of ventanas()) if (app.constructor.REACTIVA && app.rendered) app.render();
+}, 40);

@@ -1,30 +1,28 @@
-<div class="tn-board">
-  <div class="tn-board__case">
+<div class="tn-mesa d{{caso.dado}}{{#if caso.explotado}} is-explotado{{/if}}">
+  <section class="tn-mesa__dado" aria-label="Dado del crimen">
+    <span class="tn-etiqueta">Dado del crimen</span>
+    <span class="tn-dado tn-dado--mesa">{{#if caso.explotado}}<i class="fa-solid fa-burst" aria-hidden="true"></i>{{else}}{{caso.dado}}{{/if}}</span>
+    <small>{{#if caso.explotado}}Ha explotado{{else}}{{dadoTexto}}{{/if}}</small>
+  </section>
+
+  <section class="tn-mesa__caso">
     <span class="tn-kicker">Mesa del caso</span>
-    <h1 class="tn-board__name">{{caseName}}</h1>
-    <p class="tn-board__time"><strong>Día {{day}}</strong> de {{timeLimit}} · {{phase}}</p>
-  </div>
+    <h1>{{caso.nombre}}</h1>
+    <p class="tn-mesa__tiempo{{#if caso.esNoche}} es-noche{{/if}}">
+      {{#if caso.finTiempo}}<strong>Tiempo agotado</strong>{{else}}<strong>Día {{caso.dia}}</strong> de {{caso.limite}} · {{caso.franjaNombre}}{{/if}}
+    </p>
+    <ol class="tn-mesa__dias" aria-hidden="true">
+      {{#each dias}}<li>{{#each franjas}}<i class="tn-franja-punto {{estado}}"></i>{{/each}}</li>{{/each}}
+    </ol>
+  </section>
 
-  <div class="tn-board__crime {{#if exploded}}is-exploded{{/if}}">
-    <span class="tn-board__crime-label">Dado del crimen</span>
-    <span class="tn-board__crime-value">{{crimeDie}}</span>
-    {{#if exploded}}<span class="tn-board__crime-boom">Ha explotado</span>{{/if}}
-  </div>
+  <section class="tn-mesa__pistas" aria-label="Pistas">
+    <div class="tn-mesa__cifra"><strong>{{caso.pistas.total}}</strong><span>pistas descubiertas</span></div>
+    <div class="tn-mesa__cifra is-clave"><strong>{{caso.pistas.disponibles}}</strong><span>sin gastar</span></div>
+    <span class="tn-pasos tn-pasos--grande" aria-label="{{caso.pistas.progreso}} de 3 para bajar el dado">{{#each pistaProgreso}}<i class="tn-paso{{#if llena}} is-llena{{/if}}"></i>{{/each}}</span>
+  </section>
 
-  <div class="tn-board__clues">
-    <div class="tn-board__clue">
-      <strong>{{clueTotal}}</strong>
-      <span>pistas descubiertas</span>
-    </div>
-    <div class="tn-board__clue is-key">
-      <strong>{{clueAvailable}}</strong>
-      <span>sin gastar · {{cluesPerStep}} bajan el dado</span>
-    </div>
-    {{#if rumorBonusAvailable}}
-      <div class="tn-board__rumor">
-        <span class="tn-rumor__kicker">Rumor pendiente</span>
-        <p>{{rumorBonusText}}</p>
-      </div>
-    {{/if}}
-  </div>
+  {{#if caso.rumor.activo}}
+  <p class="tn-mesa__rumor tn-rumor"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> <strong>Rumor pendiente.</strong> {{caso.rumor.texto}}</p>
+  {{/if}}
 </div>

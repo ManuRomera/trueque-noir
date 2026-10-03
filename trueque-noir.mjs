@@ -1,121 +1,103 @@
 /**
  * Trueque Noir · punto de entrada.
- * Aquí solo se registran hooks y se conectan las piezas; la lógica vive en `module/`.
+ * Aquí solo se registran piezas y hooks; la lógica vive en `module/`.
  */
-import { TN, registerSystemSettings, refreshCrimeBoard } from "./module/config.mjs";
+import { ID, registrarAjustes, aplicarPreferenciaRetratos, refrescar } from "./module/config.mjs";
+import { DocumentSheetConfig, ventana, diagnostico, generacion } from "./module/compat.mjs";
 import { TruequeNoirActor } from "./module/actor.mjs";
-import { TruequeNoirDetectiveSheet } from "./module/sheet.mjs";
-import { TruequeNoirCaseTracker, TruequeNoirCaseBoard } from "./module/tracker-app.mjs";
-import { TruequeNoirDetectiveData, TruequeNoirNpcData, getDetectiveDefaults, getNpcDefaults } from "./module/data-models.mjs";
-import { LegacyActorSheet, ActorsCollection, findWindow } from "./module/compat.mjs";
-import { TruequeNoirCityGenerator, TruequeNoirCharacterGenerator } from "./module/generators.mjs";
-import { ensureCoverScene, bindCoverSceneCamera } from "./module/scene-setup.mjs";
-import { openThemePicker } from "./module/theme-picker.mjs";
+import { TruequeNoirDetectiveData, TruequeNoirNpcData } from "./module/data-models.mjs";
+import { HojaDetective } from "./module/hojas/detective.mjs";
+import { HojaPnj } from "./module/hojas/pnj.mjs";
+import { PanelCiudad } from "./module/apps/panel.mjs";
+import { MesaCaso } from "./module/apps/mesa.mjs";
+import { Bienvenida } from "./module/apps/bienvenida.mjs";
+import { Ambientacion } from "./module/apps/ambientacion.mjs";
+import { AsistenteCiudad, AsistenteDetective } from "./module/apps/asistentes.mjs";
 import { importCaseArchive } from "./module/case-archive.mjs";
-import { openWelcome, maybeOpenWelcome } from "./module/welcome.mjs";
-import { registerSceneControls, registerDirectoryButton, ensureUtilityMacros, applyPortraitPreference } from "./module/ui-hooks.mjs";
-import { restoreWindowState, persistWindowState } from "./module/window-state.mjs";
-import { bindContextHelp } from "./module/context-help.mjs";
-import { bindBackgroundHelp } from "./module/background-help.mjs";
-import { bindChatActions } from "./module/chat.mjs";
-import { handleCaseOp } from "./module/case-state.mjs";
+import { ensureCoverScene, bindCoverSceneCamera } from "./module/scene-setup.mjs";
+import { registrarControles, registrarBotonDirectorio, instalarMacros } from "./module/ui-hooks.mjs";
+import { registrarTarjetas } from "./module/tarjetas.mjs";
+import { escucharSocketCaso } from "./module/case-state.mjs";
 
-/** Completa las fichas antiguas con los campos que el modelo de datos haya añadido. */
-async function migrateLegacyActorSystemData() {
-  if (!game.user?.isGM) return;
-  const defaultsByType = { detective: getDetectiveDefaults(), npc: getNpcDefaults() };
+const soloLaCiudad = mensaje => {
+  ui.notifications.warn(mensaje);
+  return null;
+};
 
-  for (const actor of game.actors ?? []) {
-    const defaults = defaultsByType[actor.type];
-    if (!defaults) continue;
-    const source = foundry.utils.deepClone(actor.toObject().system ?? {});
-    const merged = foundry.utils.mergeObject(foundry.utils.deepClone(defaults), source, {
-      inplace: false, insertKeys: true, insertValues: true, overwrite: true, recursive: true
-    });
-    if (!foundry.utils.isEmpty(foundry.utils.diffObject(source, merged))) {
-      await actor.update({ system: merged }, { diff: false, recursive: false });
-    }
-  }
-}
-
-Hooks.once("init", function() {
+Hooks.once("init", () => {
   console.log("trueque-noir | Inicializando sistema");
-  Handlebars.registerHelper("eq", (a, b) => a === b);
-  Handlebars.registerHelper("lowercase", value => String(value ?? "").toLowerCase());
+  Handlebars.registerHelper("lowercase", valor => String(valor ?? "").toLowerCase());
 
-  registerSystemSettings();
+  registrarAjustes();
   CONFIG.Actor.documentClass = TruequeNoirActor;
   CONFIG.Actor.dataModels.detective = TruequeNoirDetectiveData;
   CONFIG.Actor.dataModels.npc = TruequeNoirNpcData;
-
-  try {
-    ActorsCollection.unregisterSheet("core", LegacyActorSheet);
-  } catch (error) {
-    console.warn("trueque-noir | La hoja base de Foundry ya no estaba registrada", error);
-  }
-  ActorsCollection.registerSheet(TN.SYSTEM_ID, TruequeNoirDetectiveSheet, { makeDefault: true, types: ["detective", "npc"] });
-
-  game.truequeNoir = {
-    openWelcome,
-    importCaseArchive,
-    openThemePicker,
-    openCityGenerator: () => {
-      if (!game.user.isGM) return ui.notifications.warn("Solo La Ciudad puede construir la ciudad.");
-      return (findWindow("trueque-noir-city-generator") ?? new TruequeNoirCityGenerator()).render(true);
-    },
-    openCharacterGenerator: () => (findWindow("trueque-noir-character-generator") ?? new TruequeNoirCharacterGenerator()).render(true),
-    openCaseTracker: () => {
-      if (!game.user.isGM) return ui.notifications.warn("El Panel de La Ciudad solo lo abre quien dirige la partida.");
-      return (findWindow("trueque-noir-case-tracker") ?? new TruequeNoirCaseTracker()).render(true);
-    },
-    openCaseBoard: () => (findWindow("trueque-noir-case-board") ?? new TruequeNoirCaseBoard()).render(true),
-    closeCaseBoard: () => findWindow("trueque-noir-case-board")?.close(),
-    toggleSharedCaseBoard: async () => {
-      if (!game.user.isGM) return ui.notifications.warn("Solo La Ciudad muestra u oculta la Mesa del caso para todo el grupo.");
-      const next = !game.settings.get(TN.SYSTEM_ID, "tableDisplayVisible");
-      await game.settings.set(TN.SYSTEM_ID, "tableDisplayVisible", next);
-      game.socket.emit(TN.SOCKET, { type: next ? "open-board" : "close-board" });
-      if (next) game.truequeNoir.openCaseBoard();
-      else game.truequeNoir.closeCaseBoard();
-      findWindow("trueque-noir-case-tracker")?.render(false);
-      ui.notifications.info(next ? "Mesa del caso visible para todo el grupo." : "Mesa del caso oculta.");
-    }
+  // Atributos que se pueden mostrar bajo el token: la cajetilla como barra.
+  CONFIG.Actor.trackableAttributes = {
+    detective: { bar: ["cigarettes"], value: ["recognition.total", "stability.person.tension", "stability.place.tension"] },
+    npc: { bar: [], value: [] }
   };
 
-  game.socket.on(TN.SOCKET, data => {
-    if (data?.type === "open-board") game.truequeNoir.openCaseBoard();
-    if (data?.type === "close-board") game.truequeNoir.closeCaseBoard();
-    if (data?.type === "case-op") handleCaseOp(data);
+  DocumentSheetConfig.registerSheet(Actor, ID, HojaDetective, { types: ["detective"], makeDefault: true, label: "Trueque Noir · Detective" });
+  DocumentSheetConfig.registerSheet(Actor, ID, HojaPnj, { types: ["npc"], makeDefault: true, label: "Trueque Noir · PNJ" });
+
+  const api = {
+    abrirPanel: () => PanelCiudad.abrir(),
+    abrirMesa: () => MesaCaso.abrir(),
+    cerrarMesa: () => ventana("trueque-noir-case-board")?.close(),
+    abrirBienvenida: () => Bienvenida.abrir(),
+    abrirAmbientacion: () => Ambientacion.abrir(),
+    abrirCreadorDetective: () => AsistenteDetective.abrir(),
+    abrirCreadorCiudad: () => (game.user.isGM ? AsistenteCiudad.abrir() : soloLaCiudad("Solo La Ciudad puede construir la ciudad.")),
+    importarCasos: () => importCaseArchive(),
+    /** Mostrar u ocultar la Mesa para todo el grupo: cada cliente reacciona al ajuste. */
+    alternarMesa: async () => {
+      if (!game.user.isGM) return soloLaCiudad("Solo La Ciudad muestra u oculta la Mesa del caso para todo el grupo.");
+      const siguiente = !game.settings.get(ID, "tableDisplayVisible");
+      await game.settings.set(ID, "tableDisplayVisible", siguiente);
+      ui.notifications.info(siguiente ? "Mesa del caso visible para todo el grupo." : "Mesa del caso oculta.");
+    },
+    diagnostico
+  };
+  // Nombres anteriores a la 3.0: las macros ya creadas siguen funcionando.
+  game.truequeNoir = Object.assign(api, {
+    openWelcome: api.abrirBienvenida, openCaseTracker: api.abrirPanel, openCaseBoard: api.abrirMesa, closeCaseBoard: api.cerrarMesa,
+    toggleSharedCaseBoard: api.alternarMesa, openCityGenerator: api.abrirCreadorCiudad, openCharacterGenerator: api.abrirCreadorDetective,
+    openThemePicker: api.abrirAmbientacion, importCaseArchive: api.importarCasos
   });
 
-  registerSceneControls();
-  registerDirectoryButton();
-  bindChatActions();
+  registrarControles();
+  registrarBotonDirectorio();
   bindCoverSceneCamera();
 });
 
-Hooks.once("ready", async function() {
-  applyPortraitPreference();
-  if (game.user?.isGM) {
-    await migrateLegacyActorSystemData();
+Hooks.once("ready", async () => {
+  console.info(`Trueque Noir ${game.system.version} · Foundry ${game.version} (generación ${generacion()})`);
+  aplicarPreferenciaRetratos();
+  escucharSocketCaso();
+  registrarTarjetas();
+
+  if (game.user.isGM) {
     await ensureCoverScene();
-    await ensureUtilityMacros();
-    await maybeOpenWelcome();
+    await instalarMacros();
+    if (!game.settings.get(ID, "welcomeSeen")) Bienvenida.abrir();
   }
-  if (game.settings.get(TN.SYSTEM_ID, "tableDisplayVisible")) game.truequeNoir.openCaseBoard();
+  if (game.settings.get(ID, "tableDisplayVisible")) MesaCaso.abrir();
 });
 
-Hooks.on("renderApplication", (app, html) => {
-  if (!(app?.options?.classes ?? []).includes("trueque-noir")) return;
-  restoreWindowState(app);
-  bindContextHelp(html);
-  bindBackgroundHelp(html);
-});
-
-Hooks.on("closeApplication", app => {
-  if ((app?.options?.classes ?? []).includes("trueque-noir")) persistWindowState(app);
-});
-
+/** El estado del caso cambia: se repintan las ventanas que lo muestran y la Mesa se abre o se cierra en todos los clientes. */
 Hooks.on("updateSetting", setting => {
-  if (setting?.namespace === TN.SYSTEM_ID) refreshCrimeBoard();
+  if (!setting.key?.startsWith(`${ID}.`)) return;
+  refrescar();
+  if (setting.key === `${ID}.tableDisplayVisible`) {
+    if (setting.value === true || setting.value === "true") MesaCaso.abrir();
+    else ventana("trueque-noir-case-board")?.close();
+  }
 });
+
+/** Los detectives que muestra el Panel cambian con las fichas. */
+for (const evento of ["createActor", "updateActor", "deleteActor"]) {
+  Hooks.on(evento, actor => {
+    if (actor.type === "detective") ventana("trueque-noir-panel")?.render();
+  });
+}

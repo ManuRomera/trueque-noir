@@ -13,7 +13,9 @@ recoge las dudas de derechos que debe resolver el autor. No es una opinión lega
 | `assets/logo.webp` | Rótulo del juego, con transparencia. Creado para el sistema. |
 | `assets/portrait.webp`, `assets/token.webp` | Retrato y token de ejemplo. Creados para el sistema. |
 | `assets/cigarette.png` | Cigarrillo con transparencia real usado en la ficha. |
-| `lang/es.json`, `system.json`, `template.json` | Manifiestos y textos de interfaz. |
+| `fonts/*.woff2` | Oswald y Barlow Semi Condensed, bajo SIL Open Font License 1.1 (ver `fonts/OFL.txt`). |
+| `module/tablas.mjs` | Tablas de trueque, interludios y generador de casos, resumidas con palabras propias a partir del manual. |
+| `lang/es.json`, `system.json` | Manifiestos y textos de interfaz. |
 
 ## 2. Contenido editorial incluido
 

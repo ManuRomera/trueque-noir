@@ -1,0 +1,72 @@
+<div class="tn-dlg">
+<div class="tn-roll">
+  <p class="tn-roll__lead">{{meta.pregunta}} <span>{{meta.resumen}}</span></p>
+
+  <section class="tn-roll__block" data-bloque="trasfondo">
+    <h3 class="tn-roll__legend">Trasfondo <small>2d10, conservas el mejor</small></h3>
+    {{#if trasfondos.length}}
+    <div class="tn-chips tn-chips--pick" role="radiogroup" aria-label="Trasfondo">
+      <label class="tn-pick"><input type="radio" name="background" value="" checked><span>Ninguno</span></label>
+      {{#each trasfondos}}
+      <label class="tn-pick" data-tooltip="{{ayuda}}"><input type="radio" name="background" value="{{nombre}}"><span>{{nombre}}</span></label>
+      {{/each}}
+    </div>
+    {{else}}
+    <p class="tn-roll__empty">Sin trasfondos todavía: elígelos en la ficha para tirar 2d10.</p>
+    {{/if}}
+  </section>
+
+  <section class="tn-roll__block" data-bloque="ayuda">
+    <h3 class="tn-roll__legend">Ayuda <small>+2 · solo una</small></h3>
+    <div class="tn-chips tn-chips--pick" role="radiogroup" aria-label="Ayuda">
+      <label class="tn-pick"><input type="radio" name="help" value="" checked><span>Sin ayuda</span></label>
+      <label class="tn-pick {{#unless cigarrillos}}is-disabled{{/unless}}" data-tooltip="Sangre fría: cuenta cómo sacas el cigarrillo y te lo fumas en la escena."><input type="radio" name="help" value="cigarette" {{disabled (not cigarrillos)}}><span><i class="fa-solid fa-smoking" aria-hidden="true"></i> Cigarrillo <b>{{cigarrillos}}</b></span></label>
+      <label class="tn-pick {{#unless reconocimientoPositivo}}is-disabled{{/unless}}" data-tooltip="«Aquí yo soy la ley»: tu reputación te respalda."><input type="radio" name="help" value="recognition" {{disabled (not reconocimientoPositivo)}}><span><i class="fa-solid fa-medal" aria-hidden="true"></i> Reconocimiento <b>{{reconocimiento}}</b></span></label>
+    </div>
+    {{#if rumor.activo}}
+    <label class="tn-switch {{#if rumor.bloqueado}}is-disabled{{/if}}" {{#if rumor.bloqueado}}data-tooltip="Quien cuenta el rumor no puede aprovecharlo."{{/if}}>
+      <input type="checkbox" name="applyRumorBonus" value="1" {{disabled rumor.bloqueado}}>
+      <span><b>+2 Rumor</b> · {{rumor.texto}}</span>
+    </label>
+    {{/if}}
+  </section>
+
+  {{#if objetos.length}}
+  <section class="tn-roll__block" data-bloque="objeto">
+    <h3 class="tn-roll__legend">Concentrarte en tu objeto <small>ignora el dado del crimen · una vez por caso</small></h3>
+    <div class="tn-chips tn-chips--pick" role="radiogroup" aria-label="Objeto representativo">
+      <label class="tn-pick"><input type="radio" name="objectSlot" value="" checked><span>Ninguno</span></label>
+      {{#each objetos}}<label class="tn-pick"><input type="radio" name="objectSlot" value="{{slot}}"><span><i class="fa-solid fa-gem" aria-hidden="true"></i> {{name}}</span></label>{{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if favores.length}}
+  <section class="tn-roll__block tn-roll__block--favor" data-bloque="favor">
+    <h3 class="tn-roll__legend">Favor <small>éxito automático, sin tirar</small></h3>
+    <div class="tn-chips tn-chips--pick" role="radiogroup" aria-label="Favor">
+      <label class="tn-pick"><input type="radio" name="favorSlot" value="" checked><span>No cobrar ninguno</span></label>
+      {{#each favores}}<label class="tn-pick"><input type="radio" name="favorSlot" value="{{slot}}"><span><i class="fa-solid fa-handshake" aria-hidden="true"></i> {{name}}{{#if zone}} · {{zone}}{{/if}}</span></label>{{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  <section class="tn-roll__block tn-roll__block--cond" data-bloque="condiciones">
+    <h3 class="tn-roll__legend">Condiciones <small>2d10, conservas el peor</small></h3>
+    <div class="tn-chips tn-chips--pick">
+      <label class="tn-switch tn-switch--chip {{#unless cigarrillos}}is-disabled{{/unless}}" data-tooltip="Visitar un lugar de noche cuesta 1 cigarrillo, sin bonificación, y todas las tiradas llevan penalizador.">
+        <input type="checkbox" name="nightVisit" value="1" {{#if esNoche}}checked{{/if}} {{disabled (not cigarrillos)}}><span><i class="fa-solid fa-moon" aria-hidden="true"></i> Visita nocturna · 1 cigarrillo</span>
+      </label>
+      <label class="tn-switch tn-switch--chip" data-tooltip="Desventaja clara que impone La Ciudad. Si un trasfondo ayuda, ambos se anulan y tiras 1d10.">
+        <input type="checkbox" name="penalty" value="1"><span><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Penalizador de la situación</span>
+      </label>
+    </div>
+  </section>
+
+  <aside class="tn-roll__summary" data-resumen aria-live="polite"></aside>
+</div>
+<footer class="tn-roll__foot">
+  <button type="button" class="tn-btn" data-action="cancelar"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Cancelar</button>
+  <button type="button" class="tn-btn tn-btn--primary" data-action="tirar" data-boton-tirar><i class="fa-solid fa-dice-d20" aria-hidden="true"></i> <span>Tirar</span></button>
+</footer>
+</div>

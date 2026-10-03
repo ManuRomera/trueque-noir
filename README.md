@@ -41,7 +41,7 @@ La pantalla compartida no es un panel de control: es la mesa donde se amontonan 
   portada y todas las tablas de creación aleatoria.
 
 <p align="center">
-  <img src="./Trueque.png" alt="Ficha, Panel de La Ciudad, Mesa del caso y archivo de casos en Foundry VTT" width="900">
+  <img src="docs/escena.webp" alt="Mesa del caso, ficha en modo compacto y tarjetas de tirada en Foundry VTT" width="900">
 </p>
 
 ## Compatibilidad
@@ -121,26 +121,54 @@ explícita y vive separado del resto.
 
 ## La ficha del detective
 
-Tres secciones, sin subpestañas:
+Cabe entera en 940 × 660 sin desplazarse. Cabecera con las dos acciones y un tablero que se mira
+antes de cada tirada: **cigarrillos como casillas** (un clic deja la cajetilla en ese número),
+reconocimiento, dado del crimen, pistas y caso. Debajo, tres pestañas:
 
-- **Personaje** · identidad, trasfondos, pilares y su tensión, recursos, estados y objetos,
-  favores y la balada triste.
-- **Investigación** · pistas y sus notas, contactos, los tres usos del cigarrillo y el rumor
-  pendiente del caso.
-- **Expediente** · cronología, sospechosos, hipótesis, escenas importantes y notas generales.
+- **Detective** · trasfondos (sin repetirlos), pilares con su tensión, objetos y favores, estados y
+  un respiro (trago tranquilo, descanso, ceder cigarrillos).
+- **Investigación** · pistas, contactos como lista, rumor pendiente y el expediente de notas.
+- **Historia** · identidad y balada triste.
 
-La cabecera mantiene siempre a la vista lo que se consulta jugando: retrato, nombre, función,
-estados activos como sellos, caso y franja, cigarrillos, reconocimiento disponible, dado del
-crimen y pistas del caso.
+El **modo compacto** deja una tira de 400 px para tener la ficha siempre a la vista.
+
+<p align="center"><img src="docs/ficha.webp" alt="Ficha del detective" width="860"></p>
+
+## Automatismos
+
+| Qué ocurre | Cómo |
+|---|---|
+| **El trueque** | Desde la tarjeta de un 5-8 (o un 4-), La Ciudad propone una consecuencia de cada columna o tira 2d4; el detective elige y se aplica: dado del crimen, estados, mitad de cigarrillos, −1 reconocimiento, tensión de un pilar, franjas de tiempo |
+| **9+** | La Ciudad concede con un clic reconocimiento, un favor o la mejora del entorno (solo uno) |
+| **Escenas flotantes** | Subir la tensión de un pilar anota la escena de esa casilla; al caer la noche La Ciudad la recibe en privado |
+| **Reloj** | Visita nocturna y penalizador marcados solos de noche; aviso al agotarse el tiempo |
+| **Dado del crimen** | Baja solo cada 3 pistas; al explotar, tabla de desenlaces |
+| **Cierre del caso** | Acusación, reconocimiento 0/1/2 para todos, aviso de quién queda quebrado o acabado, epílogo, interludios y siguiente caso de la crónica |
+| **Casos del archivo** | Un clic prepara el dado inicial y la duración que fija cada caso |
+| **Cajetilla** | 9 con dos detectives, 6 con tres: se reparte al crear y el Panel avisa si no cuadra |
+
+<p align="center"><img src="docs/trueque.webp" alt="Resolver un trueque" width="560"> <img src="docs/tirada.webp" alt="Diálogo de tirada" width="400"></p>
+
+## Las dos mesas
+
+**Mesa del caso** es el HUD compartido: caso, día y franja, el dado del crimen en grande, las
+pistas y el rumor pendiente. La Ciudad la muestra u oculta para todo el grupo con un clic.
+
+**Panel de La Ciudad** dirige la investigación: reloj de días y franjas a un clic, dado, pistas y
+escenas de la noche arriba; debajo, Detectives (tabla viva), Azar y trueque, Cierre del caso,
+Casos y Ciudad.
+
+<p align="center"><img src="docs/panel.webp" alt="Panel de La Ciudad" width="860"></p>
 
 ## Ayuda y preferencias
 
-Reposa el ratón sobre cualquier control y la explicación aparece sola; el clic derecho la fija
-hasta que pulses fuera. Donde la regla no es evidente hay un `?` discreto.
+Reposa el ratón sobre un control y Foundry muestra su explicación. Donde la regla no es evidente
+hay un `?` discreto.
 
 En **Configuración → Ajustes del sistema**:
 
 - **Retratos en blanco y negro** · activado por defecto, desactivable.
+- **Memoria de ventanas** · botón para olvidar posiciones y tamaños guardados.
 - **Instalar macros en la barra rápida** · desactivado por defecto. Todo está en el menú
   Trueque Noir.
 
@@ -155,14 +183,15 @@ de derechos queda pendiente.
 
 ## Desarrollo
 
-Sin dependencias de ejecución. Antes de publicar:
+Sin dependencias de ejecución.
 
 ```bash
-node tools/check.mjs
+npm test          # reglas puras (module/reglas.mjs)
+npm run check     # plantillas, rutas, acciones, ajustes, versión
 ```
 
-Comprueba plantillas, rutas, imports, manifiesto, ajustes y que ningún botón se quede sin acción.
-Las etiquetas `v*` publican automáticamente el ZIP instalable y el manifiesto.
+Las etiquetas `v*` publican el ZIP instalable y el manifiesto. La auditoría contra el manual está
+en [docs/AUDITORIA.md](docs/AUDITORIA.md).
 
 ## Créditos
 

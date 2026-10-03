@@ -1,57 +1,40 @@
-import {
-  TN,
-  getRecognitionAvailable,
-  classifyResult,
-  getCrimeDie,
-  canUseFavorForType,
-  refreshCrimeBoard
-} from "./config.mjs";
-import { buildRollCard, postCityNote, refreshChatMessage } from "./chat.mjs";
+import { ID, TN, getRecognitionAvailable, estadoCaso } from "./config.mjs";
+import * as R from "./reglas.mjs";
+import { buildRollCard, dadosDe, postCityNote } from "./chat.mjs";
 import { requestCaseOp } from "./case-state.mjs";
 
-/**
- * Fórmula del manual: 1d10 base, 2d10 conservando el mejor con un trasfondo que ayude
- * y 2d10 conservando el peor con penalizador. Si coinciden, se anulan y queda 1d10.
- */
-export function rollFormula({ helpfulBackground = false, penalty = false } = {}) {
-  if (penalty && helpfulBackground) return "1d10";
-  if (penalty) return "2d10kl";
-  if (helpfulBackground) return "2d10kh";
-  return "1d10";
-}
-
-function niceScope(scope) {
-  return scope || "Libre";
-}
-
-async function appendTextField(actor, path, block) {
-  const current = String(foundry.utils.getProperty(actor.system, path.replace(/^system\./, "")) ?? "").trim();
-  const next = current ? `${current}\n${block}` : block;
-  return actor.update({ [path]: next });
-}
+const HUECOS = ["slot1", "slot2"];
+const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 
 export class TruequeNoirActor extends Actor {
-  get backgroundOptions() {
-    return [this.system.background1, this.system.background2, this.system.background3].filter(Boolean);
-  }
-
   get cigarettes() {
     return Number(this.system.cigarettes?.value ?? 0);
   }
 
+  get backgroundOptions() {
+    return [this.system.background1, this.system.background2, this.system.background3].filter(Boolean);
+  }
+
   /** Favores todavía utilizables en una tirada de este tipo. */
   availableFavors(type) {
-    return ["slot1", "slot2"]
+    return HUECOS
       .map(slot => ({ slot, ...(this.system.favors?.[slot] ?? {}) }))
-      .filter(favor => favor.name && !favor.used && canUseFavorForType(favor.scope, type));
+      .filter(favor => favor.name && !favor.used && R.favorValido(favor.scope, type));
   }
 
   /** Objetos representativos sin gastar en este caso. */
   availableObjects() {
-    return ["slot1", "slot2"]
+    return HUECOS
       .map(slot => ({ slot, ...(this.system.representativeObjects?.[slot] ?? {}) }))
       .filter(object => object.name && !object.used);
   }
+
+  /** Un hueco de favor vale si está vacío o su favor ya se cobró: gastar un favor lo consume (p. 56). */
+  freeFavorSlot() {
+    return HUECOS.find(slot => !this.system.favors?.[slot]?.name || this.system.favors[slot].used);
+  }
+
+  // ---------------------------------------------------------------- Recursos
 
   async setCigarettes(value) {
     const max = Math.max(0, Number(this.system.cigarettes?.max ?? 0));
@@ -62,22 +45,21 @@ export class TruequeNoirActor extends Actor {
 
   async setCigaretteMax(maxValue, { fill = true } = {}) {
     const nextMax = Math.max(0, Number(maxValue ?? 0));
-    const current = this.cigarettes;
     await this.update({
       "system.cigarettes.max": nextMax,
-      "system.cigarettes.value": fill ? nextMax : Math.min(current, nextMax)
+      "system.cigarettes.value": fill ? nextMax : Math.min(this.cigarettes, nextMax)
     });
     return nextMax;
   }
 
-  async adjustCigarettes(delta) {
+  adjustCigarettes(delta) {
     return this.setCigarettes(this.cigarettes + Number(delta || 0));
   }
 
   async spendCigarette(amount = 1, purpose = "esta acción") {
     const cost = Math.max(0, Number(amount || 0));
     if (this.cigarettes < cost) {
-      ui.notifications.warn(`${this.name} necesita ${cost} cigarrillo${cost === 1 ? "" : "s"} para ${purpose} y solo tiene ${this.cigarettes}. Recupéralos con un trago tranquilo o un descanso.`);
+      ui.notifications.warn(`${this.name} necesita ${plural(cost, "cigarrillo", "cigarrillos")} para ${purpose} y solo tiene ${this.cigarettes}. Recupéralos con un trago tranquilo o un descanso.`);
       return false;
     }
     await this.setCigarettes(this.cigarettes - cost);
@@ -87,13 +69,14 @@ export class TruequeNoirActor extends Actor {
   async spendRecognition(points = 1) {
     const available = getRecognitionAvailable(this);
     if (available < points) {
-      ui.notifications.warn(`${this.name} necesita ${points} punto${points === 1 ? "" : "s"} de reconocimiento disponible${points === 1 ? "" : "s"} y tiene ${available}. La Ciudad concede reconocimiento en los éxitos limpios.`);
+      ui.notifications.warn(`${this.name} necesita ${plural(points, "punto", "puntos")} de reconocimiento disponible y tiene ${available}. La Ciudad concede reconocimiento en los éxitos limpios.`);
       return false;
     }
     await this.update({ "system.recognition.spent": Number(this.system.recognition?.spent ?? 0) + points });
     return true;
   }
 
+  /** Puede ser negativo: perder un punto sin tenerlo deja el reconocimiento en -1 (p. 46). */
   async addRecognition(points = 1) {
     const total = Number(this.system.recognition?.total ?? 0) + points;
     await this.update({ "system.recognition.total": total });
@@ -104,33 +87,37 @@ export class TruequeNoirActor extends Actor {
     await this.update({ [`system.representativeObjects.${slot}.used`]: used });
   }
 
-  async setFavorUsed(slot, used = true) {
-    await this.update({ [`system.favors.${slot}.used`]: used });
-  }
+  // ---------------------------------------------------------------- Pilares
 
+  /** Sube la tensión de un pilar y anota la escena flotante de esta noche (p. 27-28). */
   async increasePillarTension(kind) {
-    const current = Number(this.system.stability?.[kind]?.tension ?? 0);
-    await this.update({ [`system.stability.${kind}.tension`]: Math.min(current + 1, 3) });
+    const pilar = this.system.stability?.[kind];
+    const actual = Number(pilar?.tension ?? 0);
+    if (actual >= R.TENSION_MAXIMA) return actual;
+    const tension = actual + 1;
+    await this.update({ [`system.stability.${kind}.tension`]: tension });
+    await requestCaseOp("addFloating", { actorId: this.id, actorName: this.name, pillar: kind, pillarName: pilar?.name ?? "", tension });
+    return tension;
   }
 
   async lowerPillarTension(kind) {
-    const current = Number(this.system.stability?.[kind]?.tension ?? 0);
-    await this.update({ [`system.stability.${kind}.tension`]: Math.max(current - 1, 0) });
+    const actual = Number(this.system.stability?.[kind]?.tension ?? 0);
+    await this.update({ [`system.stability.${kind}.tension`]: Math.max(actual - 1, 0) });
   }
 
-  async recoverPersonalState(stateId = "") {
+  // ----------------------------------------------------------------- Estados
+
+  async setState(kind, stateId, active = true) {
     if (!stateId) return false;
-    if (stateId === "custom") return !!(await this.update({ "system.personalStates.customActive": false }));
-    await this.update({ [`system.personalStates.${stateId}`]: false });
+    const grupo = kind === "city" ? "cityStates" : "personalStates";
+    await this.update({ [`system.${grupo}.${stateId === "custom" ? "customActive" : stateId}`]: active });
     return true;
   }
 
-  async recoverCityState(stateId = "") {
-    if (!stateId) return false;
-    if (stateId === "custom") return !!(await this.update({ "system.cityStates.customActive": false }));
-    await this.update({ [`system.cityStates.${stateId}`]: false });
-    return true;
-  }
+  recoverPersonalState(stateId) { return this.setState("personal", stateId, false); }
+  recoverCityState(stateId) { return this.setState("city", stateId, false); }
+
+  // ------------------------------------------------------------ Pistas y rumor
 
   /** La pista propia la escribe el detective; la del grupo la aplica La Ciudad. */
   async addGroupClue() {
@@ -138,29 +125,65 @@ export class TruequeNoirActor extends Actor {
     await requestCaseOp("gainClue");
   }
 
-  async increaseCrimeDie(amount = 1) {
+  increaseCrimeDie(amount = 1) {
     return requestCaseOp("changeCrimeDie", { amount });
   }
 
+  /** El rumor es un +2 para el grupo, pero nunca para quien lo cuenta (p. 50). */
+  canUseRumor() {
+    const { rumor } = estadoCaso();
+    return rumor.activo && rumor.por !== this.id;
+  }
+
   async consumeRumorBonus() {
-    if (!game.settings.get(TN.SYSTEM_ID, "rumorBonusAvailable")) return false;
+    if (!this.canUseRumor()) return false;
     await requestCaseOp("setRumor", { text: "" });
     return true;
   }
 
-  async createContactFromCigarette({ name = "", zone = "", location = "", effect = "pista", notes = "" } = {}) {
+  /** «Conozco a un tipo que…»: 1 cigarrillo y un contacto en la agenda (p. 49). */
+  async createContactFromCigarette({ name = "", zone = "", place = "", offer = "pista", notes = "" } = {}) {
     if (!await this.spendCigarette(1, "conocer a un tipo")) return false;
-    const entry = `• ${name || "Contacto sin nombre"} — ${zone || "Zona sin definir"}${location ? ` / ${location}` : ""}. ${effect === "direcciona" ? "Puede redirigir a localizaciones con pistas." : "Tiene una pista o información valiosa."}${notes ? ` ${notes}` : ""}`;
-    await appendTextField(this, "system.contacts.notes", entry);
+    const lista = foundry.utils.deepClone(this.system.contacts?.list ?? []).map(c => ({ ...c }));
+    lista.push({ name: name || "Contacto sin nombre", zone, place, offer: offer === "ruta" ? "ruta" : "pista", done: false });
+    const update = { "system.contacts.list": lista };
+    if (notes) update["system.contacts.notes"] = [this.system.contacts?.notes, `${name || "Contacto"}: ${notes}`].filter(Boolean).join("\n");
+    await this.update(update);
     return true;
   }
 
+  /** «Aquí han pasado cosas turbias»: 1 cigarrillo y un +2 pendiente para el grupo, no para quien lo cuenta. */
   async createRumorBonus({ location = "", story = "" } = {}) {
     if (!await this.spendCigarette(1, "sembrar un rumor")) return false;
     const text = `${this.name}${location ? ` · ${location}` : ""}${story ? ` · ${story}` : ""}`;
-    await requestCaseOp("setRumor", { text });
+    await requestCaseOp("setRumor", { text, by: this.id });
     return true;
   }
+
+  /** Cede cigarrillos a otro detective: solo en momentos de sosiego (p. 31). */
+  async giveCigarette(targetId, amount = 1) {
+    if (this.cigarettes < amount) return ui.notifications.warn(`${this.name} no tiene cigarrillos que ceder.`);
+    const destino = game.actors.get(targetId);
+    if (!destino || destino.type !== "detective") return false;
+    if (!destino.isOwner && !game.user.isGM) return requestCaseOp("giveCigarette", { fromId: this.id, toId: targetId, amount });
+    return TruequeNoirActor.transferCigarettes(this, destino, amount);
+  }
+
+  static async transferCigarettes(origen, destino, amount = 1) {
+    const sitio = Number(destino.system.cigarettes.max) - destino.cigarettes;
+    const cantidad = Math.min(amount, origen.cigarettes, sitio);
+    if (cantidad < 1) {
+      ui.notifications.warn(`${destino.name} ya lleva la cajetilla llena: nunca se puede pasar del máximo.`);
+      return false;
+    }
+    await origen.setCigarettes(origen.cigarettes - cantidad);
+    await destino.setCigarettes(destino.cigarettes + cantidad);
+    const esc = foundry.utils.escapeHTML;
+    await postCityNote({ title: "Cigarrillos", body: `<p><strong>${esc(origen.name)}</strong> le pasa ${plural(cantidad, "cigarrillo", "cigarrillos")} a <strong>${esc(destino.name)}</strong>.</p>` });
+    return true;
+  }
+
+  // ------------------------------------------------------------------ Favores
 
   async useFavor(slot, type) {
     const favor = this.system.favors?.[slot];
@@ -169,26 +192,40 @@ export class TruequeNoirActor extends Actor {
       return null;
     }
     if (favor.used) {
-      ui.notifications.warn(`«${favor.name}» ya se gastó en este caso. Se recupera al reiniciar el caso.`);
+      ui.notifications.warn(`«${favor.name}» ya se cobró. Un favor se gasta una sola vez.`);
       return null;
     }
-    if (!canUseFavorForType(favor.scope, type)) {
-      ui.notifications.warn(`«${favor.name}» está reservado para ${niceScope(favor.scope)} y esta acción no encaja.`);
+    if (!R.favorValido(favor.scope, type)) {
+      ui.notifications.warn(`«${favor.name}» solo sirve para ${favor.scope === "riesgo" ? "tiradas de riesgo" : "perseguir el crimen"}.`);
       return null;
     }
-    await this.setFavorUsed(slot, true);
+    await this.update({ [`system.favors.${slot}.used`]: true });
     return favor;
   }
 
-  async takeQuietDrink({ mode = "cigarettes", stateId = "", hypothesisCorrect = true } = {}) {
-    const used = Number(this.system.caseStats?.quietDrinksUsed ?? 0);
-    if (used >= 2) {
-      ui.notifications.warn(`${this.name} ya ha tomado los 2 tragos tranquilos que permite el caso.`);
+  /** Un favor nuevo ocupa un hueco libre (máximo 2, p. 31). */
+  async addFavor({ name, scope = "libre", zone = "" }) {
+    const slot = this.freeFavorSlot();
+    if (!slot) {
+      ui.notifications.warn(`${this.name} ya guarda ${R.FAVORES_MAXIMOS} favores: cobra uno antes de aceptar otro.`);
       return false;
     }
+    await this.update({ [`system.favors.${slot}`]: { name, scope: R.normalizarAlcance(scope), zone, used: false } });
+    return true;
+  }
+
+  // ------------------------------------------------------ Trago, descanso, entre casos
+
+  async takeQuietDrink({ mode = "cigarettes", stateId = "", hypothesisCorrect = true } = {}) {
+    const usados = Number(this.system.caseStats?.quietDrinksUsed ?? 0);
+    if (usados >= R.TRAGOS_POR_CASO) {
+      ui.notifications.warn(`${this.name} ya ha tomado los ${R.TRAGOS_POR_CASO} tragos tranquilos que permite el caso.`);
+      return false;
+    }
+    if (mode === "state" && !stateId) return false;
     if (mode === "cigarettes") await this.adjustCigarettes(2);
-    if (mode === "state" && stateId) await this.recoverPersonalState(stateId);
-    await this.update({ "system.caseStats.quietDrinksUsed": used + 1 });
+    else await this.recoverPersonalState(stateId);
+    await this.update({ "system.caseStats.quietDrinksUsed": usados + 1 });
     if (hypothesisCorrect === false) await this.increaseCrimeDie(1);
     return true;
   }
@@ -198,220 +235,195 @@ export class TruequeNoirActor extends Actor {
     return true;
   }
 
-  async applyInterludeBenefit(benefit, detail = "") {
-    const costs = { cigarettes2: 1, personal: 1, city: 1, personTension: 1, placeTension: 1, fullPack: 2, favor: 2, background: 3 };
-    const cost = costs[benefit];
+  /**
+   * Ventajas entre casos a cambio de reconocimiento (p. 54-55).
+   * `choice` lleva lo que el beneficio necesita: `state`, `name`, `scope`, `zone` o `background`.
+   */
+  async applyInterludeBenefit(benefit, choice = {}) {
+    const cost = R.COSTE_INTERLUDIO[benefit];
     if (!cost) return false;
+    const aviso = texto => { ui.notifications.warn(texto); return false; };
 
-    const personal = TN.PERSONAL_STATES.find(state => state.label.toLowerCase() === detail.trim().toLowerCase())?.id
-      ?? TN.PERSONAL_STATES.find(state => this.system.personalStates?.[state.id])?.id;
-    const city = TN.CITY_STATES.find(state => state.label.toLowerCase() === detail.trim().toLowerCase())?.id
-      ?? TN.CITY_STATES.find(state => this.system.cityStates?.[state.id])?.id;
-    const freeFavor = ["slot1", "slot2"].find(slot => !this.system.favors?.[slot]?.name);
-
-    if (benefit === "personal" && !personal && !this.system.personalStates?.customActive) return ui.notifications.warn(`${this.name} no tiene ningún estado personal activo que eliminar.`);
-    if (benefit === "city" && !city && !this.system.cityStates?.customActive) return ui.notifications.warn(`${this.name} no tiene ningún estado con la ciudad que eliminar.`);
-    if (benefit === "favor" && (!detail.trim() || !freeFavor)) return ui.notifications.warn("Escribe el nombre del favor y deja libre uno de los dos huecos de la ficha.");
-    if (benefit === "background" && (!detail.trim() || this.system.background3)) return ui.notifications.warn("Escribe el trasfondo nuevo; el hueco «Extra» de la ficha debe estar libre.");
+    if (benefit === "personal" && !choice.state) return aviso(`${this.name} no tiene ningún estado personal que eliminar.`);
+    if (benefit === "city" && !choice.state) return aviso(`${this.name} no tiene ningún estado con la ciudad que eliminar.`);
+    if (benefit === "favor" && !choice.name?.trim()) return aviso("Escribe el favor que consigue.");
+    if (benefit === "favor" && !this.freeFavorSlot()) return aviso(`${this.name} ya guarda ${R.FAVORES_MAXIMOS} favores.`);
+    if (benefit === "background" && !choice.background) return aviso("Elige el trasfondo nuevo.");
+    if (benefit === "background" && this.system.background3) return aviso(`${this.name} ya tiene su tercer trasfondo.`);
     if (!await this.spendRecognition(cost)) return false;
 
     if (benefit === "cigarettes2") await this.adjustCigarettes(2);
     if (benefit === "fullPack") await this.setCigarettes(this.system.cigarettes?.max);
     if (benefit === "personTension") await this.lowerPillarTension("person");
     if (benefit === "placeTension") await this.lowerPillarTension("place");
-    if (benefit === "personal") await this.recoverPersonalState(personal || "custom");
-    if (benefit === "city") await this.recoverCityState(city || "custom");
-    if (benefit === "favor") await this.update({ [`system.favors.${freeFavor}.name`]: detail.trim(), [`system.favors.${freeFavor}.scope`]: "Libre", [`system.favors.${freeFavor}.used`]: false });
-    if (benefit === "background") await this.update({ "system.background3": detail.trim() });
+    if (benefit === "personal") await this.recoverPersonalState(choice.state);
+    if (benefit === "city") await this.recoverCityState(choice.state);
+    if (benefit === "favor") await this.addFavor({ name: choice.name.trim(), scope: choice.scope, zone: choice.zone ?? "" });
+    if (benefit === "background") await this.update({ "system.background3": choice.background });
 
     await postCityNote({
       title: "Interludio",
-      body: `<p><strong>${this.name}</strong> gasta ${cost} punto${cost === 1 ? "" : "s"} de reconocimiento.</p>`
+      body: `<p><strong>${foundry.utils.escapeHTML(this.name)}</strong> gasta ${plural(cost, "punto", "puntos")} de reconocimiento.</p>`
     });
     return true;
   }
 
+  /** Un caso nuevo recupera los objetos y los tragos; los favores cobrados se consumen, los demás se conservan (p. 56). */
   async resetCaseState() {
-    await this.update({
+    const update = {
       "system.representativeObjects.slot1.used": false,
       "system.representativeObjects.slot2.used": false,
-      "system.favors.slot1.used": false,
-      "system.favors.slot2.used": false,
       "system.caseStats.quietDrinksUsed": 0,
       "system.clues.count": 0
-    });
-    await this.unsetFlag(TN.SYSTEM_ID, "lastRoll").catch(() => {});
+    };
+    for (const slot of HUECOS) {
+      if (this.system.favors?.[slot]?.used) update[`system.favors.${slot}`] = { name: "", scope: "libre", zone: "", used: false };
+    }
+    await this.update(update);
+    await this.unsetFlag(ID, "lastRoll").catch(() => {});
   }
 
-  /** Guarda la última tirada y engancha la sobreexposición a su mensaje de chat. */
-  async _registerLastRoll(message, data) {
-    const previous = this.getFlag(TN.SYSTEM_ID, "lastRoll");
-    await this.setFlag(TN.SYSTEM_ID, "lastRoll", { ...data, messageId: message?.id ?? null, used: false });
-    if (previous?.messageId && previous.messageId !== message?.id) refreshChatMessage(previous.messageId);
-  }
+  // ------------------------------------------------------------------ Tiradas
 
-  async _postRollCard(roll, cardData, flagData) {
-    const message = await roll.toMessage({
-      speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: buildRollCard(cardData),
-      flags: { [TN.SYSTEM_ID]: { overexpose: { actorId: this.id } } }
-    });
-    await this._registerLastRoll(message, flagData);
-    return message;
-  }
-
-  /**
-   * Resuelve los costes comunes a Riesgo y Perseguir el Crimen.
-   * Devuelve null si algo impide tirar, para abortar antes de gastar nada más.
-   */
+  /** Resuelve los costes comunes a Riesgo y Perseguir el Crimen. Devuelve null si algo impide tirar. */
   async _payRollCosts({ useCigarette, useRecognition, nightVisit, applyRumorBonus }) {
     if (useCigarette && useRecognition) {
       ui.notifications.warn("Cigarrillo y reconocimiento no se acumulan: elige solo una de las dos ayudas.");
       return null;
     }
-    const cigaretteCost = (nightVisit ? 1 : 0) + (useCigarette ? 1 : 0);
-    if (cigaretteCost > this.cigarettes) {
-      ui.notifications.warn(`Esta tirada cuesta ${cigaretteCost} cigarrillos y ${this.name} tiene ${this.cigarettes}.`);
+    const coste = (nightVisit ? 1 : 0) + (useCigarette ? 1 : 0);
+    if (coste > this.cigarettes) {
+      ui.notifications.warn(`Esta tirada cuesta ${coste} cigarrillos y ${this.name} tiene ${this.cigarettes}.`);
       return null;
     }
-
-    let rumorBonus = false;
-    if (applyRumorBonus) {
-      rumorBonus = await this.consumeRumorBonus();
-      if (!rumorBonus) ui.notifications.warn("Ya no queda ningún rumor pendiente que consumir.");
+    if (useRecognition && getRecognitionAvailable(this) < 1) {
+      ui.notifications.warn(`${this.name} no tiene reconocimiento disponible.`);
+      return null;
     }
+    if (applyRumorBonus && !this.canUseRumor()) {
+      ui.notifications.warn(estadoCaso().rumor.por === this.id
+        ? "Quien cuenta el rumor no puede aprovecharlo: es un aviso para sus compañeros."
+        : "Ya no queda ningún rumor pendiente que consumir.");
+      return null;
+    }
+    const rumorBonus = applyRumorBonus ? await this.consumeRumorBonus() : false;
     if (nightVisit && !await this.spendCigarette(1, "una visita nocturna")) return null;
     if (useCigarette && !await this.spendCigarette(1, "una calada de sangre fría")) return null;
     if (useRecognition && !await this.spendRecognition(1)) return null;
     return { rumorBonus };
   }
 
-  async rollRisk({
-    background = "",
-    useCigarette = false,
-    useRecognition = false,
-    penalty = false,
-    nightVisit = false,
-    applyRumorBonus = false,
-    favorSlot = ""
-  } = {}) {
-    const paid = await this._payRollCosts({ useCigarette, useRecognition, nightVisit, applyRumorBonus });
-    if (!paid) return null;
-    const { rumorBonus } = paid;
+  rollRisk(options = {}) { return this._roll("risk", options); }
+  rollPursueCrime(options = {}) { return this._roll("pursue", options); }
 
+  async _roll(type, {
+    background = "", useCigarette = false, useRecognition = false, penalty = false, nightVisit = false,
+    applyRumorBonus = false, objectSlot = "", favorSlot = ""
+  } = {}) {
+    const pursue = type === "pursue";
+    const speaker = ChatMessage.getSpeaker({ actor: this });
+    const flags = extra => ({ [ID]: { tn: { type, actorId: this.id, resolved: {}, ...extra } } });
+
+    // Un favor resuelve la acción sin tirar: no se paga ninguna otra ayuda.
     if (favorSlot) {
-      const favor = await this.useFavor(favorSlot, "risk");
+      const favor = await this.useFavor(favorSlot, type);
       if (!favor) return null;
-      await ChatMessage.create({
-        speaker: ChatMessage.getSpeaker({ actor: this }),
-        content: buildRollCard({ type: "risk", actorName: this.name, resultClass: "clean", autoSuccess: true, favorName: favor.name, background, nightVisit, rumorBonus })
+      const previa = this.getFlag(ID, "lastRoll")?.messageId;
+      const message = await ChatMessage.create({
+        speaker, flags: flags({ cls: "clean", auto: true }),
+        content: buildRollCard({ type, actorName: this.name, resultClass: "clean", autoSuccess: true, tags: [{ text: `Favor: ${favor.name}`, tone: "favor", icon: "fa-solid fa-handshake" }] })
       });
-      await this.setFlag(TN.SYSTEM_ID, "lastRoll", { type: "risk", used: true, messageId: null });
+      await this.setFlag(ID, "lastRoll", { type, used: true, messageId: message?.id ?? null });
+      await this._sustituir(previa);
+      if (pursue) await this.addGroupClue();
       return { total: 9, resultClass: "clean", autoSuccess: true };
     }
 
-    const formula = rollFormula({ helpfulBackground: Boolean(background), penalty: Boolean(penalty || nightVisit) });
-    const modifier = (useCigarette || useRecognition ? 2 : 0) + (rumorBonus ? 2 : 0);
-    const roll = await (new Roll(`${formula}${modifier ? ` + ${modifier}` : ""}`)).evaluate();
-    const resultClass = classifyResult(roll.total);
-
-    await this._postRollCard(
-      roll,
-      { type: "risk", actorName: this.name, total: roll.total, resultClass, background, cigarette: useCigarette, recognition: useRecognition, rumorBonus, nightVisit, penalty },
-      { type: "risk", formula: roll.formula, resultClass, crimeRaised: false }
-    );
-    await refreshCrimeBoard();
-    return { roll, total: roll.total, resultClass };
-  }
-
-  async rollPursueCrime({
-    background = "",
-    useCigarette = false,
-    useRecognition = false,
-    penalty = false,
-    nightVisit = false,
-    applyRumorBonus = false,
-    objectSlot = "",
-    favorSlot = ""
-  } = {}) {
-    const objectName = objectSlot ? this.system.representativeObjects?.[objectSlot]?.name : "";
-    const ignoredCrimeDie = Boolean(objectSlot && objectName);
-    if (ignoredCrimeDie && this.system.representativeObjects?.[objectSlot]?.used) {
-      ui.notifications.warn(`«${objectName}» ya se usó en este caso. Cada objeto representativo sirve una sola vez.`);
+    const objeto = pursue && objectSlot ? this.system.representativeObjects?.[objectSlot] : null;
+    if (objeto?.name && objeto.used) {
+      ui.notifications.warn(`«${objeto.name}» ya se usó en este caso. Cada objeto representativo sirve una sola vez.`);
       return null;
     }
+    const ignoraDado = Boolean(objeto?.name);
 
     const paid = await this._payRollCosts({ useCigarette, useRecognition, nightVisit, applyRumorBonus });
     if (!paid) return null;
-    const { rumorBonus } = paid;
+    if (ignoraDado) await this.markRepresentativeObjectUsed(objectSlot, true);
 
-    if (favorSlot) {
-      const favor = await this.useFavor(favorSlot, "pursue");
-      if (!favor) return null;
-      await this.addGroupClue();
-      await ChatMessage.create({
-        speaker: ChatMessage.getSpeaker({ actor: this }),
-        content: buildRollCard({ type: "pursue", actorName: this.name, resultClass: "clean", autoSuccess: true, favorName: favor.name, background, nightVisit, rumorBonus })
-      });
-      await this.setFlag(TN.SYSTEM_ID, "lastRoll", { type: "pursue", used: true, messageId: null });
-      return { total: 9, resultClass: "clean", autoSuccess: true };
+    const dado = estadoCaso().dado;
+    const modificador = (useCigarette || useRecognition ? 2 : 0) + (paid.rumorBonus ? 2 : 0);
+    const resta = pursue && !ignoraDado ? dado : 0;
+    const peor = Boolean(penalty || nightVisit);
+    const formula = R.formulaTirada({ trasfondo: Boolean(background), penalizador: peor });
+    const expresion = `${formula}${modificador ? ` + ${modificador}` : ""}${resta ? ` - ${resta}` : ""}`;
+    const roll = await new Roll(expresion).evaluate();
+    const resultClass = R.clasificar(roll.total);
+
+    const tags = [];
+    if (background) tags.push({ text: `${background}${peor ? " · anula el penalizador" : " · mejor de 2d10"}`, icon: "fa-solid fa-book" });
+    if (useCigarette) tags.push({ text: "+2 Cigarrillo", tone: "plus" });
+    if (useRecognition) tags.push({ text: "+2 Reconocimiento", tone: "plus" });
+    if (paid.rumorBonus) tags.push({ text: "+2 Rumor", tone: "plus" });
+    if (nightVisit) tags.push({ text: "Visita nocturna · peor de 2d10", tone: "minus", icon: "fa-solid fa-moon" });
+    else if (penalty && !background) tags.push({ text: "Penalizador · peor de 2d10", tone: "minus" });
+    if (pursue) {
+      if (ignoraDado) tags.push({ text: `${objeto.name} · ignora el dado del crimen`, tone: "favor", icon: "fa-solid fa-gem" });
+      else tags.push({ text: `Dado del crimen −${dado}`, tone: "minus" });
     }
 
-    if (ignoredCrimeDie) await this.markRepresentativeObjectUsed(objectSlot, true);
+    const previa = this.getFlag(ID, "lastRoll")?.messageId;
+    const message = await roll.toMessage({
+      speaker, flags: flags({ cls: resultClass }),
+      content: buildRollCard({ type, actorName: this.name, total: roll.total, resultClass, dice: dadosDe(roll), formula: roll.formula, tags })
+    });
+    await this.setFlag(ID, "lastRoll", { type, formula: roll.formula, resultClass, crimeRaised: pursue && resultClass === "hard", messageId: message?.id ?? null, used: false });
+    await this._sustituir(previa);
 
-    const formula = rollFormula({ helpfulBackground: Boolean(background), penalty: Boolean(penalty || nightVisit) });
-    const modifier = (useCigarette || useRecognition ? 2 : 0) + (rumorBonus ? 2 : 0);
-    const crimeDie = getCrimeDie();
-    const subtraction = ignoredCrimeDie ? 0 : crimeDie;
-    const roll = await (new Roll(`${formula}${modifier ? ` + ${modifier}` : ""}${subtraction ? ` - ${subtraction}` : ""}`)).evaluate();
-    const resultClass = classifyResult(roll.total);
-
-    await this.addGroupClue();
-    if (resultClass === "hard") await this.increaseCrimeDie(1);
-
-    await this._postRollCard(
-      roll,
-      { type: "pursue", actorName: this.name, total: roll.total, resultClass, background, cigarette: useCigarette, recognition: useRecognition, rumorBonus, nightVisit, penalty, objectName, ignoredCrimeDie, crimeDie },
-      { type: "pursue", formula: roll.formula, resultClass, crimeRaised: resultClass === "hard" }
-    );
-    await refreshCrimeBoard();
+    if (pursue) {
+      await this.addGroupClue();
+      if (resultClass === "hard") await this.increaseCrimeDie(1);
+    }
     return { roll, total: roll.total, resultClass };
   }
 
-  /** Repite la última tirada a cambio de tensar un pilar. Solo una vez por tirada. */
+  /** Repite la última tirada a cambio de tensar un pilar. Solo una vez por tirada (p. 27). */
   async overexposeLastRoll(pillar = "person") {
-    const last = foundry.utils.deepClone(this.getFlag(TN.SYSTEM_ID, "lastRoll") ?? {});
-    const pillarName = this.system.stability?.[pillar]?.name;
-    const pillarLabel = pillar === "person" ? "persona" : "lugar";
-    if (!last.formula) return ui.notifications.warn("No hay ninguna tirada reciente que repetir.");
-    if (last.used) return ui.notifications.warn("Esa tirada ya se sobreexpuso: solo se permite una vez por tirada.");
-    if (!pillarName) return ui.notifications.warn(`Escribe en la ficha qué ${pillarLabel} sostiene a ${this.name} antes de sobreexponerte.`);
-    if (Number(this.system.stability?.[pillar]?.tension ?? 0) >= 3) return ui.notifications.warn(`${pillarName} ya está en tensión 3, el máximo: no puede sostener otra sobreexposición.`);
+    const last = foundry.utils.deepClone(this.getFlag(ID, "lastRoll") ?? {});
+    const pilar = this.system.stability?.[pillar];
+    const etiqueta = TN.PILLARS[pillar].toLowerCase();
+    const aviso = texto => { ui.notifications.warn(texto); return null; };
+    if (!last.formula) return aviso("No hay ninguna tirada reciente que repetir.");
+    if (last.used) return aviso("Esa tirada ya se sobreexpuso o se aceptó: solo se permite una vez por tirada.");
+    if (!pilar?.name) return aviso(`Escribe en la ficha qué ${etiqueta} sostiene a ${this.name} antes de sobreexponerte.`);
+    if (Number(pilar.tension) >= R.TENSION_MAXIMA) return aviso(`${pilar.name} ya está en tensión ${R.TENSION_MAXIMA}: no puede sostener otra sobreexposición.`);
 
-    await this.increasePillarTension(pillar);
+    const tension = await this.increasePillarTension(pillar);
     // La tirada anterior se sustituye: si había subido el dado del crimen, se deshace antes de repetir.
     if (last.type === "pursue" && last.crimeRaised) await this.increaseCrimeDie(-1);
 
-    const roll = await (new Roll(last.formula)).evaluate();
-    const resultClass = classifyResult(roll.total);
+    const roll = await new Roll(last.formula).evaluate();
+    const resultClass = R.clasificar(roll.total);
     const crimeRaised = last.type === "pursue" && resultClass === "hard";
     if (crimeRaised) await this.increaseCrimeDie(1);
 
     const message = await roll.toMessage({
       speaker: ChatMessage.getSpeaker({ actor: this }),
-      flavor: buildRollCard({
-        type: last.type,
-        label: "Sobreexposición",
-        actorName: this.name,
-        total: roll.total,
-        resultClass,
-        showGain: false,
-        extra: `<p class="tn-card__overexposed"><i class="fa-solid fa-fire"></i> ${pillarName} sube a tensión ${Number(this.system.stability?.[pillar]?.tension ?? 0)}. Este resultado sustituye al anterior.</p>`
+      // Una sobreexposición es definitiva: su tarjeta nace cerrada, sin volver a ofrecer sobreexponer.
+      flags: { [ID]: { tn: { type: last.type, actorId: this.id, cls: resultClass, resolved: {}, closed: true } } },
+      content: buildRollCard({
+        type: last.type, label: "Sobreexposición", actorName: this.name, total: roll.total, resultClass,
+        dice: dadosDe(roll), formula: roll.formula, gain: false,
+        note: `<p class="tn-card__overexposed"><i class="fa-solid fa-fire" aria-hidden="true"></i> ${foundry.utils.escapeHTML(pilar.name)} sube a tensión ${tension}. Este resultado sustituye al anterior.</p>`
       })
     });
-    await this.setFlag(TN.SYSTEM_ID, "lastRoll", { ...last, used: true, resultClass, crimeRaised, messageId: message?.id ?? last.messageId });
-    if (last.messageId) refreshChatMessage(last.messageId);
-    await refreshCrimeBoard();
+    await this.setFlag(ID, "lastRoll", { ...last, used: true, resultClass, crimeRaised, messageId: message?.id ?? last.messageId });
+    await this._sustituir(last.messageId);
     return { roll, total: roll.total, resultClass };
+  }
+
+  /** La tarjeta de una tirada anterior deja de ofrecer acciones: ya no es la vigente. */
+  async _sustituir(messageId) {
+    const anterior = messageId ? game.messages.get(messageId) : null;
+    if (anterior && (anterior.isOwner || game.user.isGM)) await anterior.update({ [`flags.${ID}.tn.superseded`]: true });
   }
 }

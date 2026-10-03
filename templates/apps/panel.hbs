@@ -1,0 +1,223 @@
+<div class="tn-panel">
+
+  {{!-- ═══ Cabecera del caso ═══ --}}
+  <header class="tn-pn-cab">
+    <div class="tn-pn-caso">
+      <span class="tn-kicker">La Ciudad dirige · caso {{caso.cronica}} de la crónica</span>
+      <input class="tn-pn-nombre" type="text" name="caseName" value="{{caso.nombre}}" aria-label="Nombre del caso" placeholder="Nombre del caso">
+    </div>
+    <div class="tn-pn-acciones">
+      <button type="button" class="tn-btn" data-action="mesa" data-tooltip="Muestra u oculta la Mesa del caso para todo el grupo.">
+        <i class="fa-solid {{#if caso.mesaVisible}}fa-eye-slash{{else}}fa-eye{{/if}}" aria-hidden="true"></i> {{#if caso.mesaVisible}}Ocultar mesa{{else}}Mostrar mesa{{/if}}</button>
+      <button type="button" class="tn-btn tn-btn--primary" data-action="nuevoCaso" data-tooltip="Pone a cero reloj, pistas, rumor y escenas. La ciudad y los detectives se conservan."><i class="fa-solid fa-folder-plus" aria-hidden="true"></i> Empezar un caso</button>
+    </div>
+  </header>
+
+  {{!-- ═══ Reloj: día y franja, a un clic ═══ --}}
+  <section class="tn-pn-reloj{{#if caso.finTiempo}} es-agotado{{/if}}" aria-label="Tiempo del caso">
+    <div class="tn-reloj__mandos">
+      <button type="button" class="tn-icono" data-action="fase" data-delta="-1" data-tooltip="Retroceder una franja" aria-label="Franja anterior"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+      <div class="tn-reloj__ahora">
+        <strong>{{#if caso.finTiempo}}Tiempo agotado{{else}}Día {{caso.dia}} de {{caso.limite}}{{/if}}</strong>
+        <span class="{{#if caso.esNoche}}es-noche{{/if}}">{{#if caso.finTiempo}}El culpable es ya intocable{{else}}{{caso.franjaNombre}}{{#if caso.esNoche}} · penalizador y 1 cigarrillo{{/if}}{{/if}}</span>
+      </div>
+      <button type="button" class="tn-icono tn-icono--primario" data-action="fase" data-delta="1" data-tooltip="Avanzar a la siguiente franja" aria-label="Franja siguiente"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+    </div>
+    <ol class="tn-reloj__dias">
+      {{#each dias}}
+      <li class="tn-dia">
+        <span class="tn-dia__n">{{n}}</span>
+        {{#each franjas}}<button type="button" class="tn-franja {{estado}}" data-action="irA" data-dia="{{../n}}" data-franja="{{i}}" data-tooltip="Día {{../n}} · {{nombre}}" aria-label="Ir al día {{../n}}, {{nombre}}"><i class="{{icono}}" aria-hidden="true"></i></button>{{/each}}
+      </li>
+      {{/each}}
+    </ol>
+    <label class="tn-reloj__limite" data-tooltip="Duración del caso: de 3 días (corto) a 6 (largo).">Límite
+      <input type="number" name="timeLimit" value="{{caso.limite}}" min="1" max="9" aria-label="Límite de días"></label>
+  </section>
+
+  {{!-- ═══ Medidores ═══ --}}
+  <div class="tn-pn-medidores">
+
+    <section class="tn-medidor tn-medidor--dado d{{caso.dado}}{{#if caso.explotado}} is-explotado{{/if}}" aria-label="Dado del crimen">
+      <span class="tn-etiqueta">Dado del crimen</span>
+      <div class="tn-dado-mando">
+        <button type="button" class="tn-icono" data-action="dado" data-delta="-1" {{#unless caso.puedeBajar}}disabled{{/unless}} aria-label="Bajar el dado"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+        <span class="tn-dado tn-dado--grande">{{#if caso.explotado}}<i class="fa-solid fa-burst" aria-hidden="true"></i>{{else}}{{caso.dado}}{{/if}}</span>
+        <button type="button" class="tn-icono" data-action="dado" data-delta="1" {{#unless caso.puedeSubir}}disabled{{/unless}} aria-label="Subir el dado"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+      </div>
+      <p class="tn-medidor__texto">{{#if caso.explotado}}Ha explotado: el caso se cierra de golpe.{{else}}{{dadoTexto}}{{/if}}</p>
+    </section>
+
+    <section class="tn-medidor tn-medidor--pistas" aria-label="Pistas del caso">
+      <span class="tn-etiqueta">Pistas del grupo</span>
+      <div class="tn-pistas-cifras">
+        <div><strong>{{caso.pistas.total}}</strong><span>descubiertas</span></div>
+        <div><strong>{{caso.pistas.gastadas}}</strong><span>gastadas</span></div>
+        <div class="is-clave"><strong>{{caso.pistas.disponibles}}</strong><span>sin gastar</span></div>
+      </div>
+      <span class="tn-pasos tn-pasos--grande" aria-label="{{caso.pistas.progreso}} de 3 para bajar el dado">{{#each pistaProgreso}}<i class="tn-paso{{#if llena}} is-llena{{/if}}"></i>{{/each}}</span>
+      {{#if caso.pistas.puedeGastar}}
+      <button type="button" class="tn-btn tn-btn--contextual" data-action="gastarPistas"><i class="fa-solid fa-fingerprint" aria-hidden="true"></i> Usar 3 pistas → dado a {{dadoTras}}</button>
+      {{else}}
+      <p class="tn-medidor__texto">Cada 3 sin gastar bajan el dado solos. {{#if caso.pistas.puedeAcusar}}Ya pueden acusar.{{else}}Faltan {{faltanAcusar}} para poder acusar.{{/if}}</p>
+      {{/if}}
+    </section>
+
+    <section class="tn-medidor tn-medidor--noche" aria-label="Rumor y escenas flotantes">
+      <span class="tn-etiqueta">Esta noche <b>{{escenas.length}}</b></span>
+      {{#if caso.rumor.activo}}<p class="tn-rumor"><i class="fa-solid fa-comment-dots" aria-hidden="true"></i> <strong>Rumor.</strong> {{caso.rumor.texto}}</p>{{/if}}
+      {{#if escenas.length}}
+      <ul class="tn-escenas">
+        {{#each escenas}}
+        <li>
+          <span><strong>{{actorName}}</strong> · {{etiquetaPilar}} «{{pillarName}}» ({{tension}}): {{text}}</span>
+          <button type="button" class="tn-icono tn-icono--xs" data-action="escenaNarrada" data-id="{{id}}" data-tooltip="Ya la narré" aria-label="Marcar como narrada"><i class="fa-solid fa-check" aria-hidden="true"></i></button>
+        </li>
+        {{/each}}
+      </ul>
+      {{else}}
+      <p class="tn-medidor__texto">Sin escenas flotantes. Subir la tensión de un pilar las anota; al caer la noche se te recuerdan.</p>
+      {{/if}}
+    </section>
+  </div>
+
+  {{!-- ═══ Pestañas de trabajo ═══ --}}
+  <nav class="tn-pestanas tabs" aria-label="Herramientas de La Ciudad">
+    {{#each tabs}}<a class="tn-pestana{{#if activa}} active{{/if}}" data-action="tab" data-group="panel" data-tab="{{id}}"><i class="{{icon}}" inert></i> <span>{{label}}</span></a>{{/each}}
+  </nav>
+
+  <main class="tn-pn-cuerpo">
+
+    {{!-- Detectives --}}
+    <section class="tab{{#if (eq tab 'detectives')}} active{{/if}}" data-group="panel" data-tab="detectives">
+      {{#if detectives.length}}
+      {{#if reparto.desajustado}}
+      <p class="tn-aviso"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Con {{detectives.length}} detectives, cada cajetilla es de {{reparto.esperado}} (18 en el grupo).
+        <button type="button" class="tn-btn tn-btn--contextual" data-action="repartir">Repartir y rellenar</button></p>
+      {{/if}}
+      <table class="tn-tabla">
+        <thead><tr><th>Detective</th><th>Cigarrillos</th><th>Rec.</th><th>Tensión</th><th>Estados</th><th aria-label="Acciones"></th></tr></thead>
+        <tbody>
+          {{#each detectives}}
+          <tr class="{{#if final}}es-final{{/if}}">
+            <td class="tn-fila__quien"><button type="button" class="tn-enlace" data-action="abrirDetective" data-id="{{id}}"><img src="{{img}}" alt="" class="tn-mini-retrato"><span>{{name}}</span></button></td>
+            <td><span class="tn-cigs tn-cigs--mini" aria-label="{{cigs.value}} de {{cigs.max}}">{{#each cigs.casillas}}<i class="tn-cig{{#if llena}} is-llena{{/if}}"></i>{{/each}}</span></td>
+            <td class="{{#if recNegativo}}es-negativo{{/if}}">{{rec}}</td>
+            <td><span class="tn-tens" data-tooltip="Persona / Lugar">{{tensionPersona}}<small>/</small>{{tensionLugar}}</span></td>
+            <td class="tn-fila__estados">{{#each estados}}<span class="tn-sello tn-sello--{{kind}}{{#if final}} is-final{{/if}}">{{label}}</span>{{else}}<span class="tn-tenue">—</span>{{/each}}</td>
+            <td class="tn-fila__acciones">
+              <button type="button" class="tn-icono tn-icono--xs" data-action="trago" data-id="{{id}}" {{#unless tragos}}disabled{{/unless}} data-tooltip="Un trago tranquilo ({{tragos}} restantes)" aria-label="Un trago tranquilo"><i class="fa-solid fa-whiskey-glass" aria-hidden="true"></i></button>
+              <button type="button" class="tn-icono tn-icono--xs" data-action="descanso" data-id="{{id}}" data-tooltip="Descanso nocturno: +1 cigarrillo" aria-label="Descanso nocturno"><i class="fa-solid fa-moon" aria-hidden="true"></i></button>
+              <button type="button" class="tn-icono tn-icono--xs" data-action="premio" data-id="{{id}}" data-tooltip="+1 reconocimiento (ayuda desinteresada)" aria-label="Dar 1 punto de reconocimiento"><i class="fa-solid fa-medal" aria-hidden="true"></i></button>
+              <button type="button" class="tn-icono tn-icono--xs" data-action="interludio" data-id="{{id}}" data-tooltip="Interludio: gastar reconocimiento entre casos" aria-label="Interludio"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i></button>
+              <button type="button" class="tn-icono tn-icono--xs" data-action="truequeDe" data-id="{{id}}" data-tooltip="Resolver un trueque para este detective" aria-label="Resolver un trueque"><i class="fa-solid fa-right-left" aria-hidden="true"></i></button>
+            </td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{else}}
+      <div class="tn-vacio-grande">
+        <p>Todavía no hay ningún detective en la ciudad.</p>
+        <button type="button" class="tn-btn tn-btn--contextual" data-action="crearDetective"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Crear un detective</button>
+      </div>
+      {{/if}}
+    </section>
+
+    {{!-- Trueque y azar --}}
+    <section class="tab{{#if (eq tab 'azar')}} active{{/if}}" data-group="panel" data-tab="azar">
+      <div class="tn-azar">
+        <div class="tn-azar__col">
+          <h3>El trueque</h3>
+          <p class="tn-pista">Tras un 5-8 (o un 4-), La Ciudad propone una consecuencia de cada columna o lanza 2d4, y el detective elige. Se aplica sola.</p>
+          <button type="button" class="tn-btn tn-btn--contextual" data-action="truequeDe"><i class="fa-solid fa-right-left" aria-hidden="true"></i> Resolver un trueque</button>
+          <h3>Cuando el dado explota</h3>
+          <button type="button" class="tn-btn" data-action="explosion"><i class="fa-solid fa-burst" aria-hidden="true"></i> ¿Cómo termina? (1d4)</button>
+        </div>
+        <div class="tn-azar__col">
+          <h3>La ciudad respira</h3>
+          <p class="tn-pista">Al visitar una localización, un obstáculo ajeno al caso: ayudar a un pobre diablo da reconocimiento.</p>
+          <button type="button" class="tn-btn" data-action="encuentro"><i class="fa-solid fa-person-walking-arrow-right" aria-hidden="true"></i> Encuentro al azar</button>
+          <h3>Un caso desde cero</h3>
+          <p class="tn-pista">El generador del manual: quién, qué, por qué, cómo llega, secreto, giro y duración.</p>
+          <button type="button" class="tn-btn" data-action="semilla"><i class="fa-solid fa-dice" aria-hidden="true"></i> Semilla de caso al azar</button>
+        </div>
+      </div>
+    </section>
+
+    {{!-- Cierre del caso --}}
+    <section class="tab{{#if (eq tab 'cierre')}} active{{/if}}" data-group="panel" data-tab="cierre">
+      <div class="tn-cierre">
+        <div class="tn-cierre__acusacion">
+          <h3>Acusación y detención</h3>
+          <p class="{{#unless caso.pistas.puedeAcusar}}tn-aviso-suave{{/unless}} tn-pista">El grupo lleva <strong>{{caso.pistas.total}}</strong> pistas. {{#if caso.pistas.puedeAcusar}}Ya puede acusar.{{else}}El manual pide {{minAcusar}} antes de detener a nadie.{{/if}}</p>
+          <div class="tn-cierre__fila"><label for="tn-c-quien">¿A quién se detiene?</label><input id="tn-c-quien" type="text" name="cierre.quien" value="{{cierre.quien}}"><label class="tn-marca"><input type="checkbox" name="cierre.okQuien" {{checked cierre.okQuien}}><span>Acierta</span></label></div>
+          <div class="tn-cierre__fila"><label for="tn-c-que">¿De qué se le acusa?</label><input id="tn-c-que" type="text" name="cierre.que" value="{{cierre.que}}"><label class="tn-marca"><input type="checkbox" name="cierre.okQue" {{checked cierre.okQue}}><span>Acierta</span></label></div>
+          <div class="tn-cierre__fila"><label for="tn-c-porque">¿Por qué lo hizo?</label><input id="tn-c-porque" type="text" name="cierre.porque" value="{{cierre.porque}}"><label class="tn-marca"><input type="checkbox" name="cierre.okPorque" {{checked cierre.okPorque}}><span>Acierta</span></label></div>
+        </div>
+        <div class="tn-cierre__resultado">
+          <h3>Resultado</h3>
+          <p class="tn-recompensa"><strong>{{recompensa}}</strong> {{#if (eq recompensa 1)}}punto{{else}}puntos{{/if}} de reconocimiento para cada detective.</p>
+          <p class="tn-pista">{{recompensaTexto}}</p>
+          <div class="tn-acciones">
+            <button type="button" class="tn-btn" data-action="acusar" data-tooltip="Publica las tres respuestas en el chat, sin cerrar el caso."><i class="fa-solid fa-gavel" aria-hidden="true"></i> Publicar la acusación</button>
+            <button type="button" class="tn-btn tn-btn--primary" data-action="cerrar" data-tooltip="Reparte el reconocimiento, avisa de quién abandona la ciudad y publica las preguntas del epílogo."><i class="fa-solid fa-handcuffs" aria-hidden="true"></i> Cerrar el caso</button>
+          </div>
+          {{#if caso.resultado}}<p class="tn-aviso-suave"><i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> {{caso.resultado}}</p>{{/if}}
+          <div class="tn-acciones">
+            <button type="button" class="tn-btn" data-action="interludios" data-tooltip="Asigna a cada detective una tabla de interludio y tira 1d4: cada uno narra un suceso con un compañero."><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Interludios (1d4)</button>
+            <button type="button" class="tn-btn" data-action="siguienteCaso" data-tooltip="Avanza la crónica un caso y prepara el siguiente."><i class="fa-solid fa-forward" aria-hidden="true"></i> Siguiente caso</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {{!-- Casos --}}
+    <section class="tab{{#if (eq tab 'casos')}} active{{/if}}" data-group="panel" data-tab="casos">
+      {{#if archivo.length}}
+      <p class="tn-pista">Elegir un caso prepara el reloj, el dado inicial y la duración que fija el propio caso. Para leerlo, impórtalo como diarios privados.
+        <button type="button" class="tn-btn tn-btn--ghost" data-action="importar"><i class="fa-solid fa-folder-tree" aria-hidden="true"></i> {{#if importado}}Revisar diarios{{else}}Importar como diarios{{/if}}</button></p>
+      <ul class="tn-casos">
+        {{#each archivo}}
+        <li>
+          <button type="button" class="tn-caso" data-action="usarCaso" data-number="{{number}}" data-tooltip="Empezar «{{title}}»">
+            <span class="tn-caso__n">{{number}}</span>
+            <span class="tn-caso__titulo">{{title}}<small>{{author}}</small></span>
+            <span class="tn-caso__datos"><i class="fa-solid fa-dice-d6" aria-hidden="true"></i> {{#if dado}}{{dado}}{{else}}?{{/if}} · {{#if dias}}{{dias}} d{{else}}?{{/if}}</span>
+          </button>
+        </li>
+        {{/each}}
+      </ul>
+      {{else}}
+      <p class="tn-vacio">El archivo de casos no está disponible en este paquete.</p>
+      {{/if}}
+    </section>
+
+    {{!-- Ciudad --}}
+    <section class="tab{{#if (eq tab 'ciudad')}} active{{/if}}" data-group="panel" data-tab="ciudad">
+      <div class="tn-ciudad__cab">
+        <h3>{{ciudad.cityName}}</h3>
+        <div class="tn-acciones">
+          <button type="button" class="tn-btn tn-btn--contextual" data-action="editarCiudad"><i class="fa-solid fa-pen" aria-hidden="true"></i> {{#if ciudad.hasContent}}Editar{{else}}Construir la ciudad{{/if}}</button>
+          <button type="button" class="tn-btn tn-btn--ghost" data-action="ambientacion"><i class="fa-solid fa-image" aria-hidden="true"></i> Ambientación</button>
+          {{#if ciudad.hasContent}}<button type="button" class="tn-btn tn-btn--ghost" data-action="vaciarCiudad"><i class="fa-solid fa-eraser" aria-hidden="true"></i> Vaciar</button>{{/if}}
+        </div>
+      </div>
+      {{#if ciudad.context}}<p class="tn-ciudad__contexto">{{ciudad.context}}</p>{{else}}<p class="tn-vacio">Todavía no hay ciudad. El asistente la crea en cuatro pasos.</p>{{/if}}
+      {{#if ciudad.hasZones}}
+      <div class="tn-zonas">
+        {{#each ciudad.zones}}
+        <article class="tn-zona"><span class="tn-zona__rumbo">{{zone}}</span><strong>{{name}}</strong><small>{{traits}}</small><small>Controla: {{controller}}</small><em>{{extra}}</em></article>
+        {{/each}}
+      </div>
+      <p class="tn-ciudad__limites"><strong>Queremos ver:</strong> {{ciudad.wanted}} · <strong>No queremos ver:</strong> {{ciudad.unwanted}}</p>
+      {{/if}}
+    </section>
+
+  </main>
+
+  <footer class="tn-pn-pie">
+    <button type="button" class="tn-enlace" data-action="bienvenida"><i class="fa-solid fa-door-open" aria-hidden="true"></i> Bienvenida</button>
+    <button type="button" class="tn-enlace tn-enlace--peligro" data-action="reiniciar"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Reiniciar el caso</button>
+  </footer>
+</div>

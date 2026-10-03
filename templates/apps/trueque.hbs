@@ -1,0 +1,71 @@
+<div class="tn-dlg">
+<div class="tn-trueque">
+  <div class="tn-trueque__who">
+    <label for="tn-trueque-actor">Quién paga</label>
+    <select id="tn-trueque-actor" name="actorId">
+      {{#each detectives}}<option value="{{id}}" {{#if seleccionado}}selected{{/if}}>{{name}}</option>{{/each}}
+    </select>
+    <button type="button" class="tn-btn tn-btn--ghost" data-action="azar" data-tooltip="La Ciudad deja las dos consecuencias en manos de la suerte: 2d4, uno para cada columna.">
+      <i class="fa-solid fa-dice" aria-hidden="true"></i> Sortear con 2d4
+    </button>
+  </div>
+
+  <div class="tn-trueque__cols">
+    <section class="tn-trueque__col">
+      <h3>La ciudad se revuelve <small>repercute en el entorno</small></h3>
+      {{#each ciudad}}
+      <label class="tn-choice {{#if marcada}}is-picked{{/if}}">
+        <input type="radio" name="ciudad" value="{{id}}" {{#if marcada}}checked{{/if}}>
+        <span class="tn-choice__label">{{titulo}}</span><small class="tn-choice__detail">{{texto}}</small>
+      </label>
+      {{/each}}
+    </section>
+    <section class="tn-trueque__col">
+      <h3>Pagar el precio <small>lo sufre el grupo</small></h3>
+      {{#each precio}}
+      <label class="tn-choice {{#if marcada}}is-picked{{/if}}">
+        <input type="radio" name="precio" value="{{id}}" {{#if marcada}}checked{{/if}}>
+        <span class="tn-choice__label">{{titulo}}</span><small class="tn-choice__detail">{{texto}}</small>
+      </label>
+      {{/each}}
+    </section>
+  </div>
+
+  <section class="tn-trueque__elige" data-elige hidden>
+    <h3>El detective elige cuál sufre</h3>
+    <div class="tn-chips tn-chips--pick" data-opciones-elige></div>
+  </section>
+
+  <section class="tn-trueque__detalle" data-detalle hidden>
+    <div class="tn-field" data-campo="estadoPersonal" hidden>
+      <label for="tn-t-ep">Estado personal que adquiere</label>
+      <select id="tn-t-ep" name="estadoPersonal">{{#each estadosPersonales}}<option value="{{id}}" {{#if activo}}disabled{{/if}}>{{label}}{{#if activo}} (ya lo tiene){{/if}}</option>{{/each}}</select>
+    </div>
+    <div class="tn-field" data-campo="estadoCiudad" hidden>
+      <label for="tn-t-ec">Estado con la ciudad que adquiere</label>
+      <select id="tn-t-ec" name="estadoCiudad">{{#each estadosCiudad}}<option value="{{id}}" {{#if activo}}disabled{{/if}}>{{label}}{{#if activo}} (ya lo tiene){{/if}}</option>{{/each}}</select>
+    </div>
+    <div class="tn-field" data-campo="sacrificio" hidden>
+      <label>El sacrificio</label>
+      <div class="tn-chips tn-chips--pick">
+        {{#each sacrificios}}<label class="tn-pick"><input type="radio" name="sacrificio" value="{{id}}" {{#if @first}}checked{{/if}}><span>{{texto}}</span></label>{{/each}}
+      </div>
+      <small class="tn-hint" data-pista-sacrificio></small>
+    </div>
+    <div class="tn-field" data-campo="pilar" hidden>
+      <label>Pilar que recibe el recado</label>
+      <div class="tn-chips tn-chips--pick">
+        {{#each pilares}}<label class="tn-pick {{#if lleno}}is-disabled{{/if}}"><input type="radio" name="pilar" value="{{id}}" {{#if @first}}checked{{/if}} {{disabled lleno}}><span>{{etiqueta}}: {{name}} · tensión {{tension}}</span></label>{{/each}}
+      </div>
+    </div>
+    <div class="tn-field" data-campo="tiempo" hidden>
+      <label for="tn-t-franjas">Franjas que pierde el caso</label>
+      <input id="tn-t-franjas" type="number" name="franjas" min="1" max="3" value="1">
+    </div>
+  </section>
+</div>
+<footer class="tn-roll__foot">
+  <button type="button" class="tn-btn" data-action="cancelar"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Cancelar</button>
+  <button type="button" class="tn-btn tn-btn--primary" data-action="aplicar" data-boton-aplicar disabled><i class="fa-solid fa-right-left" aria-hidden="true"></i> Aplicar el trueque</button>
+</footer>
+</div>

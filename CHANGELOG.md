@@ -1,5 +1,73 @@
 # Historial de cambios
 
+## 3.0.0
+
+Reescritura de la interfaz sobre ApplicationV2 y auditoría completa contra el manual.
+Compatible con Foundry 13 (probado en la build 351) y con el puente v13↔v14 aislado en
+`module/compat.mjs`. **Las fichas existentes se migran solas**; no hace falta tocar nada.
+
+### Interfaz
+
+- **Ficha del detective** rehecha para caber entera en 940 × 660 sin desplazarse: cabecera
+  con las dos acciones, tablero con cigarrillos como casillas clicables, reconocimiento,
+  dado del crimen, pistas y caso, y tres pestañas (Detective, Investigación, Historia).
+- **Modo compacto**: una tira de 400 px con lo imprescindible para tener la ficha siempre a
+  la vista sin tapar el mapa.
+- **Panel de La Ciudad** rehecho: reloj de días y franjas a un clic, dado del crimen,
+  pistas, escenas flotantes de la noche y cinco pestañas (Detectives en tabla viva, Azar y
+  trueque, Cierre del caso, Casos, Ciudad).
+- **Diálogo de tirada** más corto: trasfondo, ayuda, objeto y favor como fichas elegibles,
+  condiciones y un resumen en vivo de lo que va a pasar.
+- **Tarjeta de tirada** de una sola pieza: total grande, veredicto, dados (el descartado,
+  tachado), modificadores y las acciones que quedan por hacer.
+- **Memoria de ventanas**: posición, tamaño, pestaña y secciones plegadas por usuario y
+  mundo; el texto que se escribe sobrevive a los repintados de otros jugadores.
+- Tipografías incluidas en el paquete (Oswald y Barlow Semi Condensed, SIL OFL).
+- Ayuda con los tooltips nativos de Foundry; se retira el sistema propio de ayuda flotante.
+
+### Automatismos nuevos
+
+- **El trueque se resuelve solo**: desde la tarjeta de un 5-8 (o un 4-), La Ciudad propone
+  una consecuencia de cada columna o tira 2d4, el detective elige y se aplica: dado del
+  crimen, estado personal o con la ciudad, mitad de cigarrillos, −1 reconocimiento (puede
+  quedar en −1), tensión de un pilar o franjas de tiempo.
+- **Premios tras un 9+**: La Ciudad concede con un clic +1 reconocimiento, un favor o la
+  mejora del entorno (solo uno, nunca varios; favor y entorno solo en tiradas de riesgo).
+- **Escenas flotantes**: subir la tensión de un pilar anota la escena que corresponde a esa
+  casilla; al caer la noche La Ciudad recibe el recordatorio, solo ella.
+- **Reloj del caso**: aviso al agotarse el tiempo, penalizador y visita nocturna marcados
+  solos cuando es de noche, dado del crimen que explota con su tabla de desenlaces (1d4).
+- **Cierre del caso**: acusación con las tres preguntas, reconocimiento automático (0, 1 o
+  2), aviso de quién queda quebrado o acabado, preguntas del epílogo, interludios con 1d4,
+  siguiente caso de la crónica y final de crónica.
+- **Casos del archivo en un clic**: elegir uno pone el dado inicial y la duración que fija
+  el propio caso.
+- **Cajetilla repartida**: 9 con dos detectives, 6 con tres; el asistente la ajusta y el
+  Panel avisa si no cuadra.
+- Ceder cigarrillos entre detectives, trago tranquilo, descanso e interludios con diálogos
+  que avisan de lo que costarán.
+- Contactos como lista (nombre, zona, localización, qué ofrecen); trasfondos que no se pueden
+  repetir; semilla de caso y encuentros al azar del manual.
+
+### Reglas corregidas
+
+- Un favor se **consume** al cobrarse y los no cobrados **se conservan entre casos**; antes
+  se «recuperaban» al reiniciar el caso.
+- El alcance de un favor es un selector (libre, riesgo, crimen): escrito a mano, un favor
+  podía quedar inutilizable.
+- Quien cuenta un rumor ya no puede aprovecharlo él mismo.
+- El reconocimiento puede quedar en −1 (Sacrificio).
+- Con un favor en la tirada no se gasta ningún otro recurso; antes se cobraba la calada o la
+  visita nocturna aunque el favor luego no pudiera usarse.
+- Las operaciones del caso que piden los jugadores se validan y solo las aplica el GM
+  activo; antes cualquier cliente podía fijar el dado del crimen.
+
+### Técnico
+
+- DataModels con `migrateData`; se retira `template.json`.
+- Reglas puras en `module/reglas.mjs` con `npm test` (14 pruebas) y `npm run check`.
+- Workflow de publicación con validación, pruebas y notas de la versión.
+
 ## 2.1.0
 
 ### Once ambientaciones

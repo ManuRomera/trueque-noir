@@ -9,6 +9,14 @@
 <h1 align="center">Trueque Noir</h1>
 
 <p align="center">
+  <a href="https://github.com/ManuRomera/trueque-noir/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/ManuRomera/trueque-noir?include_prereleases&style=for-the-badge&color=8a6d3b&label=release"></a>
+  <a href="https://foundryvtt.com"><img alt="Foundry VTT V13" src="https://img.shields.io/badge/Foundry%20VTT-V13-57d8c8?style=for-the-badge"></a>
+  <a href="https://github.com/ManuRomera/trueque-noir/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/ManuRomera/trueque-noir/total?style=for-the-badge&color=ff7a1f"></a>
+  <img alt="Game system" src="https://img.shields.io/badge/type-game%20system-2b3245?style=for-the-badge">
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-2b3245?style=for-the-badge"></a>
+</p>
+
+<p align="center">
   <strong>Un expediente vivo para investigaciones noir en Foundry VTT.</strong><br>
   Llueve, alguien miente y el crimen corre más que vosotros.
 </p>

@@ -1,6 +1,6 @@
 {
   "name": "trueque-noir",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": true,
   "type": "module",
   "description": "Trueque Noir: sistema para Foundry VTT 13-14 basado en Balada triste de la ciudad.",

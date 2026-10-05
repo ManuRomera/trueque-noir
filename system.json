@@ -2,7 +2,7 @@
   "id": "trueque-noir",
   "title": "Trueque Noir",
   "description": "Investigaciones noir inspiradas en Balada triste de la ciudad: ficha de detective compacta, Panel de La Ciudad con reloj, dado del crimen y trueque automatizado, y Mesa del caso compartida.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "compatibility": {
     "minimum": "13",
     "verified": "13.351"
@@ -19,7 +19,8 @@
   "bugs": "https://github.com/ManuRomera/trueque-noir/issues",
   "license": "LICENSE",
   "esmodules": [
-    "trueque-noir.mjs"
+    "trueque-noir.mjs",
+    "module/mr-credits.mjs"
   ],
   "styles": [
     "styles/tn-core.css",

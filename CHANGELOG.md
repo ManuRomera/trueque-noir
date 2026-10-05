@@ -1,5 +1,9 @@
 # Historial de cambios
 
+## 3.0.1
+
+- Añadido el botón «Créditos» en los ajustes del paquete (Manu Romera · Digital RPG Design). No cambia el juego.
+
 ## 3.0.0
 
 Reescritura de la interfaz sobre ApplicationV2 y auditoría completa contra el manual.

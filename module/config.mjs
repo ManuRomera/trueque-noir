@@ -17,6 +17,7 @@ export const TN = {
   PORTRAIT: `${RUTA}/assets/portrait.webp`,
   TOKEN: `${RUTA}/assets/token.webp`,
   CIGARETTE: `${RUTA}/assets/cigarette.png`,
+  MARCA: `${RUTA}/assets/mr-marca.webm`,
   SCENE_FLAG: "Trueque Noir · Portada",
   BACKGROUNDS: [
     "Intimidación", "Encontrar pruebas", "Negociación", "Bajos fondos", "Uso de armas", "Buscar información",

@@ -135,7 +135,9 @@ for (const rel of templates) {
 const registered = new Set();
 const config = read("module/config.mjs");
 for (const match of config.matchAll(/^\s{2}(\w+): \[/gm)) registered.add(match[1]);
-for (const match of config.matchAll(/game\.settings\.register(?:Menu)?\(ID, "(\w+)"/g)) registered.add(match[1]);
+for (const rel of modules) {
+  for (const match of read(rel).matchAll(/(?:game\.settings\.register(?:Menu)?\(ID, |\breg\()"(\w+)"/g)) registered.add(match[1]);
+}
 for (const rel of modules) {
   const text = read(rel);
   const used = [

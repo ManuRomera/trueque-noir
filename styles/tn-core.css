@@ -407,3 +407,69 @@ body.tn-portraits-color .trueque-noir .tn-retrato { filter: none; }
   color: #f0d9c8; font: 600 13px/1.2 var(--tn-ui); cursor: pointer;
 }
 .tn-directory-tools .tn-dir-btn:hover { border-color: var(--tn-red-bright); filter: brightness(1.15); }
+
+/* ------------------------------------------------- Ventanas en cualquier pantalla
+   ventanas.mjs escala cada ventana en proporción a la pantalla (--tn-esc-ventana); el tope de tamaño se divide
+   por esa escala para que, ya escalada, nunca se salga. Lo que no cabe se desplaza por dentro y el pie de los
+   diálogos, con sus botones, queda siempre a la vista. Kit común: Scripts para Foundry/mr-pantallas. */
+.trueque-noir.application {
+  max-width: calc((100vw - 8px) / var(--tn-esc-ventana, 1));
+  max-height: calc((100vh - 1.5 * var(--hotbar-height, 52px)) / var(--tn-esc-ventana, 1));
+}
+.trueque-noir.application .window-content { overflow: auto; min-height: 0; overscroll-behavior: contain; }
+.trueque-noir.application .window-content:has(> form.dialog-form) { overflow: hidden; }
+.trueque-noir.application form.dialog-form { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.trueque-noir.application form.dialog-form > .dialog-content { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.trueque-noir.application form.dialog-form > .form-footer { flex: none; }
+
+/* ------------------------------------------------------- Opciones de accesibilidad */
+/* Tamaño del texto: todo el contenido de las ventanas y las tarjetas del chat. */
+.trueque-noir.application .window-content, .tn-chat-card { zoom: var(--tn-escala, 1); }
+
+body.tn-contraste :is(.trueque-noir, .tn-chat-card, .tn-directory-tools) {
+  --tn-text: #ffffff; --tn-ivory: #ffffff; --tn-muted: #f0ece4; --tn-faint: #dcd8d0;
+  --tn-line: #8d96a5; --tn-line-soft: #6f7887; --tn-line-strong: #c4ccd8;
+  --tn-bg: #000000; --tn-surface: #07090c; --tn-surface-2: #0d1015; --tn-input: #000000; --tn-paper: #000000;
+  --tn-red-bright: #ff7a6e; --tn-gold: #ffd27a;
+}
+body.tn-legible :is(.trueque-noir, .tn-chat-card, .tn-directory-tools) {
+  --tn-ui: "Atkinson Hyperlegible", Verdana, "Trebuchet MS", sans-serif;
+  --tn-display: "Atkinson Hyperlegible", Verdana, "Trebuchet MS", sans-serif;
+  --tn-serif: "Atkinson Hyperlegible", Verdana, sans-serif;
+  letter-spacing: .01em;
+}
+body.tn-sin-movimiento :is(.trueque-noir, .tn-chat-card, .tn-lupa) * { transition: none !important; animation: none !important; }
+body.tn-sin-movimiento .tn-lupa { animation: none; }
+
+.tn-a11y-cuerpo { display: grid; gap: 10px; }
+.tn-a11y-rango { display: grid; gap: 4px; }
+.tn-a11y-rango span { display: flex; justify-content: space-between; color: var(--tn-muted); font: 600 12px/1.2 var(--tn-display); letter-spacing: .1em; text-transform: uppercase; }
+.tn-a11y-rango b { color: var(--tn-ivory); }
+.tn-a11y-rango input { width: 100%; accent-color: var(--tn-red-bright); }
+.tn-a11y-fila { display: flex; gap: 10px; align-items: flex-start; padding: 7px 9px; border: 1px solid var(--tn-line-soft); border-radius: var(--tn-radius); background: var(--tn-surface); cursor: pointer; }
+.tn-a11y-fila input { margin: 2px 0 0; accent-color: var(--tn-red-bright); }
+.tn-a11y-fila span { display: grid; gap: 2px; }
+.tn-a11y-fila small { color: var(--tn-muted); font-size: 12.5px; }
+.tn-a11y-nota { margin: 0; color: var(--tn-faint); font-size: 12.5px; }
+.tn-a11y-acciones { display: flex; justify-content: flex-end; }
+
+/* ------------------------------------------------------------- Encuadre del retrato */
+.trueque-noir .tn-retrato[data-action="encuadrar"] { cursor: zoom-in; }
+.tn-ret-cuerpo { display: grid; grid-template-columns: 1fr 190px; gap: 14px; }
+.tn-ret-escenario { position: relative; height: 380px; overflow: hidden; border: 1px solid var(--tn-line); border-radius: var(--tn-radius); background: var(--tn-void); cursor: crosshair; touch-action: none; }
+.tn-ret-escenario img.base { position: absolute; max-width: none; border: 0; opacity: .55; user-select: none; pointer-events: none; }
+.tn-ret-escenario .marco { position: absolute; border: 2px solid var(--tn-gold); box-shadow: 0 0 0 9999px rgba(0, 0, 0, .55); pointer-events: none; }
+.tn-ret-lado { display: grid; align-content: start; gap: 12px; }
+.tn-ret-lado .vistas { display: flex; align-items: flex-end; gap: 10px; }
+.tn-ret-lado .vistas img { border: 1px solid var(--tn-line-strong); border-radius: 4px; object-fit: cover; }
+.tn-ret-lado .v-ficha { width: 112px; height: 112px; }
+.tn-ret-lado .v-chica { width: 40px; height: 40px; }
+.tn-ret-pie { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; }
+.tn-ret-pie span { display: flex; gap: 6px; }
+
+/* --------------------------------------------------------------------------- Lupa */
+.tn-lupa { position: fixed; z-index: 99999; pointer-events: none; animation: tn-lupa .16s ease-out; }
+.tn-lupa img { width: 100%; height: 100%; object-fit: contain; border: 0; filter: drop-shadow(0 14px 30px rgba(0, 0, 0, .85)); }
+.tn-lupa img.tn-retrato { filter: grayscale(1) contrast(1.08) drop-shadow(0 14px 30px rgba(0, 0, 0, .85)); }
+body.tn-portraits-color .tn-lupa img.tn-retrato { filter: drop-shadow(0 14px 30px rgba(0, 0, 0, .85)); }
+@keyframes tn-lupa { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: none; } }

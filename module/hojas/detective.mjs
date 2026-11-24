@@ -14,6 +14,7 @@ import { BACKGROUND_HELP } from "../background-help.mjs";
 import { abrirDialogoTirada } from "../apps/roll-dialog.mjs";
 import { tragoTranquilo, contacto, rumor, cederCigarrillo, zonas } from "../apps/dialogos.mjs";
 import { postCityNote } from "../chat.mjs";
+import { EditorRetrato } from "../retrato.mjs";
 
 const casillas = (valor, max) => Array.from({ length: max }, (_, i) => ({ n: i + 1, llena: i < valor }));
 
@@ -38,6 +39,7 @@ export class HojaDetective extends ConMemoria(HandlebarsApplicationMixin(ActorSh
       limpiarFavor: HojaDetective.#limpiarFavor,
       cajetilla: HojaDetective.#cajetilla,
       compacto: HojaDetective.#compacto,
+      encuadrar() { if (this.isEditable) EditorRetrato.abrir(this.document); },
       abrirPanel: () => game.truequeNoir.abrirPanel(),
       abrirMesa: () => game.truequeNoir.abrirMesa()
     }

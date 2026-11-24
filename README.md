@@ -58,10 +58,11 @@ La pantalla compartida no es un panel de control: es la mesa donde se amontonan 
 | Foundry VTT | Estado |
 | --- | --- |
 | 13 | Probado en la build 351 |
-| 14 | Verificado en el manifiesto; el puente heredado vive aislado en `module/compat.mjs` |
+| 14 | Sin probar todavía; lo que cambia entre versiones vive aislado en `module/compat.mjs` |
 
-Pensado para **escritorio, pantalla mediana o grande, ratón y teclado**. Se adapta a ventanas
-estrechas, pero no compromete la vista de escritorio para imitar una interfaz táctil.
+Pensado para **escritorio, ratón y teclado**. Cada ventana se escala en proporción a tu pantalla
+(de una tableta de 1024 px a un monitor 1440p) y nunca deja fuera su botón principal: se comprueba
+emulando nueve pantallas antes de cada versión.
 
 ## Instalación
 
@@ -117,17 +118,6 @@ objetos representativos, zonas, quién manda en cada barrio y las catorce locali
 comunes del manual dichas con sus palabras. Se cambia desde el menú **Trueque Noir**, desde
 el Panel o al construir la ciudad, y la escena de portada se adapta sola.
 
-## Las dos mesas
-
-**Mesa del caso** es el HUD compartido. Muestra el caso, el día y la franja, el dado del crimen
-en grande, las pistas descubiertas y las que quedan sin gastar, y el rumor pendiente si lo hay.
-Nada más. La Ciudad la muestra u oculta para todo el grupo con un clic.
-
-**Panel de La Ciudad** dirige la investigación. Arriba, lo que se toca cada franja: caso, día,
-límite, dado del crimen y pistas. Debajo, plegado hasta que hace falta: la ciudad, los
-detectives, el trueque, la acusación y la administración. Reiniciar el caso pide confirmación
-explícita y vive separado del resto.
-
 ## La ficha del detective
 
 Cabe entera en 940 × 660 sin desplazarse. Cabecera con las dos acciones y un tablero que se mira
@@ -140,6 +130,9 @@ reconocimiento, dado del crimen, pistas y caso. Debajo, tres pestañas:
 - **Historia** · identidad y balada triste.
 
 El **modo compacto** deja una tira de 400 px para tener la ficha siempre a la vista.
+
+Un clic en el retrato abre su **encuadre**: eliges zona y zoom y el retrato se ve igual en la
+ficha, el Panel y el directorio. Al dejar el cursor encima, la **lupa** lo enseña en grande.
 
 <p align="center"><img src="docs/ficha.webp" alt="Ficha del detective" width="860"></p>
 
@@ -174,9 +167,14 @@ Casos y Ciudad.
 Reposa el ratón sobre un control y Foundry muestra su explicación. Donde la regla no es evidente
 hay un `?` discreto.
 
-En **Configuración → Ajustes del sistema**:
+Cada ventana lleva en la cabecera, junto a la de cerrar, el icono de **accesibilidad**
+(♿): tamaño del texto y de las ventanas, alto contraste, fuente de alta legibilidad, reducir
+movimiento, ayuda inmediata y retratos en color. Son ajustes de cada navegador.
+
+En **Configuración → Ajustes del sistema** están además:
 
 - **Retratos en blanco y negro** · activado por defecto, desactivable.
+- **Ampliar las imágenes al pasar el ratón** · la lupa, activada por defecto.
 - **Memoria de ventanas** · botón para olvidar posiciones y tamaños guardados.
 - **Instalar macros en la barra rápida** · desactivado por defecto. Todo está en el menú
   Trueque Noir.
@@ -184,7 +182,8 @@ En **Configuración → Ajustes del sistema**:
 ## Qué incluye realmente
 
 El sistema trae su código, su interfaz, las once ilustraciones de portada, el rótulo, el retrato,
-el token y el cigarrillo de la ficha.
+el token y el cigarrillo de la ficha, todo firmado con la marca MR (en la portada, con un
+brillo animado).
 Incluye además un archivo de **veinte casos escritos por Pepe Pedraz, Jorge Serrano y Mirella
 Machancoses**, que **no se importa solo**: La Ciudad decide si quiere crearlos como diarios
 privados. [CONTENIDO.md](CONTENIDO.md) detalla qué se distribuye, qué se retiró y qué decisión
@@ -195,8 +194,10 @@ de derechos queda pendiente.
 Sin dependencias de ejecución.
 
 ```bash
-npm test          # reglas puras (module/reglas.mjs)
-npm run check     # plantillas, rutas, acciones, ajustes, versión
+npm test            # reglas puras y escala de ventanas
+npm run check       # plantillas, rutas, acciones, ajustes, versión
+npm run zip         # el mismo zip que publica la release, comprobado
+npm run pantallas   # ventanas en nueve pantallas, en un Foundry de pruebas en el puerto 30015
 ```
 
 Las etiquetas `v*` publican el ZIP instalable y el manifiesto. La auditoría contra el manual está

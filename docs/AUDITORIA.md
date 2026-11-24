@@ -130,3 +130,28 @@ del trago es correcta. Son decisiones de La Ciudad (p. 33, 59, 65): automatizarl
 - En Foundry 13.351 con un mundo copiado del QA anterior: migración automática de dos fichas
   antiguas, GM y jugadora a la vez (tiradas, pistas por socket, sobreexposición, escena flotante),
   trueque, trago, interludio, cierre de caso, asistentes de ciudad y detective, modo compacto.
+
+## 7. Puesta al día 3.1.0 (noviembre de 2026)
+
+Revisión contra la lista de mejoras que llevan hoy todos los sistemas:
+
+| Mejora | Antes | 3.1.0 |
+|---|---|---|
+| Ventanas proporcionales a la pantalla, scroll interno y botón siempre visible | ✗ (tamaño fijo; la ficha de 940 × 660 llenaba un portátil de 13″) | ✔ `module/ventanas.mjs` (kit mr-pantallas) |
+| Todas las ventanas redimensionables | 5 no lo eran | ✔ |
+| Verificación emulando pantallas | ✗ | ✔ `npm run pantallas`: 12 ventanas × 9 pantallas + texto al 160 % y fuente legible, en Foundry 13.351 real |
+| Icono de accesibilidad en la cabecera | ✗ (solo retratos en color) | ✔ texto, ventanas, contraste, fuente legible, movimiento, ayuda, retratos |
+| Retratos encuadrables e iguales en todas partes | ✗ | ✔ `module/retrato.mjs`, bandera `flags.trueque-noir.retrato` |
+| Lupa sobre retratos | ✗ | ✔ ajuste de cliente |
+| Marca MR en las imágenes (animada en escena) | ✗ | ✔ `tools/marca.py`; la marca de las portadas va dentro de la zona que se ve con el encuadre «cubrir» en pantallas de 1,6 a 2,0 |
+| Mismo script de zip en local y en la release, con comprobación de contenido | ✗ (zip en línea en el workflow) | ✔ `tools/zip.mjs` |
+| Iconos de cabecera sin romper | ✔ | ✔ comprobado: Font Awesome 6 Pro en todos los botones |
+| Sin códigos de regla en la interfaz | ✔ (las páginas solo están en comentarios del código) | ✔ |
+| Diagnóstico fuera de hojas y barras | ✔ (solo `game.truequeNoir.diagnostico()`) | ✔ |
+
+**Sigue pendiente de tu decisión** (sección 5): el archivo de casos con texto ajeno, Foundry 14 y el
+rumor «una vez por detective». De las reglas sin ayuda en pantalla (sección 3) siguen igual
+«Caso abierto», el enfrentamiento entre detectives y el descanso de una vez por noche.
+
+**No aplicado a propósito:** banda sonora, tutorial guiado y mesa a pantalla completa (las dos
+últimas solo se añaden si se piden); banner nuevo (el rótulo propio del juego ya hace de cabecera).

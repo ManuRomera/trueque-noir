@@ -94,7 +94,7 @@ function detectiveAlAzar(tema) {
 export class AsistenteDetective extends Asistente {
   static DEFAULT_OPTIONS = {
     id: "trueque-noir-character-generator",
-    window: { title: "Crear detective", icon: "fa-solid fa-user-plus", resizable: false }
+    window: { title: "Crear detective", icon: "fa-solid fa-user-plus", resizable: true }
   };
 
   static PARTS = { cuerpo: { template: `${RUTA}/templates/apps/character-generator.hbs` } };
@@ -169,7 +169,7 @@ export class AsistenteCiudad extends Asistente {
   static DEFAULT_OPTIONS = {
     id: "trueque-noir-city-generator",
     position: { width: 860 },
-    window: { title: "Construir la ciudad", icon: "fa-solid fa-city", resizable: false }
+    window: { title: "Construir la ciudad", icon: "fa-solid fa-city", resizable: true }
   };
 
   static PARTS = { cuerpo: { template: `${RUTA}/templates/apps/city-generator.hbs` } };

@@ -100,7 +100,7 @@
         <tbody>
           {{#each detectives}}
           <tr class="{{#if final}}es-final{{/if}}">
-            <td class="tn-fila__quien"><button type="button" class="tn-enlace" data-action="abrirDetective" data-id="{{id}}"><img src="{{img}}" alt="" class="tn-mini-retrato"><span>{{name}}</span></button></td>
+            <td class="tn-fila__quien"><button type="button" class="tn-enlace" data-action="abrirDetective" data-id="{{id}}"><img src="{{img}}" alt="" class="tn-mini-retrato" data-retrato="{{id}}" data-lupa=""><span>{{name}}</span></button></td>
             <td><span class="tn-cigs tn-cigs--mini" aria-label="{{cigs.value}} de {{cigs.max}}">{{#each cigs.casillas}}<i class="tn-cig{{#if llena}} is-llena{{/if}}"></i>{{/each}}</span></td>
             <td class="{{#if recNegativo}}es-negativo{{/if}}">{{rec}}</td>
             <td><span class="tn-tens" data-tooltip="Persona / Lugar">{{tensionPersona}}<small>/</small>{{tensionLugar}}</span></td>

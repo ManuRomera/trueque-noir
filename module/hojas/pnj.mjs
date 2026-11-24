@@ -3,13 +3,15 @@ import { ActorSheetV2, HandlebarsApplicationMixin } from "../compat.mjs";
 import { ConMemoria } from "../memoria.mjs";
 import { RUTA } from "../config.mjs";
 import { zonas } from "../apps/dialogos.mjs";
+import { EditorRetrato } from "../retrato.mjs";
 
 export class HojaPnj extends ConMemoria(HandlebarsApplicationMixin(ActorSheetV2)) {
   static DEFAULT_OPTIONS = {
     classes: ["trueque-noir", "tn-ficha", "tn-pnj"],
     position: { width: 560, height: 440 },
     window: { icon: "fa-solid fa-user", resizable: true },
-    form: { submitOnChange: true }
+    form: { submitOnChange: true },
+    actions: { encuadrar() { if (this.isEditable) EditorRetrato.abrir(this.document); } }
   };
 
   static PARTS = { hoja: { template: `${RUTA}/templates/actors/npc-sheet.hbs`, scrollable: [".tn-cuerpo"] } };

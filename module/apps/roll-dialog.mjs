@@ -16,7 +16,6 @@ export class DialogoTirada extends AppTN {
     classes: ["tn-dialog", "tn-roll-dialog"],
     tag: "form",
     position: { width: 520, height: "auto" },
-    window: { resizable: false },
     actions: { tirar: DialogoTirada.#tirar, cancelar() { this.close(); } }
   };
 

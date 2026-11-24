@@ -62,7 +62,7 @@ export class DialogoTrueque extends AppTN {
     classes: ["tn-dialog", "tn-trueque-dialog"],
     tag: "form",
     position: { width: 680, height: "auto" },
-    window: { title: "Trueque", icon: "fa-solid fa-right-left", resizable: false },
+    window: { title: "Trueque", icon: "fa-solid fa-right-left", resizable: true },
     actions: { azar: DialogoTrueque.#azar, aplicar: DialogoTrueque.#aplicar, cancelar() { this.close(); } }
   };
 

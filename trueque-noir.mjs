@@ -18,6 +18,9 @@ import { ensureCoverScene, bindCoverSceneCamera } from "./module/scene-setup.mjs
 import { registrarControles, registrarBotonDirectorio, instalarMacros } from "./module/ui-hooks.mjs";
 import { registrarTarjetas } from "./module/tarjetas.mjs";
 import { escucharSocketCaso } from "./module/case-state.mjs";
+import { registrarVentanas } from "./module/ventanas.mjs";
+import { registrarAccesibilidad } from "./module/accesibilidad.mjs";
+import { registrarRetratos } from "./module/retrato.mjs";
 
 const soloLaCiudad = mensaje => {
   ui.notifications.warn(mensaje);
@@ -29,6 +32,9 @@ Hooks.once("init", () => {
   Handlebars.registerHelper("lowercase", valor => String(valor ?? "").toLowerCase());
 
   registrarAjustes();
+  registrarVentanas();
+  registrarAccesibilidad();
+  registrarRetratos();
   CONFIG.Actor.documentClass = TruequeNoirActor;
   CONFIG.Actor.dataModels.detective = TruequeNoirDetectiveData;
   CONFIG.Actor.dataModels.npc = TruequeNoirNpcData;

@@ -77,6 +77,25 @@ async function ensureLogoTile(scene) {
   return existing;
 }
 
+/**
+ * Brillo animado de la marca MR: cae justo encima del monograma que ya lleva la imagen de la escena
+ * (tools/marca.py calcula la caja de cada ambientación). El vídeo arranca tras el primer clic del usuario.
+ */
+async function ensureMarcaTile(scene, themeId = getSceneTheme()) {
+  const caja = getTheme(themeId).scene.marca;
+  const existing = scene.tiles.find(tile => tile.getFlag(TN.SYSTEM_ID, "marca"));
+  if (!caja) return existing?.delete();
+  const [x, y, width, height] = caja;
+  const wanted = {
+    texture: { src: TN.MARCA }, x, y, width, height, elevation: 0, sort: 11, locked: true,
+    video: { loop: true, autoplay: true, volume: 0 },
+    flags: { [TN.SYSTEM_ID]: { marca: true } }
+  };
+  if (!existing) return scene.createEmbeddedDocuments("Tile", [wanted]);
+  if (["x", "y", "width", "height"].some(k => existing[k] !== wanted[k]) || existing.texture?.src !== TN.MARCA) await existing.update(wanted);
+  return existing;
+}
+
 /** Crea la escena de portada, o corrige la existente si alguien alteró sus ajustes clave. */
 export async function ensureCoverScene() {
   if (!game.user?.isGM) return null;
@@ -95,7 +114,7 @@ export async function ensureCoverScene() {
     const { name, navigation, ...fixes } = source;
     await scene.update(fixes);
   }
-  if (scene) await ensureLogoTile(scene);
+  if (scene) { await ensureLogoTile(scene); await ensureMarcaTile(scene); }
   return scene;
 }
 
@@ -115,6 +134,7 @@ export async function applySceneTheme(themeId) {
   const { name, navigation, ...fixes } = coverSceneSource(theme.id);
   await scene.update(fixes);
   await ensureLogoTile(scene);
+  await ensureMarcaTile(scene, theme.id);
   if (canvas?.scene?.id === scene.id) canvas.pan(coverView(scene));
   ui.notifications.info(`Ambientación «${theme.label}» aplicada a la escena de portada.`);
 }

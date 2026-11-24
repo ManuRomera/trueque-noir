@@ -1,5 +1,24 @@
 # Historial de cambios
 
+## 3.1.0
+
+Puesta al día con los estándares actuales de los sistemas de Manu Romera. No cambia ninguna regla
+ni hace falta tocar las fichas.
+
+- **Ventanas en cualquier pantalla**: fichas, Panel, Mesa, asistentes y diálogos se escalan en
+  proporción a la pantalla, se desplazan por dentro si no caben y dejan siempre a la vista su botón
+  principal. Todas se pueden redimensionar. Ajuste «Tamaño de las ventanas» (automático por defecto).
+- **Accesibilidad** en la cabecera de cada ventana, junto al botón de cerrar: tamaño del texto,
+  alto contraste, fuente de alta legibilidad, reducir movimiento, ayuda inmediata y retratos en color.
+- **Encuadre del retrato**: un clic en el retrato elige zona y zoom (o cambia la imagen); se ve igual
+  en la ficha, el Panel y el directorio de Actores.
+- **Lupa**: al dejar el cursor sobre un retrato se ve en grande. Se puede apagar en Ajustes.
+- **Marca MR** en las once portadas, el retrato y el token por defecto, con un brillo animado sobre
+  la marca de la escena de portada (que sigue a la ambientación elegida).
+- Empaquetado con un solo script (`npm run zip`) para la release y las pruebas, que comprueba que al
+  zip no le falta nada; verificación de pantallas en Foundry real (`npm run pantallas`).
+- README: quitada una sección duplicada y corregida la compatibilidad (Foundry 14 aún sin probar).
+
 ## 3.0.1
 
 - Añadido el botón «Créditos» en los ajustes del paquete (Manu Romera · Digital RPG Design). No cambia el juego.

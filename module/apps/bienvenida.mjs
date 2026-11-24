@@ -13,7 +13,7 @@ export class Bienvenida extends AppTN {
     id: "trueque-noir-welcome",
     classes: ["tn-app", "tn-welcome-app"],
     position: { width: 700, height: "auto" },
-    window: { title: "Trueque Noir", icon: "fa-solid fa-user-secret", resizable: false },
+    window: { title: "Trueque Noir", icon: "fa-solid fa-user-secret", resizable: true },
     actions: {
       ciudad() { game.truequeNoir.abrirCreadorCiudad(); this.close(); },
       detective() { game.truequeNoir.abrirCreadorDetective(); this.close(); },

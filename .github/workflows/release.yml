@@ -26,13 +26,8 @@ jobs:
       - name: Pruebas de las reglas
         run: npm test
 
-      - name: Empaquetar
-        run: |
-          mkdir -p dist
-          # Solo lo que Foundry necesita: sin pruebas, herramientas ni la captura del README.
-          zip -r dist/trueque-noir.zip system.json trueque-noir.mjs module templates styles fonts lang assets data LICENSE README.md CHANGELOG.md CONTENIDO.md
-          cp system.json dist/system.json
-          unzip -l dist/trueque-noir.zip | tail -1
+      - name: Empaquetar (el mismo script que en local; falla si al zip le falta algo)
+        run: npm run zip
 
       - name: Notas de la versión
         run: |

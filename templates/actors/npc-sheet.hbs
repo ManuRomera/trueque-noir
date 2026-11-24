@@ -1,7 +1,7 @@
 <div class="tn-hoja tn-hoja--pnj">
   <fieldset class="tn-fs" {{disabled (not editable)}}>
     <header class="tn-cabecera">
-      <img class="tn-retrato" src="{{actor.img}}" alt="Retrato de {{actor.name}}" data-edit="img" data-action="editImage" data-tooltip="Cambiar el retrato">
+      <img class="tn-retrato" src="{{actor.img}}" alt="Retrato de {{actor.name}}" data-retrato="{{actor.id}}" data-lupa="" data-action="encuadrar" data-tooltip="Encuadrar o cambiar el retrato">
       <div class="tn-ident">
         <input class="tn-nombre" type="text" name="name" value="{{actor.name}}" placeholder="Nombre del PNJ" aria-label="Nombre del PNJ">
         <input class="tn-rol" type="text" name="system.role" value="{{system.role}}" placeholder="Rol en la ciudad" aria-label="Rol del PNJ">

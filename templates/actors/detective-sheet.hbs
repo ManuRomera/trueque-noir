@@ -3,7 +3,7 @@
 
     {{!-- ═══ Cabecera: quién es y las dos acciones del juego ═══ --}}
     <header class="tn-cabecera">
-      <img class="tn-retrato" src="{{actor.img}}" alt="Retrato de {{actor.name}}" data-edit="img" data-action="editImage" data-tooltip="Cambiar el retrato">
+      <img class="tn-retrato" src="{{actor.img}}" alt="Retrato de {{actor.name}}" data-retrato="{{actor.id}}" data-lupa="" data-action="encuadrar" data-tooltip="Encuadrar o cambiar el retrato">
       <div class="tn-ident">
         <input class="tn-nombre" type="text" name="name" value="{{actor.name}}" placeholder="Nombre del detective" aria-label="Nombre del detective">
         <div class="tn-ident__fila">

@@ -63,7 +63,7 @@ export const THEMES = {
     id: "noir",
     label: "Noir clásico",
     blurb: "Lluvia, gabardinas y una ciudad que no piensa devolverte nada.",
-    scene: { src: `${SCENES}/noir.webp`, width: 1920, height: 1024 },
+    scene: { src: `${SCENES}/noir.webp`, width: 1920, height: 1024, marca: [1660, 890, 109, 91] },
     contexts: [
       "Ciudad portuaria sin nombre, lluvia constante y una policía que mira a otro lado",
       "Metrópolis de posguerra donde todo el mundo debe un favor a alguien"
@@ -89,7 +89,7 @@ export const THEMES = {
     id: "los20",
     label: "Los años veinte",
     blurb: "Ley seca, charlestón y sótanos donde el alcohol vale más que la vida.",
-    scene: { src: `${SCENES}/los20.webp`, width: 1920, height: 1280 },
+    scene: { src: `${SCENES}/los20.webp`, width: 1920, height: 1280, marca: [1801, 1019, 109, 91] },
     contexts: [
       "Años veinte, ley seca y una ciudad que baila mientras se desangra",
       "Años veinte, fiebre bursátil y sindicatos rompiendo huelgas a golpes"
@@ -115,7 +115,7 @@ export const THEMES = {
     id: "actual",
     label: "Actualidad",
     blurb: "Cámaras en cada esquina, alquileres imposibles y expedientes que se archivan solos.",
-    scene: { src: `${SCENES}/actual.webp`, width: 1920, height: 1024 },
+    scene: { src: `${SCENES}/actual.webp`, width: 1920, height: 1024, marca: [1660, 890, 109, 91] },
     contexts: [
       "Ciudad costera contemporánea en decadencia, turismo y ladrillo",
       "Capital de provincia con más cámaras que vecinos y una corrupción cansada"
@@ -141,7 +141,7 @@ export const THEMES = {
     id: "futuro",
     label: "Futuro tecnológico",
     blurb: "Todo queda registrado y, aun así, nadie sabe qué pasó.",
-    scene: { src: `${SCENES}/futuro.webp`, width: 1920, height: 1024 },
+    scene: { src: `${SCENES}/futuro.webp`, width: 1920, height: 1024, marca: [1660, 890, 109, 91] },
     contexts: [
       "Metrópolis vertical administrada por contratos y algoritmos de reputación",
       "Ciudad estado donde la identidad es un servicio que se puede suspender"
@@ -167,7 +167,7 @@ export const THEMES = {
     id: "runner",
     label: "Replicantes",
     blurb: "Neón sobre agua sucia y preguntas que es mejor no hacerle a nadie.",
-    scene: { src: `${SCENES}/runner.webp`, width: 1920, height: 1280 },
+    scene: { src: `${SCENES}/runner.webp`, width: 1920, height: 1280, marca: [1801, 1019, 109, 91] },
     contexts: [
       "Megalópolis en lluvia ácida donde las corporaciones fabrican personas",
       "Ciudad de anuncios de cien metros y gente que no puede probar quién es"
@@ -193,7 +193,7 @@ export const THEMES = {
     id: "fallout",
     label: "Después del fin",
     blurb: "Queda ciudad suficiente para que alguien quiera matar por ella.",
-    scene: { src: `${SCENES}/fallout.webp`, width: 1920, height: 1024 },
+    scene: { src: `${SCENES}/fallout.webp`, width: 1920, height: 1024, marca: [1660, 890, 109, 91] },
     contexts: [
       "Décadas después del colapso: agua racionada y una ley que se escribe cada mañana",
       "Asentamiento levantado sobre las ruinas, con más armas que médicos"
@@ -219,7 +219,7 @@ export const THEMES = {
     id: "farwest",
     label: "Lejano Oeste",
     blurb: "Polvo, deudas y una estrella de hojalata que no impresiona a nadie.",
-    scene: { src: `${SCENES}/farwest.webp`, width: 1920, height: 1280 },
+    scene: { src: `${SCENES}/farwest.webp`, width: 1920, height: 1280, marca: [1801, 1019, 109, 91] },
     contexts: [
       "Pueblo fronterizo que creció demasiado rápido alrededor de una mina",
       "Final de la línea del ferrocarril, con más forasteros que vecinos"
@@ -245,7 +245,7 @@ export const THEMES = {
     id: "medievo",
     label: "Medievo",
     blurb: "Callejones de barro, gremios que lo deciden todo y un obispo que perdona por dinero.",
-    scene: { src: `${SCENES}/medievo.webp`, width: 1920, height: 1081 },
+    scene: { src: `${SCENES}/medievo.webp`, width: 1920, height: 1081, marca: [1705, 920, 109, 91] },
     contexts: [
       "Ciudad amurallada en año de malas cosechas, con la peste rondando el arrabal",
       "Villa de mercado donde los gremios mandan más que el señor"
@@ -271,7 +271,7 @@ export const THEMES = {
     id: "spqr",
     label: "Roma imperial",
     blurb: "Ínsulas que se derrumban, clientelas que se compran y vigiles que llegan tarde.",
-    scene: { src: `${SCENES}/spqr.webp`, width: 1920, height: 1024 },
+    scene: { src: `${SCENES}/spqr.webp`, width: 1920, height: 1024, marca: [1660, 890, 109, 91] },
     contexts: [
       "Roma bajo un emperador nervioso: delaciones, herencias y fuego en la Suburra",
       "Ciudad portuaria del imperio donde el grano vale más que la sangre"
@@ -297,7 +297,7 @@ export const THEMES = {
     id: "steampunk",
     label: "Steampunk",
     blurb: "Vapor, hollín y máquinas que valen más que quienes las manejan.",
-    scene: { src: `${SCENES}/steampunk.webp`, width: 1920, height: 1024 },
+    scene: { src: `${SCENES}/steampunk.webp`, width: 1920, height: 1024, marca: [1660, 890, 109, 91] },
     contexts: [
       "Capital industrial ahogada en hollín, con huelgas y patentes robadas",
       "Ciudad de canales y dirigibles donde el carbón decide quién respira"
@@ -323,7 +323,7 @@ export const THEMES = {
     id: "edo",
     label: "Edo",
     blurb: "Faroles de papel, deudas de honor y una ciudad de madera que arde cada década.",
-    scene: { src: `${SCENES}/edo.webp`, width: 1920, height: 1081 },
+    scene: { src: `${SCENES}/edo.webp`, width: 1920, height: 1081, marca: [1705, 920, 109, 91] },
     contexts: [
       "Edo en tiempo de paz forzada: samuráis sin guerra y comerciantes con demasiado dinero",
       "Ciudad de canales y barrios de placer, con incendios y rumores en cada esquina"
